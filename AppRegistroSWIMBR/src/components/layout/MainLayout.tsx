@@ -5,12 +5,12 @@
  * Layout principal sincronizando Sidebar, Header e conteúdo.
  */
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect, useContext } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
 import api from '@/lib/axios';
+import { ColorModeContext } from '../../app/[locale]/MuiProvider';
 import { 
   Box, 
   AppBar, 
@@ -27,20 +27,25 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import LanguageIcon from '@mui/icons-material/Language';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import { Sidebar } from './Sidebar';
 import { InputBase, alpha, styled } from '@mui/material';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: '12px',
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  backgroundColor: theme.palette.common.white,
   '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
+    backgroundColor: '#fdfdfd',
+    borderColor: '#80879e',
   },
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: '100%',
-  border: '1px solid rgba(0,0,0,0.08)',
+  border: '1px solid #DBDADE',
+  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+  transition: 'all 0.2s',
   [theme.breakpoints.up('sm')]: {
     marginLeft: theme.spacing(3),
     width: 'auto',
@@ -89,6 +94,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopVisible, setDesktopVisible] = useState(true);
+  const colorMode = useContext(ColorModeContext);
 
   // Busca de Usuário logado
   const [user, setUser] = useState<{ first_name: string; last_name: string; username: string } | null>(null);
@@ -145,7 +151,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   }[locale] || 'Idioma';
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F5F5F9' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       
       {/* Sidebar Desktop (Persistent) */}
       <Drawer
@@ -192,9 +198,9 @@ export function MainLayout({ children }: MainLayoutProps) {
           position="sticky"
           elevation={0}
           sx={{
-            bgcolor: 'rgba(245, 245, 249, 0.95)',
+            bgcolor: alpha(theme.palette.background.default, 0.95),
             backdropFilter: 'blur(10px)',
-            borderBottom: '1px solid rgba(0,0,0,0.05)',
+            borderBottom: `1px solid ${theme.palette.divider}`,
             color: 'text.primary',
             zIndex: theme.zIndex.drawer - 1,
           }}
@@ -221,6 +227,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* Ações do cabeçalho */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 
+                {/* Toggle Dark/Light Mode */}
+                <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                  {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+
                 {/* Seletor de Idioma */}
                 <Button
                   startIcon={<LanguageIcon />}
@@ -260,7 +271,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     justifyContent: 'center',
                     fontWeight: 700,
                     fontSize: '0.9rem',
-                    boxShadow: '0 4px 10px rgba(105, 108, 255, 0.3)'
+                    boxShadow: '0 4px 10px rgba(37, 56, 101, 0.3)'
                   }}
                 >
                   {initials}

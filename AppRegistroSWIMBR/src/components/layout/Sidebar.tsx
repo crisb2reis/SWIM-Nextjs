@@ -79,7 +79,7 @@ const StyledNavItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
     background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
     color: '#FFFFFF',
-    boxShadow: `0 4px 12px rgba(105, 108, 255, 0.3)`,
+    boxShadow: `0 4px 12px rgba(37, 56, 101, 0.3)`,
     '& .MuiListItemIcon-root': {
       color: '#FFFFFF',
     },
@@ -227,7 +227,7 @@ export function Sidebar() {
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(105, 108, 255, 0.4)'
+          boxShadow: '0 4px 12px rgba(37, 56, 101, 0.4)'
         }}>
           <FlightIcon sx={{ color: 'white' }} />
         </Box>

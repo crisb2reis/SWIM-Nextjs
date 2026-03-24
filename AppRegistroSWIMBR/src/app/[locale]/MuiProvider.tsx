@@ -5,18 +5,54 @@
  * Resolve o problema de hidratação de estilos no SSR.
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect, createContext, useContext } from 'react';
 import { useServerInsertedHTML } from 'next/navigation';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
-import theme from './theme';
+import { getAppTheme } from './theme';
+
+type ColorModeContextType = {
+  toggleColorMode: () => void;
+  mode: 'light' | 'dark';
+};
+
+export const ColorModeContext = createContext<ColorModeContextType>({
+  toggleColorMode: () => {},
+  mode: 'light',
+});
 
 function createEmotionCache() {
   return createCache({ key: 'mui', prepend: true });
 }
 
 export default function MuiProvider({ children }: { children: React.ReactNode }) {
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
+
+  // Load preferred mode from localStorage if available
+  useEffect(() => {
+    const savedMode = localStorage.getItem('themeMode');
+    if (savedMode === 'dark' || savedMode === 'light') {
+      setMode(savedMode);
+    }
+  }, []);
+
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => {
+          const newMode = prevMode === 'light' ? 'dark' : 'light';
+          localStorage.setItem('themeMode', newMode);
+          return newMode;
+        });
+      },
+      mode,
+    }),
+    [mode],
+  );
+
+  const theme = useMemo(() => getAppTheme(mode), [mode]);
+
   const [{ cache, flush }] = useState(() => {
     const cache = createEmotionCache();
     cache.compat = true;
@@ -54,11 +90,13 @@ export default function MuiProvider({ children }: { children: React.ReactNode })
   });
 
   return (
-    <CacheProvider value={cache}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </CacheProvider>
+    <ColorModeContext.Provider value={colorMode}>
+      <CacheProvider value={cache}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          {children}
+        </ThemeProvider>
+      </CacheProvider>
+    </ColorModeContext.Provider>
   );
 }

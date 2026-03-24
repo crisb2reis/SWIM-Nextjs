@@ -27,8 +27,8 @@ export default function LoginPage() {
       : null
   );
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin@swim.com');
+  const [password, setPassword] = useState('admin1234');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {

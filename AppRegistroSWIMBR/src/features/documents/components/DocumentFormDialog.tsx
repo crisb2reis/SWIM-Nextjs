@@ -23,15 +23,15 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import CloseIcon       from '@mui/icons-material/Close';
-import UploadFileIcon  from '@mui/icons-material/UploadFile';
-import SaveIcon        from '@mui/icons-material/Save';
-import TitleIcon       from '@mui/icons-material/Title';
+import CloseIcon from '@mui/icons-material/Close';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SaveIcon from '@mui/icons-material/Save';
+import TitleIcon from '@mui/icons-material/Title';
 import DescriptionIcon from '@mui/icons-material/Description';
-import PersonIcon      from '@mui/icons-material/Person';
+import PersonIcon from '@mui/icons-material/Person';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import TagIcon         from '@mui/icons-material/Tag';
-import LanguageIcon    from '@mui/icons-material/Language';
+import TagIcon from '@mui/icons-material/Tag';
+import LanguageIcon from '@mui/icons-material/Language';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { InputAdornment } from '@mui/material';
 
@@ -43,11 +43,11 @@ import type { Document } from '../types/document.types';
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface DocumentFormDialogProps {
-  open:        boolean;
-  document?:   Document | null;
+  open: boolean;
+  document?: Document | null;
   isSubmitting: boolean;
-  onClose:     () => void;
-  onSubmit:    (values: DocumentFormValues) => Promise<void>;
+  onClose: () => void;
+  onSubmit: (values: DocumentFormValues) => Promise<void>;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -65,19 +65,19 @@ export function DocumentFormDialog({
   const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = form;
 
   const uploadedFile = watch('uploadfile');
-  const inputRef     = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Reset do formulário quando o dialog abre/fecha
   useEffect(() => {
     if (open) {
       reset({
-        title:       document?.title       ?? '',
+        title: document?.title ?? '',
         description: document?.description ?? '',
-        publish:     document?.publish     ?? '',
-        date_issued: document?.dateIssued  ?? document?.date_issued ?? '',
-        version:     document?.version     ?? '',
-        location:    document?.location    ?? '',
-        uploadfile:  null,
+        publish: document?.publish ?? '',
+        date_issued: document?.dateIssued ?? document?.date_issued ?? '',
+        version: document?.version ?? '',
+        location: document?.location ?? '',
+        uploadfile: null,
       });
     }
   }, [open, document, reset]);
@@ -94,11 +94,11 @@ export function DocumentFormDialog({
       maxWidth="md"
       fullWidth
       scroll="body"
-      PaperProps={{ 
-        sx: { 
+      PaperProps={{
+        sx: {
           borderRadius: 4,
           boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
-        } 
+        }
       }}
     >
       {/* Cabeçalho Premium */}
@@ -108,19 +108,19 @@ export function DocumentFormDialog({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #696CFF 0%, #8082FF 100%)',
+          background: 'linear-gradient(135deg, #253865 0%, #80879e 100%)',
           color: '#fff',
           py: 4,
           px: { xs: 3, md: 5 },
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box 
-            sx={{ 
-              backgroundColor: 'rgba(255,255,255,0.2)', 
-              borderRadius: 1.5, 
-              p: 1, 
-              display: 'flex' 
+          <Box
+            sx={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              borderRadius: 1.5,
+              p: 1,
+              display: 'flex'
             }}
           >
             {isEditing ? <SaveIcon /> : <CloudUploadIcon />}
@@ -137,7 +137,7 @@ export function DocumentFormDialog({
         <IconButton
           onClick={onClose}
           disabled={isSubmitting}
-          sx={{ 
+          sx={{
             color: 'inherit',
             bgcolor: 'rgba(255,255,255,0.1)',
             '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
@@ -151,7 +151,7 @@ export function DocumentFormDialog({
       <Divider />
 
       {/* Formulário com espaçamento superior corrigido */}
-      <DialogContent sx={{ px: { xs: 3, md: 5 }, pt: 10, pb: 6 }}>
+      <DialogContent sx={{ px: { xs: 3, md: 5 }, pt: 4, pb: 6 }}>
         <Grid container spacing={4} sx={{ mt: 2 }}>
 
           {/* Linha 1: Título e Versão */}
@@ -318,10 +318,13 @@ export function DocumentFormDialog({
                 alignItems: 'center',
                 textAlign: { xs: 'center', sm: 'left' },
                 gap: 3,
-                bgcolor: uploadedFile ? 'rgba(105, 108, 255, 0.04)' : 'background.paper',
+                bgcolor: uploadedFile ? (theme) => theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.04)' : 'rgba(74, 120, 255, 0.08)' : 'background.paper',
                 cursor: 'pointer',
                 transition: 'all .25s ease',
-                '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(105, 108, 255, 0.08)' },
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  bgcolor: (theme) => theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.08)' : 'rgba(74, 120, 255, 0.12)'
+                },
               }}
               onClick={() => inputRef.current?.click()}
             >
@@ -332,7 +335,7 @@ export function DocumentFormDialog({
                   borderRadius: 2,
                   p: 1.5,
                   display: 'flex',
-                  boxShadow: '0 4px 10px rgba(105, 108, 255, 0.25)',
+                  boxShadow: (theme) => `0 4px 10px ${theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.25)' : 'rgba(74, 120, 255, 0.25)'}`,
                 }}
               >
                 <CloudUploadIcon />
@@ -343,7 +346,7 @@ export function DocumentFormDialog({
                   {uploadedFile ? t('form.upload.ready') : t('form.upload.title')}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {uploadedFile 
+                  {uploadedFile
                     ? t('form.upload.saveReady', { name: uploadedFile.name })
                     : t('form.upload.clickToSearch')}
                 </Typography>
@@ -372,7 +375,7 @@ export function DocumentFormDialog({
       </DialogContent>
 
       {/* Ações Modernizadas */}
-      <DialogActions sx={{ px: { xs: 3, md: 5 }, py: 4, bgcolor: '#F9FAFB', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
+      <DialogActions sx={{ px: { xs: 3, md: 5 }, py: 4, bgcolor: 'background.default', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
         <Button
           onClick={onClose}
           disabled={isSubmitting}
@@ -388,14 +391,14 @@ export function DocumentFormDialog({
           disabled={isSubmitting}
           startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
           onClick={handleSubmit(onSubmit)}
-          sx={{ 
-            borderRadius: 2, 
-            px: 5, 
+          sx={{
+            borderRadius: 2,
+            px: 5,
             py: 1.2,
             fontWeight: 700,
-            boxShadow: '0 4px 14px 0 rgba(105, 108, 255, 0.39)',
+            boxShadow: (theme) => `0 4px 14px 0 ${theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.39)' : 'rgba(74, 120, 255, 0.39)'}`,
             '&:hover': {
-              boxShadow: '0 6px 20px rgba(105, 108, 255, 0.23)',
+              boxShadow: (theme) => `0 6px 20px ${theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.23)' : 'rgba(74, 120, 255, 0.23)'}`,
             }
           }}
         >

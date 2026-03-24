@@ -89,6 +89,8 @@ def delete_user(db: Session, user_id: int) -> Optional[User]:
 def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
     from core.security import verify_password
     user = get_user_by_username(db, username)
+    if not user:
+        user = get_user_by_email(db, username)
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user

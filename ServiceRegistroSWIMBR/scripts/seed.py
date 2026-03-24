@@ -12,7 +12,7 @@ from db.session import SessionLocal
 from db.base import Base
 from db.session import engine
 from schemas.user import UserCreate
-from models.user import UserType, UserLevelAuth
+from models.user import User, UserType, UserLevelAuth
 import crud
 
 # Garante que as tabelas existem (útil em dev local sem Alembic)
@@ -23,13 +23,19 @@ Base.metadata.create_all(bind=engine)
 def seed_superuser():
     db = SessionLocal()
     try:
-        existing = crud.get_user_by_username(db, "admin")
-        if existing:
-            print("⚠️  Superusuário 'admin' já existe. Nenhuma ação tomada.")
-            return
+        # 🔥 Remove usuário existente
+        existing = db.query(User).filter(
+            User.email == "admin@swim.com"
+        ).first()
 
+        if existing:
+            db.delete(existing)
+            db.commit()
+            print("🗑️  Usuário existente removido.")
+
+        # 🚀 Cria novo usuário
         admin_in = UserCreate(
-            username="admin",
+            username="admin@swim.com",
             email="admin@swim.com",
             password="admin1234",
             first_name="Admin",
@@ -40,11 +46,15 @@ def seed_superuser():
             is_staff=True,
             is_superuser=True,
         )
+
         user = crud.create_user(db, admin_in)
-        print(f"✅ Superusuário criado com sucesso!")
+        db.commit()  # 🔥 garante persistência
+
+        print(f"✅ Superusuário recriado com sucesso!")
         print(f"   Username: {user.username}")
         print(f"   Email:    {user.email}")
         print(f"   Senha:    admin1234 (troque imediatamente!)")
+
     finally:
         db.close()
 

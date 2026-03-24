@@ -35,6 +35,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArticleIcon from '@mui/icons-material/Article';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import Button from '@mui/material/Button';
+import { TablePagination } from '@mui/material';
 
 import type { Document } from '../types/document.types';
 
@@ -140,7 +141,7 @@ export function DocumentTable({
       flex: 1.5,
       minWidth: 160,
       renderCell: (params: GridRenderCellParams<Document>) => (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.primary" fontWeight={500}>
           {(params.value as string) ?? '—'}
         </Typography>
       ),
@@ -150,7 +151,7 @@ export function DocumentTable({
       headerName: t('columns.date'),
       width: 140,
       renderCell: (params: GridRenderCellParams<Document>) => (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.primary">
           {params.row.date_issued ?? params.row.dateIssued ?? '—'}
         </Typography>
       ),
@@ -282,11 +283,6 @@ export function DocumentTable({
             columnMenuShowColumns: t('dataGrid.showColumns'),
           }}
           slotProps={{
-            pagination: {
-              labelRowsPerPage: t('dataGrid.rowsPerPage'),
-              labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
-                `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`,
-            },
             toolbar: {
               showQuickFilter: true,
               quickFilterProps: { debounceMs: 500 },
@@ -294,6 +290,15 @@ export function DocumentTable({
           }}
           slots={{
             toolbar: () => <CustomToolbar onAdd={handleToolbarAdd} />,
+            pagination: (props) => (
+              <TablePagination
+                {...props}
+                labelRowsPerPage={t('dataGrid.rowsPerPage')}
+                labelDisplayedRows={({ from, to, count }: { from: number; to: number; count: number }) =>
+                  `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
+                }
+              />
+            ),
           }}
           disableRowSelectionOnClick
           autoHeight
@@ -302,8 +307,15 @@ export function DocumentTable({
             '& .MuiDataGrid-columnHeaders': {
               bgcolor: theme.palette.mode === 'dark'
                 ? theme.palette.grey[800]
-                : theme.palette.grey[100],
-              fontWeight: 700,
+                : '#f8f9fa',
+              borderBottom: `2px solid ${theme.palette.divider}`,
+              '& .MuiDataGrid-columnHeaderTitle': {
+                fontWeight: 800,
+                color: theme.palette.primary.main,
+                textTransform: 'uppercase',
+                fontSize: '0.75rem',
+                letterSpacing: '0.05rem',
+              },
             },
             '& .MuiDataGrid-row:hover': {
               bgcolor: theme.palette.action.hover,
