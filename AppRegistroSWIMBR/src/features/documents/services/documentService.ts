@@ -29,7 +29,7 @@ function extractErrorMessage(error: unknown): string {
 
 // ─── Resource URL factory ──────────────────────────────────────────────────────
 
-const ENDPOINT = `${BASE_URL}/utilities/documents`;
+const ENDPOINT = '/api/v1/documents';
 
 // ─── Serviço ───────────────────────────────────────────────────────────────────
 
@@ -63,8 +63,8 @@ export const documentService = {
   /** Lista todos os documentos */
   async list(): Promise<Document[]> {
     if (IS_MOCK) return MOCK_DOCS;
-    const { data } = await api.get<Document[]>(`${ENDPOINT}/`);
-    return Array.isArray(data) ? data : [];
+    const { data } = await api.get<{ data: Document[], total: number }>(`${ENDPOINT}/`);
+    return Array.isArray(data.data) ? data.data : [];
   },
 
   /** Busca um documento por ID */
@@ -105,10 +105,10 @@ export const documentService = {
   },
 
   /** Faz download de um arquivo associado ao documento */
-  async download(filename: string): Promise<Blob> {
+  async download(id: string | number): Promise<Blob> {
     if (IS_MOCK) return new Blob(['Mock file content'], { type: 'application/pdf' });
     const { data } = await api.get<Blob>(
-      `/download/${encodeURIComponent(filename)}`,
+      `${ENDPOINT}/${id}/file`,
       { responseType: 'blob' },
     );
     return data;
@@ -121,12 +121,15 @@ function buildFormData(values: DocumentFormValues): FormData {
   const fd = new FormData();
   fd.append('title',       values.title);
   fd.append('publish',     values.publish);
-  fd.append('date_issued', values.date_issued);
-  fd.append('version',     values.version);
-  fd.append('description', values.description ?? '');
-  fd.append('location',    values.location);
+  if (values.description) fd.append('description', values.description);
+  
+  // Como são defaults ou não cruciais inicialmente no Pydantic, garantimos que existam se presentes
+  if (values.version) fd.append('version', values.version);
+  if (values.location) fd.append('location', values.location);
+  if (values.date_issued) fd.append('date_issued', values.date_issued);
+  
   if (values.uploadfile instanceof File) {
-    fd.append('uploadfile', values.uploadfile);
+    fd.append('file', values.uploadfile); // FastAPI Pydantic usa UploadFile "file" no form
   }
   return fd;
 }

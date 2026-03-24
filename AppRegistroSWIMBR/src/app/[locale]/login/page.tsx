@@ -37,16 +37,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // ─── LOGIN FAKE PARA DESENVOLVIMENTO ──────────────────────────────────────
-      if (username === 'admin' && password === 'admin') {
-        localStorage.setItem('token', 'fake-dev-token-swimb');
-        router.push('/utility/document/documentTable');
-        return;
-      }
-      // ──────────────────────────────────────────────────────────────────────────
+      // Cria FormData nativo ou URLSearchParams para o OAuth2PasswordRequestForm do FastAPI
+      const params = new URLSearchParams();
+      params.append('username', username);
+      params.append('password', password);
 
-      const response = await api.post('/users/login/', { username, password });
-      const token = response.data.token || response.data.auth_token;
+      const response = await api.post('/api/v1/auth/login', params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      const token = response.data.access_token; // FastAPI devolve access_token
 
       if (token) {
         localStorage.setItem('token', token);
@@ -57,8 +59,8 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error(err);
       setError(
+        err.response?.data?.detail?.[0]?.msg ||
         err.response?.data?.detail || 
-        err.response?.data?.error || 
         'Credenciais inválidas ou erro no servidor.'
       );
     } finally {

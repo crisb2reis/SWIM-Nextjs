@@ -9,6 +9,8 @@ import { ReactNode, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import api from '@/lib/axios';
 import { 
   Box, 
   AppBar, 
@@ -87,6 +89,22 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopVisible, setDesktopVisible] = useState(true);
+
+  // Busca de Usuário logado
+  const [user, setUser] = useState<{ first_name: string; last_name: string; username: string } | null>(null);
+
+  useEffect(() => {
+    api.get('/api/v1/users/me')
+      .then(res => setUser(res.data))
+      .catch(err => console.error("Falha ao buscar usuário", err));
+  }, []);
+
+  const fullName = user 
+    ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username 
+    : 'Carregando...';
+  const initials = user 
+    ? (user.first_name?.[0] || user.username[0]).toUpperCase() 
+    : '...';
 
   // Controle do menu de idiomas
   const [langAnchor, setLangAnchor] = useState<null | HTMLElement>(null);
@@ -224,7 +242,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
                 <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
                   <Typography variant="body2" fontWeight={800} sx={{ lineHeight: 1 }}>
-                    Cristiano Cepr
+                    {fullName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {t('admin')}
@@ -245,7 +263,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     boxShadow: '0 4px 10px rgba(105, 108, 255, 0.3)'
                   }}
                 >
-                  CC
+                  {initials}
                 </Box>
             </Box>
           </Toolbar>

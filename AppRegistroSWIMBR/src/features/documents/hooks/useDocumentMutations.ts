@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { documentService } from '../services/documentService';
+import { documentService, extractErrorMessage } from '../services/documentService';
 import type { DocumentFormValues } from '../types/document.types';
 
 export function useDocumentMutations(onSuccess?: () => void) {
@@ -22,7 +22,7 @@ export function useDocumentMutations(onSuccess?: () => void) {
       onSuccess?.();
       return true;
     } catch (e: unknown) {
-      setError((e as Error).message ?? t('createError'));
+      setError(extractErrorMessage(e) ?? t('createError'));
       return false;
     } finally {
       setIsSubmitting(false);
@@ -41,7 +41,7 @@ export function useDocumentMutations(onSuccess?: () => void) {
       onSuccess?.();
       return true;
     } catch (e: unknown) {
-      setError((e as Error).message ?? t('updateError'));
+      setError(extractErrorMessage(e) ?? t('updateError'));
       return false;
     } finally {
       setIsSubmitting(false);
@@ -56,7 +56,7 @@ export function useDocumentMutations(onSuccess?: () => void) {
       onSuccess?.();
       return true;
     } catch (e: unknown) {
-      setError((e as Error).message ?? t('deleteError'));
+      setError(extractErrorMessage(e) ?? t('deleteError'));
       return false;
     } finally {
       setIsSubmitting(false);

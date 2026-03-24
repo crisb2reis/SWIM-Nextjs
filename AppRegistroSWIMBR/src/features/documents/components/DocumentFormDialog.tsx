@@ -103,6 +103,7 @@ export function DocumentFormDialog({
     >
       {/* Cabeçalho Premium */}
       <DialogTitle
+        component="div"
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -360,7 +361,7 @@ export function DocumentFormDialog({
 
               {isEditing && document?.uploadfile && !uploadedFile && (
                 <Typography variant="caption" sx={{ bgcolor: 'action.selected', px: 1.5, py: 0.5, borderRadius: 1 }}>
-                  {t('form.upload.current', { name: String(document.uploadfile.name ?? t('actions.view')) })}
+                  {t('form.upload.current', { name: String(document.uploadfile.name ?? t('messages.view')) })}
                 </Typography>
               )}
 

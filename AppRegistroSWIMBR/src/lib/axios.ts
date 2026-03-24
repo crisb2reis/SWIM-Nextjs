@@ -5,10 +5,10 @@
 import axios from 'axios';
 
 const RAW_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001';
 
 function normalizeBaseUrl(url: string): string {
-  if (!url) return 'http://localhost:8000';
+  if (!url) return 'http://localhost:8001';
   const hasProtocol = /^https?:\/\//i.test(url);
   const isLocalhost  = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(url);
   const protocol     = isLocalhost ? 'http' : 'https';
@@ -26,7 +26,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   if (token && config.headers) {
-    config.headers.Authorization = `Token ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
