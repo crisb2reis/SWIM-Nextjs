@@ -1,0 +1,139 @@
+{
+  "common": {
+    "login": "Login",
+    "search": "Search...",
+    "searchAll": "Search across SWIMB (Ctrl+K)",
+    "admin": "Administrator",
+    "logout": "Logout",
+    "loading": "Loading...",
+    "errorOccurred": "An error occurred",
+    "noResults": "No results found"
+  },
+  "navigation": {
+    "servicos": "SERVICES",
+    "gerenciamento": "MANAGEMENT",
+    "informacoes": "INFORMATION",
+    "catalogo": "Service Catalog",
+    "usuarios": "User Management",
+    "gestao-servicos": "Service Management",
+    "organizacao": "Organization",
+    "documentacao": "Documentation",
+    "contato": "Points of Contact",
+    "sobre": "About SWIM",
+    "todos": "All Services",
+    "gerenciar": "Manage",
+    "adicionar": "Add",
+    "consultar": "Consult",
+    "manage": "Manage"
+  },
+  "documents": {
+    "title": "Documents",
+    "managementTitle": "Document Management",
+    "gallerySubtitle": "Registered documents gallery",
+    "resultsFor": "Results for \"{query}\"",
+    "newDocument": "New Document",
+    "filterOnPage": "Filter on this page...",
+    "rowsPerPage": "Rows per page:",
+    "noDocsFound": "No documents found",
+    "columns": {
+      "title": "Title",
+      "publisher": "Publisher",
+      "date": "Date",
+      "version": "Version",
+      "actions": "Actions"
+    },
+    "tooltips": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dataGrid": {
+      "filters": "Filters",
+      "export": "Export",
+      "quickFilter": "Search...",
+      "noRows": "No documents found",
+      "sortAsc": "Sort ascending",
+      "sortDesc": "Sort descending",
+      "filter": "Filter",
+      "hide": "Hide",
+      "showColumns": "Show columns",
+      "rowsPerPage": "Rows per page:",
+      "of": "of",
+      "moreThan": "more than"
+    },
+    "docCount": "{count} document(s) found",
+    "loading": "Loading…",
+    "tableLoadError": "Failed to load documents. Please try again.",
+    "labels": {
+      "title": "Title",
+      "version": "Version",
+      "publisher": "Publisher / Agency",
+      "date": "Issue Date",
+      "location": "Location (URL)",
+      "description": "Description / Details",
+      "file": "File"
+    },
+    "messages": {
+      "created": "Document created successfully!",
+      "updated": "Document updated successfully!",
+      "deleted": "Document deleted successfully!",
+      "createError": "Error creating document",
+      "updateError": "Error updating document",
+      "deleteError": "Error deleting document",
+      "confirmDelete": "Confirm Deletion",
+      "deleteWarning": "Are you sure you want to delete the document \"{name}\"? This action cannot be undone.",
+      "addSubtitle": "Fill in the details for the new document",
+      "editSubtitle": "Updating existing record in the SWIM repository",
+      "discard": "Discard",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "create": "Create Document",
+      "view": "View Document"
+    },
+    "form": {
+      "titlePlaceholder": "Official document name...",
+      "versionPlaceholder": "Ex: 1.0.0",
+      "publisherPlaceholder": "Ex: ICEA / DECEA",
+      "locationPlaceholder": "Ex: https://swim.br/docs/document.pdf",
+      "descriptionPlaceholder": "A brief contextualization of the purpose of this document...",
+      "upload": {
+        "title": "Technical Document (PDF/DOC)",
+        "ready": "File Ready",
+        "saveReady": "Ready to save: {name}",
+        "clickToSearch": "Click here to browse files on your system",
+        "current": "Current: {name}"
+      }
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "titleMax": "Maximum 120 characters",
+      "descriptionMax": "Maximum 1000 characters",
+      "publisherRequired": "Publisher is required",
+      "publisherMax": "Maximum 100 characters",
+      "publisherInvalid": "Invalid publisher format",
+      "dateRequired": "Issue date is required",
+      "dateInvalid": "Invalid date",
+      "versionRequired": "Version is required",
+      "versionFormat": "Use X.Y.Z format (ex: 1.0.0)",
+      "locationRequired": "Location is required",
+      "locationMax": "Maximum 200 characters",
+      "urlInvalid": "Invalid URL"
+    },
+    "gallery": {
+      "access": "Access document →",
+      "issue": "Issued",
+      "loadError": "Error loading documents.",
+      "noResultsHint": "Try adjusting the search filters.",
+      "download": "Download"
+    }
+  },
+  "actions": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View"
+  }
+}

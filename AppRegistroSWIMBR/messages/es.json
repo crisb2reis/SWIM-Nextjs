@@ -1,0 +1,139 @@
+{
+  "common": {
+    "login": "Ingresar",
+    "search": "Buscar...",
+    "searchAll": "Buscar en todo SWIMB (Ctrl+K)",
+    "admin": "Administrador",
+    "logout": "Cerrar sesión",
+    "loading": "Cargando...",
+    "errorOccurred": "Ocurrió un error",
+    "noResults": "No se encontraron resultados"
+  },
+  "navigation": {
+    "servicos": "SERVICIOS",
+    "gerenciamento": "GESTIÓN",
+    "informacoes": "INFORMACIÓN",
+    "catalogo": "Catálogo de Servicios",
+    "usuarios": "Gestión de Usuarios",
+    "gestao-servicos": "Gestión de Servicios",
+    "organizacao": "Organización",
+    "documentacao": "Documentación",
+    "consultar": "Consultar",
+    "contato": "Puntos de Contacto",
+    "sobre": "Sobre SWIM",
+    "todos": "Todos los Servicios",
+    "gerenciar": "Gestionar",
+    "adicionar": "Agregar",
+    "manage": "Gestionar"
+  },
+  "documents": {
+    "title": "Documentos",
+    "managementTitle": "Gestión de Documentos",
+    "gallerySubtitle": "Galería de documentos registrados",
+    "resultsFor": "Resultados para \"{query}\"",
+    "newDocument": "Nuevo Documento",
+    "filterOnPage": "Filtrar en esta página...",
+    "rowsPerPage": "Filas por página:",
+    "noDocsFound": "No se encontraron documentos",
+    "columns": {
+      "title": "Título",
+      "publisher": "Publicador",
+      "date": "Fecha",
+      "version": "Versión",
+      "actions": "Acciones"
+    },
+    "tooltips": {
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "dataGrid": {
+      "filters": "Filtros",
+      "export": "Exportar",
+      "quickFilter": "Buscar...",
+      "noRows": "No se encontraron documentos",
+      "sortAsc": "Ordenar ascendente",
+      "sortDesc": "Ordenar descendente",
+      "filter": "Filtrar",
+      "hide": "Ocultar",
+      "showColumns": "Mostrar columnas",
+      "rowsPerPage": "Filas por página:",
+      "of": "de",
+      "moreThan": "más de"
+    },
+    "docCount": "{count} documento(s) encontrado(s)",
+    "loading": "Cargando…",
+    "tableLoadError": "Error al cargar los documentos. Inténtalo de nuevo.",
+    "labels": {
+      "title": "Título",
+      "version": "Versión",
+      "publisher": "Publicador / Órgano",
+      "date": "Data de Emisión",
+      "location": "Ubicación (URL)",
+      "description": "Descripción / Detalles",
+      "file": "Archivo"
+    },
+    "messages": {
+      "created": "¡Documento creado con éxito!",
+      "updated": "¡Documento actualizado con éxito!",
+      "deleted": "¡Documento eliminado con éxito!",
+      "createError": "Error al crear documento",
+      "updateError": "Error al actualizar documento",
+      "deleteError": "Error al eliminar documento",
+      "confirmDelete": "Confirmar Eliminación",
+      "deleteWarning": "¿Está seguro de que deseja eliminar el documento \"{name}\"? Esta acción no se puede deshacer.",
+      "addSubtitle": "Complete los datos del novo documento",
+      "editSubtitle": "Atualización de registro existente no repositório SWIM",
+      "discard": "Descartar",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar Cambios",
+      "create": "Crear Documento",
+      "view": "Visualizar Documento"
+    },
+    "form": {
+      "titlePlaceholder": "Nombre oficial do documento...",
+      "versionPlaceholder": "Ej: 1.0.0",
+      "publisherPlaceholder": "Ej: ICEA / DECEA",
+      "locationPlaceholder": "Ej: https://swim.br/docs/documento.pdf",
+      "descriptionPlaceholder": "Contextualización del propósito de este documento...",
+      "upload": {
+        "title": "Documento Técnico (PDF/DOC)",
+        "ready": "Archivo Preparado",
+        "saveReady": "Listo para guardar: {name}",
+        "clickToSearch": "Clique aquí para buscar o arquivo nos arquivos do sistema",
+        "current": "Atual: {name}"
+      }
+    },
+    "validation": {
+      "titleRequired": "El título es obligatorio",
+      "titleMax": "Máximo de 120 caracteres",
+      "descriptionMax": "Máximo de 1000 caracteres",
+      "publisherRequired": "El publicador é obligatorio",
+      "publisherMax": "Máximo de 100 caracteres",
+      "publisherInvalid": "Formato de publicador inválido",
+      "dateRequired": "Fecha de emisión é obligatoria",
+      "dateInvalid": "Fecha inválida",
+      "versionRequired": "La versión é obligatoria",
+      "versionFormat": "Utilice el formato X.Y.Z (ej: 1.0.0)",
+      "locationRequired": "La ubicación é obligatoria",
+      "locationMax": "Máximo de 200 caracteres",
+      "urlInvalid": "URL inválida"
+    },
+    "gallery": {
+      "access": "Acceder al documento →",
+      "issue": "Emisión",
+      "loadError": "Error al cargar los documentos.",
+      "noResultsHint": "Tente ajustar los filtros de búsqueda.",
+      "download": "Descargar"
+    }
+  },
+  "actions": {
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "view": "Ver"
+  }
+}

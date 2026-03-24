@@ -1,0 +1,138 @@
+{
+  "common": {
+    "login": "Entrar",
+    "search": "Buscar...",
+    "searchAll": "Pesquisar em todo o SWIMB (Ctrl+K)",
+    "admin": "Administrador",
+    "logout": "Sair",
+    "loading": "Carregando...",
+    "errorOccurred": "Ocorreu um erro",
+    "noResults": "Nenhum resultado encontrado"
+  },
+  "navigation": {
+    "servicos": "SERVIÇOS",
+    "gerenciamento": "GERENCIAMENTO",
+    "informacoes": "INFORMAÇÕES",
+    "catalogo": "Catálogo de Serviços",
+    "usuarios": "Gestão de Usuários",
+    "gestao-servicos": "Gestão de Serviços",
+    "organizacao": "Organização",
+    "documentacao": "Documentação",
+    "contato": "Pontos de Contato",
+    "sobre": "Sobre o SWIM",
+    "todos": "Todos os Serviços",
+    "gerenciar": "Gerenciar",
+    "adicionar": "Adicionar",
+    "consultar": "Consultar",
+    "manage": "Gerenciar"
+  },
+  "documents": {
+    "title": "Documentos",
+    "managementTitle": "Gestão de Documentos",
+    "gallerySubtitle": "Galeria de documentos registrados",
+    "resultsFor": "Resultados para \"{query}\"",
+    "newDocument": "Novo Documento",
+    "filterOnPage": "Filtrar nesta página...",
+    "rowsPerPage": "Linhas por página:",
+    "noDocsFound": "Nenhum documento encontrado",
+    "columns": {
+      "title": "Título",
+      "publisher": "Publicador",
+      "date": "Data",
+      "version": "Versão",
+      "actions": "Ações"
+    },
+    "tooltips": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "dataGrid": {
+      "filters": "Filtros",
+      "export": "Exportar",
+      "quickFilter": "Buscar...",
+      "noRows": "Nenhum documento encontrado",
+      "sortAsc": "Ordenar crescente",
+      "sortDesc": "Ordenar decrescente",
+      "filter": "Filtrar",
+      "hide": "Ocultar",
+      "showColumns": "Mostrar colunas",
+      "rowsPerPage": "Linhas por página:",
+      "of": "de",
+      "moreThan": "mais de"
+    },
+    "docCount": "{count} documento(s) encontrado(s)",
+    "loading": "Carregando…",
+    "tableLoadError": "Falha ao carregar documentos. Tente novamente.",
+    "labels": {
+      "title": "Título",
+      "version": "Versão",
+      "publisher": "Publicador / Órgão",
+      "date": "Data de Emissão",
+      "location": "Localização (URL)",
+      "description": "Descrição / Detalhes",
+      "file": "Arquivo"
+    },
+    "messages": {
+      "created": "Documento criado com sucesso!",
+      "updated": "Documento atualizado com sucesso!",
+      "createError": "Erro ao criar documento",
+      "updateError": "Erro ao atualizar documento",
+      "deleteError": "Erro ao excluir documento",
+      "confirmDelete": "Confirmar Exclusão",
+      "deleteWarning": "Tem certeza que deseja excluir o documento \"{name}\"? Esta ação não pode ser desfeita.",
+      "addSubtitle": "Preencha os dados do novo documento",
+      "editSubtitle": "Atualização de registro existente no repositório SWIM",
+      "discard": "Descartar",
+      "saving": "Salvando...",
+      "saveChanges": "Salvar Alterações",
+      "create": "Criar Documento",
+      "view": "Visualizar Documento"
+    },
+    "form": {
+      "titlePlaceholder": "Nome oficial do documento...",
+      "versionPlaceholder": "Ex: 1.0.0",
+      "publisherPlaceholder": "Ex: ICEA / DECEA",
+      "locationPlaceholder": "Ex: https://swim.br/docs/documento.pdf",
+      "descriptionPlaceholder": "Uma breve contextualização do propósito deste documento...",
+      "upload": {
+        "title": "Documento Técnico (PDF/DOC)",
+        "ready": "Arquivo Preparado",
+        "saveReady": "Pronto para salvar: {name}",
+        "clickToSearch": "Clique aqui para buscar o arquivo nos arquivos do sistema",
+        "current": "Atual: {name}"
+      }
+    },
+    "validation": {
+      "titleRequired": "Título é obrigatório",
+      "titleMax": "Máximo de 120 caracteres",
+      "descriptionMax": "Máximo de 1000 caracteres",
+      "publisherRequired": "Publicador é obrigatório",
+      "publisherMax": "Máximo de 100 caracteres",
+      "publisherInvalid": "Formato de publicador inválido",
+      "dateRequired": "Data de emissão é obrigatória",
+      "dateInvalid": "Data inválida",
+      "versionRequired": "Versão é obrigatória",
+      "versionFormat": "Use o formato X.Y.Z (ex: 1.0.0)",
+      "locationRequired": "Localização é obrigatória",
+      "locationMax": "Máximo de 200 caracteres",
+      "urlInvalid": "URL inválida"
+    },
+    "gallery": {
+      "access": "Acessar documento →",
+      "issue": "Emissão",
+      "loadError": "Erro ao carregar documentos.",
+      "noResultsHint": "Tente ajustar os filtros de busca.",
+      "download": "Download"
+    }
+  },
+  "actions": {
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "close": "Fechar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "view": "Visualizar"
+  }
+}
