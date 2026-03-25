@@ -1,14 +1,19 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useState } from 'react';
 import { Box, Typography, Breadcrumbs, Link as MuiLink, Snackbar, Alert, Container } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import { useTranslations } from 'next-intl';
 
-import { ServiceFormDialog } from '@/features/services/components/ServiceFormDialog';
-import { serviceService } from '@/features/services/services/serviceService';
+import dynamic from 'next/dynamic';
+import { serviceService, extractServiceErrorMessage } from '@/features/services/services/serviceService';
+
+const ServiceFormDialog = dynamic(
+  () => import('@/features/services/components/ServiceFormDialog').then((mod) => mod.ServiceFormDialog),
+  { ssr: false }
+);
 import type { ServiceFormValues } from '@/features/services/types/service.types';
 
 export default function ServicesAddPage() {
@@ -26,10 +31,10 @@ export default function ServicesAddPage() {
       setTimeout(() => {
         router.push('/utility/services/manage');
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setToast({ 
-        message: err.response?.data?.detail || t('messages.loadError'), 
+        message: extractServiceErrorMessage(err), 
         severity: 'error' 
       });
     } finally {

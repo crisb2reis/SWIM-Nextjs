@@ -1,13 +1,17 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useState } from 'react';
 import { Box, Typography, Breadcrumbs, Link as MuiLink, Snackbar, Alert, Container } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import BusinessIcon from '@mui/icons-material/Business';
 import { useTranslations } from 'next-intl';
 
-import { OrganizationFormDialog } from '@/features/organizations/components/OrganizationFormDialog';
+import dynamic from 'next/dynamic';
+const OrganizationFormDialog = dynamic(
+  () => import('@/features/organizations/components/OrganizationFormDialog').then(mod => mod.OrganizationFormDialog),
+  { ssr: false }
+);
 import {
   organizationService,
   parseOrganizationError,

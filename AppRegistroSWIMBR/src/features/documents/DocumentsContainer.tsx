@@ -17,7 +17,7 @@ import dynamic from 'next/dynamic';
 import { useDocuments }         from './hooks/useDocuments';
 import { useDocumentMutations } from './hooks/useDocumentMutations';
 
-import { DocumentTable }        from './components/DocumentTable';
+const DocumentTable = dynamic(() => import('./components/DocumentTable').then(mod => mod.DocumentTable), { ssr: false });
 
 const DocumentFormDialog  = dynamic(() => import('./components/DocumentFormDialog').then(mod => mod.DocumentFormDialog), { ssr: false });
 const DocumentViewDialog  = dynamic(() => import('./components/DocumentViewDialog').then(mod => mod.DocumentViewDialog), { ssr: false });
