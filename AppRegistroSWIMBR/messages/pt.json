@@ -200,7 +200,10 @@
       "logo": "Logo",
       "name": "Nome",
       "acronym": "Sigla",
+      "tipo": "Tipo",
+      "status": "Status",
       "description": "Descrição",
+      "createdAt": "Criação",
       "actions": "Ações"
     },
     "tooltips": {
@@ -239,7 +242,29 @@
       "saveChanges": "Salvar Alterações",
       "create": "Criar Organização"
     },
+    "validation": {
+      "nameRequired": "Nome é obrigatório",
+      "nameMax": "Máximo 255 caracteres",
+      "acronymMax": "Máximo 20 caracteres",
+      "descriptionMax": "Máximo 1000 caracteres",
+      "tipoRequired": "Tipo é obrigatório",
+      "statusRequired": "Status é obrigatório",
+      "logoMax": "O logotipo não deve exceder 2MB"
+    },
+    "tipo": {
+      "PROVEDOR": "Provedor",
+      "CONSUMIDOR": "Consumidor",
+      "PARCEIRO": "Parceiro",
+      "OUTRO": "Outro"
+    },
+    "status": {
+      "ATIVO": "Ativo",
+      "INATIVO": "Inativo",
+      "EM_APROVACAO": "Em Aprovação"
+    },
     "form": {
+      "tipoLabel": "Tipo",
+      "statusLabel": "Status",
       "nameLabel": "Nome da Organização",
       "namePlaceholder": "Ex: Departamento de Controle do Espaço Aéreo",
       "acronymLabel": "Sigla",
@@ -252,12 +277,100 @@
       "noLogo": "Sem logo",
       "clearLogo": "Limpar Logotipo",
       "chooseLogo": "Escolher arquivo"
+    }
+  },
+  "services": {
+    "title": "Serviços",
+    "managementTitle": "Gestão de Serviços",
+    "newService": "Novo Serviço",
+    "pageSubtitle": "Gerencie os serviços SWIM cadastrados no sistema",
+    "columns": {
+      "name":         "Nome",
+      "organization": "Organização",
+      "version":      "Versão",
+      "status":       "Status",
+      "lifeCycle":    "Ciclo de Vida",
+      "tipo":         "Tipo",
+      "actions":      "Ações"
+    },
+    "tooltips": {
+      "edit":   "Editar Serviço",
+      "delete": "Excluir Serviço"
+    },
+    "dataGrid": {
+      "filters":     "Filtros",
+      "export":      "Exportar",
+      "quickFilter": "Buscar serviço...",
+      "noRows":      "Nenhum serviço encontrado",
+      "rowsPerPage": "Linhas por página:",
+      "of":          "de",
+      "moreThan":    "mais de",
+      "sortAsc":     "Ordenar crescente",
+      "sortDesc":    "Ordenar decrescente",
+      "filter":      "Filtrar",
+      "hide":        "Ocultar",
+      "showColumns": "Mostrar colunas"
+    },
+    "status": {
+      "EM_APROVACAO": "Em Aprovação",
+      "ATIVO":        "Ativo",
+      "INATIVO":      "Inativo",
+      "SUSPENSO":     "Suspenso"
+    },
+    "lifeCycle": {
+      "PROPOSTA":    "Proposta",
+      "CANDIDATO":   "Candidato",
+      "OPERACIONAL": "Operacional",
+      "LEGADO":      "Legado",
+      "RETIRADO":    "Retirado"
+    },
+    "tipo": {
+      "REST": "REST",
+      "SOAP": "SOAP",
+      "FTP":  "FTP",
+      "AMHS": "AMHS",
+      "OUTRO": "Outro"
+    },
+    "publishStatus": {
+      "PUBLICADO": "Publicado",
+      "RASCUNHO":  "Rascunho",
+      "INATIVO":   "Inativo"
+    },
+    "form": {
+      "nameLabel":           "Nome do Serviço",
+      "namePlaceholder":     "Ex: Serviço de NOTAM",
+      "organizationLabel":   "Organização",
+      "organizationPlaceholder": "Ex: DECEA",
+      "versionLabel":        "Versão",
+      "versionPlaceholder":  "Ex: 1.0.0",
+      "statusLabel":         "Status do Serviço",
+      "lifeCycleLabel":      "Ciclo de Vida",
+      "tipoLabel":           "Tipo do Serviço",
+      "publishStatusLabel":  "Status da Publicação"
     },
     "validation": {
-      "nameRequired": "Nome é obrigatório",
-      "nameMax": "Máximo 255 caracteres",
-      "acronymMax": "Máximo 20 caracteres",
-      "descriptionMax": "Máximo 1000 caracteres"
+      "nameRequired":          "Nome é obrigatório",
+      "nameMax":               "Máximo 255 caracteres",
+      "versionMax":            "Máximo 50 caracteres",
+      "statusRequired":        "Status é obrigatório",
+      "lifeCycleRequired":     "Ciclo de Vida é obrigatório",
+      "tipoRequired":          "Tipo é obrigatório",
+      "publishStatusRequired": "Status da Publicação é obrigatório"
+    },
+    "messages": {
+      "created":    "Serviço criado com sucesso!",
+      "updated":    "Serviço atualizado com sucesso!",
+      "deleted":    "Serviço excluído com sucesso!",
+      "createError": "Erro ao criar serviço",
+      "updateError": "Erro ao atualizar serviço",
+      "deleteError": "Erro ao excluir serviço",
+      "editTitle":   "Atualizar Serviço",
+      "discard":     "Descartar",
+      "saving":      "Salvando...",
+      "saveChanges": "Salvar Alterações",
+      "create":      "Criar Serviço",
+      "addSubtitle": "Cadastre um novo serviço de dados SWIM",
+      "loadError":   "Falha ao carregar ou salvar o serviço. Verifique a conexão."
     }
   },
   "actions": {

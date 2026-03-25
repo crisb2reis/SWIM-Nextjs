@@ -8,7 +8,7 @@ import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import { useTranslations } from 'next-intl';
 
 import { contactService, extractErrorMessage } from '@/features/contacts/services/contactService';
-import { organizationService } from '@/features/contacts/services/organizationService';
+import { organizationService } from '@/features/organizations/services/organizationService';
 import { ContactPointTable } from '@/features/contacts/components/ContactPointTable';
 import { ContactPointFormDialog } from '@/features/contacts/components/ContactPointFormDialog';
 import type { ContactPoint } from '@/features/contacts/types/contact.types';

@@ -29,7 +29,7 @@ import { useTranslations } from 'next-intl';
 
 import { useContactPointForm, type ContactPointFormValues } from '../hooks/useContactPointForm';
 import type { ContactPoint } from '../types/contact.types';
-import type { Organization } from '../types/organization.types';
+import type { Organization } from '@/features/organizations/types/organization.types';
 
 interface ContactPointFormDialogProps {
   open: boolean;

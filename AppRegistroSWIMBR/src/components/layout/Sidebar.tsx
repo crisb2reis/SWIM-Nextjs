@@ -105,23 +105,23 @@ export function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   
-  // Inicialização inteligente: abre o submenu correspondente ao caminho atual
-  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>(() => {
-    const initialState: Record<string, boolean> = {
-      documentacao: pathname.includes('/utility/document'),
-    };
+  // Inicialização inteligente: abre o submenu correspondente ao caminho atual (Apenas UM por vez)
+  const [openSubMenuId, setOpenSubMenuId] = useState<string | null>(() => {
+    let activeId: string | null = null;
+    
+    if (pathname.includes('/utility/document')) activeId = 'documentacao';
     
     navigationItems.forEach(item => {
       if (item.children?.some(child => pathname.startsWith(child.path ?? ''))) {
-        initialState[item.id] = true;
+        activeId = item.id;
       }
     });
     
-    return initialState;
+    return activeId;
   });
 
   const handleToggleSubMenu = (id: string) => {
-    setOpenSubMenus((prev) => ({ ...prev, [id]: !prev[id] }));
+    setOpenSubMenuId((prev) => (prev === id ? null : id));
   };
 
   const handleNavigate = (path: string) => {
@@ -138,7 +138,7 @@ export function Sidebar() {
 
       const isSelected = pathname === item.path || (item.children?.some(child => pathname === child.path));
       const hasChildren = !!item.children;
-      const isOpen = openSubMenus[item.id];
+      const isOpen = openSubMenuId === item.id;
       const itemTitle = t(item.id);
 
       return (

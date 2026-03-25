@@ -55,7 +55,8 @@ export const navigationItems: NavItem[] = [
     title: 'Gestão de Serviços',
     icon: AppsIcon,
     children: [
-      { id: 'gestao-servicos-gerenciar', title: 'Gerenciar',   path: '/utility/services-mgmt/manage' },
+      { id: 'gestao-servicos-gerenciar', title: 'Gerenciar',   path: '/utility/services/manage' },
+      { id: 'gestao-servicos-adicionar', title: 'Adicionar',   path: '/utility/services/add' },
     ],
   },
   {

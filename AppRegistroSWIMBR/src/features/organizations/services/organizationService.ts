@@ -8,6 +8,8 @@ function toFormData(values: OrganizationFormValues): FormData {
   fd.append('name', values.name);
   if (values.acronym) fd.append('acronym', values.acronym);
   if (values.description) fd.append('description', values.description);
+  if (values.tipo) fd.append('tipo', values.tipo);
+  if (values.status) fd.append('status', values.status);
   if (values.logo) fd.append('logo', values.logo);
   return fd;
 }
@@ -43,11 +45,34 @@ export const organizationService = {
   },
 };
 
-export function extractOrganizationErrorMessage(err: unknown): string {
-  if (err instanceof Error) {
-    const msg = (err as any)?.response?.data?.detail;
-    if (msg) return String(msg);
-    return err.message;
+export class ApiError extends Error {
+  public fieldErrors?: Array<{ field: string; message: string }>;
+  constructor(message: string, fieldErrors?: Array<{ field: string; message: string }>) {
+    super(message);
+    this.fieldErrors = fieldErrors;
   }
-  return 'Erro desconhecido';
+}
+
+export function parseOrganizationError(err: unknown): ApiError {
+  if (err instanceof Error) {
+    const detail = (err as any)?.response?.data?.detail;
+    
+    // Formato de erro de validação do FastAPI (array de objetos loc/msg)
+    if (Array.isArray(detail)) {
+      const fieldErrors = detail.map((e: any) => {
+        // e.loc = ["body", "name"]
+        const fieldName = e.loc?.length > 1 ? e.loc[e.loc.length - 1] : 'unknown';
+        return { field: fieldName, message: e.msg };
+      });
+      return new ApiError('Erro de validação. Verifique os campos.', fieldErrors);
+    }
+
+    // Erro string simples
+    if (typeof detail === 'string') {
+      return new ApiError(detail);
+    }
+    
+    return new ApiError(err.message);
+  }
+  return new ApiError('Erro desconhecido');
 }
