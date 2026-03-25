@@ -1,24 +1,12 @@
 'use client';
 
-import { Box, Typography, Button } from '@mui/material';
-import { useTranslations } from 'next-intl';
+/**
+ * src/app/[locale]/utility/services-mgmt/manage/page.tsx
+ * Página principal do módulo de Gestão de Serviços
+ */
 
-export default function ServicesmgmtManagePage() {
-  const t = useTranslations('navigation');
-  
-  return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight={800} gutterBottom>
-        Página em Construção: {t('todos')} {/* Apenas como exemplo */}
-      </Typography>
-      <Typography variant="body1" color="text.secondary">
-        Rota: `/utility/services-mgmt/manage`
-      </Typography>
-      <Box sx={{ mt: 4 }}>
-        <Button variant="contained" href="/utility/document/documentTable">
-          Voltar para Documentos
-        </Button>
-      </Box>
-    </Box>
-  );
+import { ServicesContainer } from '@/features/services/ServicesContainer';
+
+export default function ServicesManagePage() {
+  return <ServicesContainer />;
 }

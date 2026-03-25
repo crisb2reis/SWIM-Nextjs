@@ -201,7 +201,10 @@
       "logo": "Logo",
       "name": "Name",
       "acronym": "Acronym",
+      "tipo": "Type",
+      "status": "Status",
       "description": "Description",
+      "createdAt": "Created At",
       "actions": "Actions"
     },
     "tooltips": {
@@ -240,7 +243,29 @@
       "saveChanges": "Save Changes",
       "create": "Create Organization"
     },
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameMax": "Maximum 255 characters",
+      "acronymMax": "Maximum 20 characters",
+      "descriptionMax": "Maximum 1000 characters",
+      "tipoRequired": "Type is required",
+      "statusRequired": "Status is required",
+      "logoMax": "Logo must not exceed 2MB"
+    },
+    "tipo": {
+      "PROVEDOR": "Provider",
+      "CONSUMIDOR": "Consumer",
+      "PARCEIRO": "Partner",
+      "OUTRO": "Other"
+    },
+    "status": {
+      "ATIVO": "Active",
+      "INATIVO": "Inactive",
+      "EM_APROVACAO": "Under Review"
+    },
     "form": {
+      "tipoLabel": "Type",
+      "statusLabel": "Status",
       "nameLabel": "Organization Name",
       "namePlaceholder": "Ex: Department of Airspace Control",
       "acronymLabel": "Acronym",
@@ -253,12 +278,100 @@
       "noLogo": "No logo",
       "clearLogo": "Clear Logo",
       "chooseLogo": "Choose file"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "managementTitle": "Service Management",
+    "newService": "New Service",
+    "pageSubtitle": "Manage SWIM services registered in the system",
+    "columns": {
+      "name":         "Name",
+      "organization": "Organization",
+      "version":      "Version",
+      "status":       "Status",
+      "lifeCycle":    "Life Cycle",
+      "tipo":         "Type",
+      "actions":      "Actions"
+    },
+    "tooltips": {
+      "edit":   "Edit Service",
+      "delete": "Delete Service"
+    },
+    "dataGrid": {
+      "filters":     "Filters",
+      "export":      "Export",
+      "quickFilter": "Search service...",
+      "noRows":      "No services found",
+      "rowsPerPage": "Rows per page:",
+      "of":          "of",
+      "moreThan":    "more than",
+      "sortAsc":     "Sort ascending",
+      "sortDesc":    "Sort descending",
+      "filter":      "Filter",
+      "hide":        "Hide",
+      "showColumns": "Show columns"
+    },
+    "status": {
+      "EM_APROVACAO": "Under Approval",
+      "ATIVO":        "Active",
+      "INATIVO":      "Inactive",
+      "SUSPENSO":     "Suspended"
+    },
+    "lifeCycle": {
+      "PROPOSTA":    "Proposed",
+      "CANDIDATO":   "Candidate",
+      "OPERACIONAL": "Operational",
+      "LEGADO":      "Legacy",
+      "RETIRADO":    "Retired"
+    },
+    "tipo": {
+      "REST": "REST",
+      "SOAP": "SOAP",
+      "FTP":  "FTP",
+      "AMHS": "AMHS",
+      "OUTRO": "Other"
+    },
+    "publishStatus": {
+      "PUBLICADO": "Published",
+      "RASCUNHO":  "Draft",
+      "INATIVO":   "Inactive"
+    },
+    "form": {
+      "nameLabel":               "Service Name",
+      "namePlaceholder":         "E.g.: NOTAM Service",
+      "organizationLabel":       "Organization",
+      "organizationPlaceholder": "E.g.: DECEA",
+      "versionLabel":            "Version",
+      "versionPlaceholder":      "E.g.: 1.0.0",
+      "statusLabel":             "Service Status",
+      "lifeCycleLabel":          "Life Cycle",
+      "tipoLabel":               "Service Type",
+      "publishStatusLabel":      "Publication Status"
     },
     "validation": {
-      "nameRequired": "Name is required",
-      "nameMax": "Maximum 255 characters",
-      "acronymMax": "Maximum 20 characters",
-      "descriptionMax": "Maximum 1000 characters"
+      "nameRequired":          "Name is required",
+      "nameMax":               "Maximum 255 characters",
+      "versionMax":            "Maximum 50 characters",
+      "statusRequired":        "Status is required",
+      "lifeCycleRequired":     "Life Cycle is required",
+      "tipoRequired":          "Type is required",
+      "publishStatusRequired": "Publication Status is required"
+    },
+    "messages": {
+      "created":     "Service created successfully!",
+      "updated":     "Service updated successfully!",
+      "deleted":     "Service deleted successfully!",
+      "createError": "Error creating service",
+      "updateError": "Error updating service",
+      "deleteError": "Error deleting service",
+      "editTitle":   "Update Service",
+      "discard":     "Discard",
+      "saving":      "Saving...",
+      "saveChanges": "Save Changes",
+      "create":      "Create Service",
+      "addSubtitle": "Register a new SWIM data service",
+      "loadError":   "Failed to load or save service. Please check connection."
     }
   },
   "actions": {

@@ -10,7 +10,7 @@ import { useTranslations }  from 'next-intl';
 
 import { ContactPointFormDialog } from '@/features/contacts/components/ContactPointFormDialog';
 import { contactService, extractErrorMessage } from '@/features/contacts/services/contactService';
-import { organizationService }    from '@/features/contacts/services/organizationService';
+import { organizationService }    from '@/features/organizations/services/organizationService';
 import type { ContactPointFormValues } from '@/features/contacts/hooks/useContactPointForm';
 
 export default function ContactsAddPage() {

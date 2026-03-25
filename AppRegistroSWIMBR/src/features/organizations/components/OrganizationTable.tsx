@@ -2,21 +2,33 @@
 
 import { useMemo, useState, useCallback } from 'react';
 import {
-  Box, Card, CardHeader, Typography, Tooltip, IconButton,
-  Skeleton, Alert, useMediaQuery, useTheme, Avatar, Button,
-  TablePagination,
+  Box, Card, Typography, Tooltip, IconButton,
+  Chip, Skeleton, Alert, useMediaQuery, useTheme,
+  Avatar, Button, TablePagination,
 } from '@mui/material';
 import {
   DataGrid, type GridColDef, type GridRenderCellParams,
   GridToolbarQuickFilter, GridToolbarContainer, GridToolbarExport,
 } from '@mui/x-data-grid';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import BusinessIcon from '@mui/icons-material/Business';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AddIcon from '@mui/icons-material/Add';
 import { useTranslations } from 'next-intl';
 
-import type { Organization } from '@/features/contacts/types/organization.types';
+import type { Organization, OrganizationStatus, OrganizationTipo } from '../types/organization.types';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8001';
+
+// ─── Mapeamento de cores para Status ─────────────────────────────────────────
+
+const STATUS_COLORS: Record<OrganizationStatus, 'success' | 'error' | 'warning'> = {
+  ATIVO: 'success',
+  INATIVO: 'error',
+  EM_APROVACAO: 'warning',
+};
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface OrganizationTableProps {
   organizations: Organization[];
@@ -28,7 +40,7 @@ interface OrganizationTableProps {
   onDelete: (org: Organization) => void;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8001';
+// ─── Toolbar ──────────────────────────────────────────────────────────────────
 
 function CustomToolbar({ onAdd }: { onAdd: () => void }) {
   const t = useTranslations('organizations');
@@ -37,24 +49,24 @@ function CustomToolbar({ onAdd }: { onAdd: () => void }) {
       <Button
         variant="contained"
         size="small"
-        startIcon={<AddCircleOutlineIcon />}
+        startIcon={<AddIcon />}
         onClick={onAdd}
-        sx={{ borderRadius: 2, fontWeight: 700, px: 2 }}
+        sx={{ borderRadius: 1, fontWeight: 600, textTransform: 'none', px: 2 }}
       >
         {t('newOrganization')}
       </Button>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         <GridToolbarQuickFilter
           placeholder={t('dataGrid.quickFilter')}
-          sx={{ '& .MuiInputBase-root': { borderRadius: 2, fontSize: 13 } }}
+          sx={{ '& .MuiInputBase-root': { borderRadius: 1, fontSize: 13 } }}
         />
-        <GridToolbarExport
-          slotProps={{ tooltip: { title: t('dataGrid.export') }, button: { size: 'small', sx: { borderRadius: 2 } } }}
-        />
+        <GridToolbarExport />
       </Box>
     </GridToolbarContainer>
   );
 }
+
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export function OrganizationTable({
   organizations, isLoading, isError, errorMessage, onAdd, onEdit, onDelete,
@@ -63,69 +75,105 @@ export function OrganizationTable({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(8);
+
+  const handleAdd = useCallback(onAdd, [onAdd]);
 
   const columns = useMemo<GridColDef[]>(() => [
+    // ── Logo ──
     {
       field: 'logo_url',
       headerName: t('columns.logo'),
-      width: 70,
+      width: 64,
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams<Organization>) => (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
           <Avatar
             src={params.value ? `${API_BASE}${params.value}` : undefined}
-            sx={{ width: 36, height: 36, bgcolor: 'primary.light' }}
+            sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}
           >
-            <BusinessIcon fontSize="small" />
+            <BusinessIcon sx={{ fontSize: 18 }} />
           </Avatar>
         </Box>
       ),
     },
+    // ── Nome ──
     {
       field: 'name',
       headerName: t('columns.name'),
       flex: 2,
       minWidth: 180,
+      renderCell: (params: GridRenderCellParams<Organization>) => (
+        <Typography variant="body2" fontWeight={500}>
+          {params.value as string}
+        </Typography>
+      ),
     },
+    // ── Sigla ──
     {
       field: 'acronym',
       headerName: t('columns.acronym'),
-      width: 120,
+      width: 110,
       renderCell: (params: GridRenderCellParams<Organization>) =>
         params.value ? (
-          <Box sx={{
-            display: 'inline-flex', alignItems: 'center', px: 1.5, py: 0.3,
-            bgcolor: 'primary.light', borderRadius: 99, color: 'primary.contrastText',
-            fontWeight: 700, fontSize: 12,
-          }}>
-            {params.value}
-          </Box>
-        ) : '—',
+          <Chip
+            label={params.value as string}
+            size="small"
+            variant="outlined"
+            color="primary"
+            sx={{ fontWeight: 700, fontSize: 11, borderRadius: 1 }}
+          />
+        ) : (
+          <Typography variant="body2" color="text.disabled">—</Typography>
+        ),
     },
+    // ── Tipo ──
     ...(!isMobile ? [{
-      field: 'description',
-      headerName: t('columns.description'),
-      flex: 3,
-      minWidth: 200,
-      renderCell: (params: GridRenderCellParams<Organization>) => (
-        <Typography variant="body2" noWrap color="text.secondary">
-          {params.value || '—'}
-        </Typography>
-      ),
+      field: 'tipo',
+      headerName: t('columns.tipo'),
+      width: 130,
+      renderCell: (params: GridRenderCellParams<Organization>) => {
+        const tipo = params.value as OrganizationTipo | null;
+        return tipo ? (
+          <Typography variant="body2">{t(`tipo.${tipo}`)}</Typography>
+        ) : (
+          <Typography variant="body2" color="text.disabled">—</Typography>
+        );
+      },
     } as GridColDef] : []),
+    // ── Status ──
     {
-      field: 'actions',
+      field: 'status',
+      headerName: t('columns.status'),
+      width: 140,
+      renderCell: (params: GridRenderCellParams<Organization>) => {
+        const st = params.value as OrganizationStatus | null;
+        if (!st) return <Typography variant="body2" color="text.disabled">—</Typography>;
+        return (
+          <Chip
+            label={t(`status.${st}`)}
+            size="small"
+            color={STATUS_COLORS[st] ?? 'default'}
+            sx={{ fontWeight: 700, fontSize: 11, borderRadius: 1, minWidth: 90, justifyContent: 'center' }}
+          />
+        );
+      },
+    },
+    // ── Ações ──
+    {
+      field: '__actions__',
       headerName: t('columns.actions'),
-      width: 100,
+      width: 90,
       sortable: false,
       filterable: false,
+      align: 'center',
+      headerAlign: 'center',
       renderCell: (params: GridRenderCellParams<Organization>) => (
         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>
           <Tooltip title={t('tooltips.edit')}>
             <IconButton size="small" color="primary" onClick={() => onEdit(params.row)}>
-              <EditTwoToneIcon fontSize="small" />
+              <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title={t('tooltips.delete')}>
@@ -140,14 +188,14 @@ export function OrganizationTable({
 
   if (isLoading) {
     return (
-      <Card sx={{ borderRadius: 4, p: 2 }}>
-        {[...Array(5)].map((_, i) => <Skeleton key={i} height={52} sx={{ mb: 1 }} />)}
+      <Card sx={{ borderRadius: 2, p: 2, border: '1px solid', borderColor: 'divider' }}>
+        {[...Array(8)].map((_, i) => <Skeleton key={i} height={48} sx={{ mb: 0.5 }} />)}
       </Card>
     );
   }
 
   if (isError) {
-    return <Alert severity="error" sx={{ borderRadius: 3 }}>{errorMessage}</Alert>;
+    return <Alert severity="error" sx={{ borderRadius: 2 }}>{errorMessage}</Alert>;
   }
 
   const paginated = organizations.slice(page * pageSize, (page + 1) * pageSize);
@@ -155,19 +203,8 @@ export function OrganizationTable({
   return (
     <Card
       elevation={0}
-      sx={{ borderRadius: 4, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}
+      sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}
     >
-      <CardHeader
-        title={
-          <Typography variant="h6" fontWeight={700}>{t('managementTitle')}</Typography>
-        }
-        subheader={
-          <Typography variant="body2" color="text.secondary">
-            {t('count', { count: organizations.length })}
-          </Typography>
-        }
-        sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 3, py: 2 }}
-      />
       <DataGrid
         rows={paginated}
         columns={columns}
@@ -176,7 +213,7 @@ export function OrganizationTable({
         disableRowSelectionOnClick
         autoHeight
         slots={{ toolbar: CustomToolbar }}
-        slotProps={{ toolbar: { onAdd } }}
+        slotProps={{ toolbar: { onAdd: handleAdd } }}
         localeText={{
           toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
           noRowsLabel: t('dataGrid.noRows'),
@@ -191,30 +228,42 @@ export function OrganizationTable({
         sx={{
           border: 0,
           '& .MuiDataGrid-columnHeaders': {
-            bgcolor: 'background.default',
+            bgcolor: '#f8f9fa',
             borderBottom: '2px solid',
             borderColor: 'divider',
             '& .MuiDataGrid-columnHeaderTitle': {
-              fontWeight: 700,
-              fontSize: 12,
+              fontWeight: 800,
+              fontSize: 11,
               textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              color: 'text.secondary',
+              letterSpacing: 0.6,
+              color: 'primary.dark',
             },
           },
-          '& .MuiDataGrid-row:hover': { bgcolor: 'action.hover' },
-          '& .MuiDataGrid-cell': { borderColor: 'divider', alignContent: 'center' },
+          '& .MuiDataGrid-row': {
+            cursor: 'default',
+            '&:hover': { bgcolor: 'action.hover' },
+          },
+          '& .MuiDataGrid-cell': {
+            borderColor: 'divider',
+            alignContent: 'center',
+            py: 0.75,
+          },
         }}
       />
+
+      {/* ── Paginação no rodapé ── */}
       <TablePagination
         component="div"
         count={organizations.length}
         page={page}
         rowsPerPage={pageSize}
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[8, 16, 32]}
         onPageChange={(_, p) => setPage(p)}
         onRowsPerPageChange={(e) => { setPageSize(parseInt(e.target.value)); setPage(0); }}
         labelRowsPerPage={t('dataGrid.rowsPerPage')}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
+        }
         sx={{ borderTop: '1px solid', borderColor: 'divider' }}
       />
     </Card>
