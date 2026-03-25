@@ -196,7 +196,12 @@ export function ContactPointTable({
     },
   ], [theme, onEdit, onDelete, t]);
 
-  const tdg = useTranslations('documents.dataGrid');
+  const mobileColumns = useMemo<GridColDef<ContactPoint>[]>(
+    () => columns.filter(c => ['name', '__actions__'].includes(c.field as string)),
+    [columns],
+  );
+
+  const handleToolbarAdd = useCallback(onAdd, [onAdd]);
 
   if (isError) {
     return (
@@ -234,31 +239,35 @@ export function ContactPointTable({
       ) : (
         <DataGrid<ContactPoint>
           rows={contacts}
-          columns={columns}
+          columns={isMobile ? mobileColumns : columns}
           getRowId={(row) => row.id}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           localeText={{
-            toolbarFilters: tdg('filters'),
-            toolbarExport: tdg('export'),
-            toolbarQuickFilterPlaceholder: tdg('quickFilter'),
+            toolbarFilters: t('dataGrid.filters'),
+            toolbarExport: t('dataGrid.export'),
+            toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
             noRowsLabel: t('dataGrid.noRows'),
-            columnMenuSortAsc: tdg('sortAsc'),
-            columnMenuSortDesc: tdg('sortDesc'),
-            columnMenuFilter: tdg('filter'),
-            columnMenuHideColumn: tdg('hide'),
-            columnMenuShowColumns: tdg('showColumns'),
+            columnMenuSortAsc: t('dataGrid.sortAsc'),
+            columnMenuSortDesc: t('dataGrid.sortDesc'),
+            columnMenuFilter: t('dataGrid.filter'),
+            columnMenuHideColumn: t('dataGrid.hide'),
+            columnMenuShowColumns: t('dataGrid.showColumns'),
           }}
           slotProps={{
+            toolbar: {
+              showQuickFilter: true,
+              quickFilterProps: { debounceMs: 500 },
+            },
             pagination: {
-              labelRowsPerPage: tdg('rowsPerPage'),
+              labelRowsPerPage: t('dataGrid.rowsPerPage'),
               labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
-                `${from}-${to} ${tdg('of')} ${count !== -1 ? count : `${tdg('moreThan')} ${to}`}`
+                `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
             }
           }}
           slots={{
-            toolbar: () => <CustomToolbar onAdd={onAdd} />,
+            toolbar: () => <CustomToolbar onAdd={handleToolbarAdd} />,
           }}
           disableRowSelectionOnClick
           autoHeight
@@ -280,6 +289,8 @@ export function ContactPointTable({
             },
             '& .MuiDataGrid-cell': {
               borderBottom: `1px solid ${theme.palette.divider}`,
+              display: 'flex',
+              alignItems: 'center',
             },
           }}
         />

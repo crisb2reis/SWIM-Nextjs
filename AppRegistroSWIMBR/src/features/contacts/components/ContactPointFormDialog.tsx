@@ -69,8 +69,9 @@ export function ContactPointFormDialog({
     <Dialog
       open={open}
       onClose={isSubmitting ? undefined : onClose}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
+      scroll="body"
       PaperProps={{
         sx: {
           borderRadius: 4,
@@ -86,31 +87,49 @@ export function ContactPointFormDialog({
           justifyContent: 'space-between',
           background: 'linear-gradient(135deg, #253865 0%, #80879e 100%)',
           color: '#fff',
-          py: 3,
-          px: 4,
+          py: 4,
+          px: { xs: 3, md: 5 },
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <PersonIcon />
+          <Box
+            sx={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              borderRadius: 1.5,
+              p: 1,
+              display: 'flex'
+            }}
+          >
+            {isEditing ? <SaveIcon /> : <PersonIcon />}
+          </Box>
           <Box>
-            <Typography variant="h6" fontWeight={700}>
-              {isEditing ? t('messages.editSubtitle') : t('newContact')}
+            <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.2 }}>
+              {isEditing ? contact?.name : t('newContact')}
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.8 }}>
               {isEditing ? t('messages.editSubtitle') : t('messages.addSubtitle')}
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} disabled={isSubmitting} size="small" sx={{ color: 'inherit' }}>
+        <IconButton
+          onClick={onClose}
+          disabled={isSubmitting}
+          sx={{
+            color: 'inherit',
+            bgcolor: 'rgba(255,255,255,0.1)',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+          }}
+          size="small"
+        >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
       <Divider />
 
-      <DialogContent sx={{ p: 4 }}>
-        <Grid container spacing={3} sx={{ mt: 1 }}>
-          <Grid size={{ xs: 12 }}>
+      <DialogContent sx={{ px: { xs: 3, md: 5 }, pt: 4, pb: 6 }}>
+        <Grid container spacing={4} sx={{ mt: 2 }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Controller
               name="name"
               control={control}
@@ -134,7 +153,7 @@ export function ContactPointFormDialog({
             />
           </Grid>
 
-          <Grid size={{ xs: 12 }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Controller
               name="email"
               control={control}
@@ -158,7 +177,7 @@ export function ContactPointFormDialog({
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Controller
               name="role"
               control={control}
@@ -182,7 +201,7 @@ export function ContactPointFormDialog({
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Controller
               name="phone"
               control={control}
@@ -244,8 +263,14 @@ export function ContactPointFormDialog({
         </Grid>
       </DialogContent>
 
-      <DialogActions sx={{ p: 4, bgcolor: 'background.default' }}>
-        <Button onClick={onClose} disabled={isSubmitting} color="inherit">
+      <DialogActions sx={{ px: { xs: 3, md: 5 }, py: 4, bgcolor: 'background.default', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
+        <Button
+          onClick={onClose}
+          disabled={isSubmitting}
+          variant="text"
+          color="inherit"
+          sx={{ borderRadius: 2, px: 3, fontWeight: 600 }}
+        >
           {t('messages.discard')}
         </Button>
         <Box sx={{ flexGrow: 1 }} />
@@ -254,7 +279,16 @@ export function ContactPointFormDialog({
           disabled={isSubmitting}
           startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
           onClick={handleSubmit(onSubmit)}
-          sx={{ px: 4, borderRadius: 2, fontWeight: 700 }}
+          sx={{
+            borderRadius: 2,
+            px: 5,
+            py: 1.2,
+            fontWeight: 700,
+            boxShadow: (theme) => `0 4px 14px 0 ${theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.39)' : 'rgba(74, 120, 255, 0.39)'}`,
+            '&:hover': {
+              boxShadow: (theme) => `0 6px 20px ${theme.palette.mode === 'light' ? 'rgba(37, 56, 101, 0.23)' : 'rgba(74, 120, 255, 0.23)'}`,
+            }
+          }}
         >
           {isSubmitting ? '...' : (isEditing ? t('messages.saveChanges') : t('messages.create'))}
         </Button>

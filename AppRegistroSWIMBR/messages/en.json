@@ -144,7 +144,18 @@
       "delete": "Delete Contact"
     },
     "dataGrid": {
-      "noRows": "No points of contact found"
+      "filters": "Filters",
+      "export": "Export",
+      "quickFilter": "Search...",
+      "noRows": "No points of contact found",
+      "rowsPerPage": "Rows per page:",
+      "of": "of",
+      "moreThan": "more than",
+      "sortAsc": "Sort ascending",
+      "sortDesc": "Sort descending",
+      "filter": "Filter",
+      "hide": "Hide",
+      "showColumns": "Show columns"
     },
     "count": "{count} contact(s) found",
     "messages": {

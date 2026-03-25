@@ -7,7 +7,9 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Box, Snackbar, Alert } from '@mui/material';
+import { Box, Container, Typography, Breadcrumbs, Link, Snackbar, Alert } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import ArticleIcon from '@mui/icons-material/Article';
 import { useTranslations } from 'next-intl';
 
 import dynamic from 'next/dynamic';
@@ -95,7 +97,27 @@ export function DocumentsContainer() {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Header & Breadcrumbs */}
+      <Box mb={4}>
+        <Breadcrumbs sx={{ mb: 2 }}>
+          <Link href="/" color="inherit" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </Link>
+          <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+            <ArticleIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            {t('title')}
+          </Typography>
+        </Breadcrumbs>
+        <Typography variant="h4" fontWeight={800} gutterBottom>
+          {t('title')}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Gerenciamento centralizado de documentos, normas e publicações técnicas do ecossistema SWIM.
+        </Typography>
+      </Box>
+
       {/* Tabela principal */}
       <DocumentTable
         documents={documents}
@@ -151,6 +173,6 @@ export function DocumentsContainer() {
           </Alert>
         ) : <Box />}
       </Snackbar>
-    </Box>
+    </Container>
   );
 }

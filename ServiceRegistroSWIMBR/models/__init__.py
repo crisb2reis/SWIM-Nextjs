@@ -3,6 +3,7 @@ from models.organization import Organization
 from models.user import User
 from models.uploaded_file import UploadedFile
 from models.document import Document
+from models.contact_point import ContactPoint
 from models.registry import GeographicalExtent, Policy, SecurityMechanism
 
 __all__ = [
@@ -10,6 +11,7 @@ __all__ = [
     "User",
     "UploadedFile",
     "Document",
+    "ContactPoint",
     "GeographicalExtent",
     "Policy",
     "SecurityMechanism",
