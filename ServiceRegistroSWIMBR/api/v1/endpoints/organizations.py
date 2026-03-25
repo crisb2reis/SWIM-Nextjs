@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from db.session import get_db
 from schemas.organization import OrganizationCreate, OrganizationUpdate, OrganizationRead
-from models.organization import Organization
+from models.organization import Organization, OrganizationTipo, OrganizationStatus
 from api.dependencies import get_current_active_user
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
@@ -61,6 +61,8 @@ def create_organization(
     name: str = Form(...),
     acronym: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
+    tipo: Optional[str] = Form(None),
+    org_status: Optional[str] = Form(None, alias="status"),
     logo: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user),
@@ -79,11 +81,16 @@ def create_organization(
 
     logo_url = _save_logo(logo) if logo and logo.filename else None
 
+    tipo_enum = OrganizationTipo(tipo) if tipo else OrganizationTipo.OUTRO
+    status_enum = OrganizationStatus(org_status) if org_status else OrganizationStatus.ATIVO
+
     org = Organization(
         name=name_stripped,
         acronym=acronym,
         description=description,
         logo_url=logo_url,
+        tipo=tipo_enum,
+        status=status_enum,
     )
     db.add(org)
     db.commit()
@@ -98,6 +105,8 @@ def update_organization(
     name: Optional[str] = Form(None),
     acronym: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
+    tipo: Optional[str] = Form(None),
+    org_status: Optional[str] = Form(None, alias="status"),
     logo: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user),
@@ -115,17 +124,21 @@ def update_organization(
             )
         conflict = (
             db.query(Organization)
-            .filter(Organization.name == name.strip(), Organization.id != org_id)
+            .filter(Organization.name == name_stripped, Organization.id != org_id)
             .first()
         )
         if conflict:
             raise HTTPException(status_code=400, detail="Já existe uma organização com este nome")
-        org.name = name.strip()
+        org.name = name_stripped
 
     if acronym is not None:
         org.acronym = acronym
     if description is not None:
         org.description = description
+    if tipo is not None:
+        org.tipo = OrganizationTipo(tipo)
+    if org_status is not None:
+        org.status = OrganizationStatus(org_status)
     if logo and logo.filename:
         org.logo_url = _save_logo(logo)
 
@@ -146,4 +159,3 @@ def delete_organization(
         raise HTTPException(status_code=404, detail="Organização não encontrada")
     db.delete(org)
     db.commit()
-

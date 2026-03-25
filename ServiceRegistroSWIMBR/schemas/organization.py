@@ -1,12 +1,16 @@
 from pydantic import BaseModel, field_validator, ConfigDict
 from typing import Optional
 
+from models.organization import OrganizationTipo, OrganizationStatus
+
 
 class OrganizationBase(BaseModel):
     name: str
     acronym: Optional[str] = None
     description: Optional[str] = None
     logo_url: Optional[str] = None
+    tipo: Optional[OrganizationTipo] = OrganizationTipo.OUTRO
+    status: Optional[OrganizationStatus] = OrganizationStatus.ATIVO
 
     @field_validator("name")
     @classmethod
@@ -25,6 +29,8 @@ class OrganizationUpdate(BaseModel):
     acronym: Optional[str] = None
     description: Optional[str] = None
     logo_url: Optional[str] = None
+    tipo: Optional[OrganizationTipo] = None
+    status: Optional[OrganizationStatus] = None
 
 
 class OrganizationRead(OrganizationBase):
