@@ -192,6 +192,75 @@
       "organizationRequired": "Organization is required"
     }
   },
+  "organizations": {
+    "title": "Organizations",
+    "managementTitle": "Organization Management",
+    "newOrganization": "New Organization",
+    "pageSubtitle": "Manage the organizations registered in the system",
+    "columns": {
+      "logo": "Logo",
+      "name": "Name",
+      "acronym": "Acronym",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "tooltips": {
+      "view": "View Organization",
+      "edit": "Edit Organization",
+      "delete": "Delete Organization"
+    },
+    "dataGrid": {
+      "filters": "Filters",
+      "export": "Export",
+      "quickFilter": "Search organization...",
+      "noRows": "No organizations found",
+      "rowsPerPage": "Rows per page:",
+      "of": "of",
+      "moreThan": "more than",
+      "sortAsc": "Sort ascending",
+      "sortDesc": "Sort descending",
+      "filter": "Filter",
+      "hide": "Hide",
+      "showColumns": "Show columns"
+    },
+    "count": "{count} organization(s) found",
+    "messages": {
+      "created": "Organization created successfully!",
+      "updated": "Organization updated successfully!",
+      "deleted": "Organization deleted successfully!",
+      "createError": "Error creating organization",
+      "updateError": "Error updating organization",
+      "deleteError": "Error deleting organization",
+      "confirmDelete": "Confirm Deletion",
+      "deleteWarning": "Are you sure you want to delete the organization \"{name}\"? This action cannot be undone.",
+      "addSubtitle": "Fill in the details for the new organization",
+      "editSubtitle": "Updating existing record in the SWIM repository",
+      "discard": "Discard",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "create": "Create Organization"
+    },
+    "form": {
+      "nameLabel": "Organization Name",
+      "namePlaceholder": "Ex: Department of Airspace Control",
+      "acronymLabel": "Acronym",
+      "acronymPlaceholder": "Ex: DECEA",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Brief description of the organization...",
+      "logoLabel": "Logo",
+      "logoHint": "PNG, JPG or SVG - up to 2MB",
+      "logoPreview": "Logo preview",
+      "noLogo": "No logo",
+      "clearLogo": "Clear Logo",
+      "chooseLogo": "Choose file"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameMax": "Maximum 255 characters",
+      "acronymMax": "Maximum 20 characters",
+      "descriptionMax": "Maximum 1000 characters"
+    }
+  },
   "actions": {
     "confirm": "Confirm",
     "cancel": "Cancel",

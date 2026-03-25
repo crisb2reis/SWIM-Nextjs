@@ -1,10 +1,32 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, field_validator, ConfigDict
+from typing import Optional
 
 
-class OrganizationRead(BaseModel):
-    id: int
+class OrganizationBase(BaseModel):
     name: str
+    acronym: Optional[str] = None
+    description: Optional[str] = None
+    logo_url: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    @field_validator("name")
+    @classmethod
+    def name_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Nome não pode ser vazio")
+        return v.strip()
+
+
+class OrganizationCreate(OrganizationBase):
+    pass
+
+
+class OrganizationUpdate(BaseModel):
+    name: Optional[str] = None
+    acronym: Optional[str] = None
+    description: Optional[str] = None
+    logo_url: Optional[str] = None
+
+
+class OrganizationRead(OrganizationBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
