@@ -31,7 +31,7 @@ def override_auth():
 
 @pytest.fixture
 def org_data():
-    return {"name": "Autoridade de Aviação Civil", "acronym": "AAC", "description": "Regulador."}
+    return {"name": "Autoridade de Aviação Civil", "acronym": "AAC", "description": "Regulador.", "tipo": "PROVEDOR", "status": "ATIVO"}
 
 
 # ── CREATE ────────────────────────────────────────────────────────────────────
@@ -42,6 +42,8 @@ def test_create_organization(client: TestClient, org_data):
     json = response.json()
     assert json["name"] == org_data["name"]
     assert json["acronym"] == org_data["acronym"]
+    assert json["tipo"] == "PROVEDOR"
+    assert json["status"] == "ATIVO"
     assert "id" in json
 
 
@@ -155,3 +157,34 @@ def test_delete_organization(client: TestClient, db: Session):
 def test_delete_not_found(client: TestClient):
     response = client.delete("/api/v1/organizations/99999")
     assert response.status_code == 404
+
+
+# ── NOVOS CAMPOS: TIPO E STATUS ───────────────────────────────────────────────
+
+def test_create_with_tipo_and_status(client: TestClient):
+    response = client.post("/api/v1/organizations/", data={
+        "name": "Org Tipo Teste",
+        "tipo": "CONSUMIDOR",
+        "status": "INATIVO",
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert data["tipo"] == "CONSUMIDOR"
+    assert data["status"] == "INATIVO"
+
+
+def test_update_tipo_and_status(client: TestClient, db: Session):
+    from models.organization import OrganizationTipo, OrganizationStatus
+    org = Organization(name="Org Para Update Tipo", tipo=OrganizationTipo.PROVEDOR, status=OrganizationStatus.ATIVO)
+    db.add(org)
+    db.commit()
+    db.refresh(org)
+
+    response = client.put(f"/api/v1/organizations/{org.id}", data={
+        "tipo": "PARCEIRO",
+        "status": "EM_APROVACAO",
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["tipo"] == "PARCEIRO"
+    assert data["status"] == "EM_APROVACAO"
