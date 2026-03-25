@@ -191,6 +191,75 @@
       "organizationRequired": "Organização é obrigatória"
     }
   },
+  "organizations": {
+    "title": "Organizações",
+    "managementTitle": "Gestão de Organizações",
+    "newOrganization": "Nova Organização",
+    "pageSubtitle": "Gerencie as organizações cadastradas no sistema",
+    "columns": {
+      "logo": "Logo",
+      "name": "Nome",
+      "acronym": "Sigla",
+      "description": "Descrição",
+      "actions": "Ações"
+    },
+    "tooltips": {
+      "view": "Visualizar Organização",
+      "edit": "Editar Organização",
+      "delete": "Excluir Organização"
+    },
+    "dataGrid": {
+      "filters": "Filtros",
+      "export": "Exportar",
+      "quickFilter": "Buscar organização...",
+      "noRows": "Nenhuma organização encontrada",
+      "rowsPerPage": "Linhas por página:",
+      "of": "de",
+      "moreThan": "mais de",
+      "sortAsc": "Ordenar crescente",
+      "sortDesc": "Ordenar decrescente",
+      "filter": "Filtrar",
+      "hide": "Ocultar",
+      "showColumns": "Mostrar colunas"
+    },
+    "count": "{count} organização(s) encontrada(s)",
+    "messages": {
+      "created": "Organização criada com sucesso!",
+      "updated": "Organização atualizada com sucesso!",
+      "deleted": "Organização excluída com sucesso!",
+      "createError": "Erro ao criar organização",
+      "updateError": "Erro ao atualizar organização",
+      "deleteError": "Erro ao excluir organização",
+      "confirmDelete": "Confirmar Exclusão",
+      "deleteWarning": "Tem certeza que deseja excluir a organização \"{name}\"? Esta ação não pode ser desfeita.",
+      "addSubtitle": "Preencha os dados da nova organização",
+      "editSubtitle": "Atualizando registro existente no repositório SWIM",
+      "discard": "Descartar",
+      "saving": "Salvando...",
+      "saveChanges": "Salvar Alterações",
+      "create": "Criar Organização"
+    },
+    "form": {
+      "nameLabel": "Nome da Organização",
+      "namePlaceholder": "Ex: Departamento de Controle do Espaço Aéreo",
+      "acronymLabel": "Sigla",
+      "acronymPlaceholder": "Ex: DECEA",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Breve descrição da organização...",
+      "logoLabel": "Logotipo",
+      "logoHint": "PNG, JPG ou SVG - até 2MB",
+      "logoPreview": "Pré-visualização do logo",
+      "noLogo": "Sem logo",
+      "clearLogo": "Limpar Logotipo",
+      "chooseLogo": "Escolher arquivo"
+    },
+    "validation": {
+      "nameRequired": "Nome é obrigatório",
+      "nameMax": "Máximo 255 caracteres",
+      "acronymMax": "Máximo 20 caracteres",
+      "descriptionMax": "Máximo 1000 caracteres"
+    }
+  },
   "actions": {
     "confirm": "Confirmar",
     "cancel": "Cancelar",

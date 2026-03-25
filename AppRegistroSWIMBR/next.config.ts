@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8001',
+        pathname: '/**',
+      },
+      {
         protocol: 'https',
         hostname: 'prototiporegistroswim.icea.decea.mil.br',
         pathname: '/**',
