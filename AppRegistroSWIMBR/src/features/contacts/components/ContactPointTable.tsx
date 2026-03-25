@@ -1,11 +1,5 @@
 'use client';
 
-/**
- * Módulo: features/documents/components/DocumentTable.tsx
- * Descrição: Tabela de documentos responsiva com DataGrid (MUI) e ações inline.
- *            Segue o padrão Presentation Component: recebe dados e callbacks via props.
- */
-
 import { useMemo, useState, useCallback } from 'react';
 import {
   Box,
@@ -20,6 +14,7 @@ import {
   useMediaQuery,
   useTheme,
   Avatar,
+  Button
 } from '@mui/material';
 import {
   DataGrid,
@@ -31,33 +26,25 @@ import {
 } from '@mui/x-data-grid';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ArticleIcon from '@mui/icons-material/Article';
+import PersonIcon from '@mui/icons-material/Person';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import Button from '@mui/material/Button';
 import { TablePagination } from '@mui/material';
-
-import type { Document } from '../types/document.types';
-
 import { useTranslations } from 'next-intl';
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+import type { ContactPoint } from '../types/contact.types';
 
-interface DocumentTableProps {
-  documents: Document[];
+interface ContactPointTableProps {
+  contacts: ContactPoint[];
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string;
   onAdd: () => void;
-  onEdit: (doc: Document) => void;
-  onDelete: (doc: Document) => void;
-  onView: (doc: Document) => void;
+  onEdit: (contact: ContactPoint) => void;
+  onDelete: (contact: ContactPoint) => void;
 }
 
-// ─── Toolbar customizada ──────────────────────────────────────────────────────
-
 function CustomToolbar({ onAdd }: { onAdd: () => void }) {
-  const t = useTranslations('documents');
+  const t = useTranslations('contacts');
   return (
     <GridToolbarContainer sx={{ p: 1.5, gap: 1, justifyContent: 'space-between' }}>
       <Button
@@ -67,7 +54,7 @@ function CustomToolbar({ onAdd }: { onAdd: () => void }) {
         onClick={onAdd}
         sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
       >
-        {t('newDocument')}
+        {t('newContact')}
       </Button>
       <Box display="flex" gap={1} alignItems="center">
         <Box sx={{ '& .MuiInputBase-root': { borderRadius: 2 } }}>
@@ -79,8 +66,6 @@ function CustomToolbar({ onAdd }: { onAdd: () => void }) {
   );
 }
 
-// ─── Skeleton de carregamento ─────────────────────────────────────────────────
-
 function TableSkeleton() {
   return (
     <Box sx={{ p: 2 }}>
@@ -91,33 +76,28 @@ function TableSkeleton() {
   );
 }
 
-// ─── Componente principal ─────────────────────────────────────────────────────
-
-export function DocumentTable({
-  documents,
+export function ContactPointTable({
+  contacts,
   isLoading,
   isError,
   errorMessage,
   onAdd,
   onEdit,
   onDelete,
-  onView,
-}: DocumentTableProps) {
-  const t = useTranslations('documents');
+}: ContactPointTableProps) {
+  const t = useTranslations('contacts');
+  const tCommon = useTranslations('common');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
-  // ─── Definição das colunas ────────────────────────────────────────────────
-
-  const columns = useMemo<GridColDef<Document>[]>(() => [
+  const columns = useMemo<GridColDef<ContactPoint>[]>(() => [
     {
-      field: 'title',
-      headerName: t('columns.title'),
-      flex: 2,
-      minWidth: 200,
-      renderCell: (params: GridRenderCellParams<Document>) => (
+      field: 'name',
+      headerName: t('columns.name'),
+      flex: 1.5,
+      minWidth: 180,
+      renderCell: (params: GridRenderCellParams<ContactPoint>) => (
         <Box display="flex" alignItems="center" gap={1.5}>
           <Avatar
             sx={{
@@ -127,7 +107,7 @@ export function DocumentTable({
               color: theme.palette.primary.contrastText,
             }}
           >
-            <ArticleIcon fontSize="small" />
+            <PersonIcon fontSize="small" />
           </Avatar>
           <Typography variant="body2" fontWeight={500}>
             {params.value as string}
@@ -136,62 +116,57 @@ export function DocumentTable({
       ),
     },
     {
-      field: 'publish',
-      headerName: t('columns.publisher'),
+      field: 'email',
+      headerName: t('columns.email'),
       flex: 1.5,
-      minWidth: 160,
-      renderCell: (params: GridRenderCellParams<Document>) => (
-        <Typography variant="body2" color="text.primary" fontWeight={500}>
-          {(params.value as string) ?? '—'}
+      minWidth: 200,
+      renderCell: (params: GridRenderCellParams<ContactPoint>) => (
+        <Typography 
+          variant="body2" 
+          color="primary" 
+          component="a" 
+          href={`mailto:${params.value}`}
+          sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+        >
+          {params.value as string}
         </Typography>
       ),
     },
     {
-      field: 'date_issued',
-      headerName: t('columns.date'),
-      width: 140,
-      renderCell: (params: GridRenderCellParams<Document>) => (
-        <Typography variant="body2" color="text.primary">
-          {params.row.date_issued ?? params.row.dateIssued ?? '—'}
+      field: 'role',
+      headerName: t('columns.role'),
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params: GridRenderCellParams<ContactPoint>) => (
+        <Typography variant="body2">
+          {params.value as string || '—'}
         </Typography>
       ),
     },
     {
-      field: 'version',
-      headerName: t('columns.version'),
-      width: 100,
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: (params: GridRenderCellParams<Document>) =>
-        params.value ? (
-          <Chip
-            label={params.value as string}
-            size="small"
-            color="primary"
-            variant="outlined"
-            sx={{ fontWeight: 600, fontSize: 11 }}
-          />
-        ) : null,
+      field: 'organization_name',
+      headerName: t('columns.organization'),
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params: GridRenderCellParams<ContactPoint>) => (
+        <Chip 
+          label={params.value as string || '—'} 
+          size="small" 
+          variant="outlined"
+          sx={{ fontStyle: 'italic', color: 'text.secondary' }}
+        />
+      ),
     },
     {
       field: '__actions__',
       headerName: t('columns.actions'),
-      width: 130,
+      width: 110,
       sortable: false,
       filterable: false,
       align: 'center',
       headerAlign: 'center',
-      renderCell: (params: GridRenderCellParams<Document>) => (
+      renderCell: (params: GridRenderCellParams<ContactPoint>) => (
         <Box display="flex" gap={0.5} justifyContent="center">
-          <Tooltip title={t('tooltips.view')}>
-            <IconButton
-              size="small"
-              onClick={() => onView(params.row)}
-              sx={{ color: theme.palette.info.main }}
-            >
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
           <Tooltip title={t('tooltips.edit')}>
             <IconButton
               size="small"
@@ -219,21 +194,14 @@ export function DocumentTable({
         </Box>
       ),
     },
-  ], [theme, onView, onEdit, onDelete, t]);
+  ], [theme, onEdit, onDelete, t]);
 
-  const mobileColumns = useMemo<GridColDef<Document>[]>(
-    () => columns.filter(c => ['title', '__actions__'].includes(c.field as string)),
-    [columns],
-  );
-
-  const handleToolbarAdd = useCallback(onAdd, [onAdd]);
-
-  // ─── Estados de UI ────────────────────────────────────────────────────────
+  const tdg = useTranslations('documents.dataGrid');
 
   if (isError) {
     return (
       <Alert severity="error" sx={{ m: 2 }}>
-        {errorMessage ?? t('tableLoadError')}
+        {errorMessage || t('messages.loadError')}
       </Alert>
     );
   }
@@ -255,7 +223,7 @@ export function DocumentTable({
         }
         subheader={
           <Typography variant="body2" color="text.secondary">
-            {isLoading ? t('loading') : t('docCount', { count: documents.length })}
+            {isLoading ? tCommon('loading') : t('count', { count: contacts.length })}
           </Typography>
         }
         sx={{ px: 2.5, pt: 2.5, pb: 0 }}
@@ -264,46 +232,40 @@ export function DocumentTable({
       {isLoading ? (
         <TableSkeleton />
       ) : (
-        <DataGrid<Document>
-          rows={documents}
-          columns={isMobile ? mobileColumns : columns}
-          getRowId={(row) => row.id ?? Math.random()}
+        <DataGrid<ContactPoint>
+          rows={contacts}
+          columns={columns}
+          getRowId={(row) => row.id}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           localeText={{
-            toolbarFilters: t('dataGrid.filters'),
-            toolbarExport: t('dataGrid.export'),
-            toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
+            toolbarFilters: tdg('filters'),
+            toolbarExport: tdg('export'),
+            toolbarQuickFilterPlaceholder: tdg('quickFilter'),
             noRowsLabel: t('dataGrid.noRows'),
-            columnMenuSortAsc: t('dataGrid.sortAsc'),
-            columnMenuSortDesc: t('dataGrid.sortDesc'),
-            columnMenuFilter: t('dataGrid.filter'),
-            columnMenuHideColumn: t('dataGrid.hide'),
-            columnMenuShowColumns: t('dataGrid.showColumns'),
+            columnMenuSortAsc: tdg('sortAsc'),
+            columnMenuSortDesc: tdg('sortDesc'),
+            columnMenuFilter: tdg('filter'),
+            columnMenuHideColumn: tdg('hide'),
+            columnMenuShowColumns: tdg('showColumns'),
           }}
           slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
-            },
             pagination: {
-                labelRowsPerPage: t('dataGrid.rowsPerPage'),
-                labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
-                  `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
+              labelRowsPerPage: tdg('rowsPerPage'),
+              labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
+                `${from}-${to} ${tdg('of')} ${count !== -1 ? count : `${tdg('moreThan')} ${to}`}`
             }
           }}
           slots={{
-            toolbar: () => <CustomToolbar onAdd={handleToolbarAdd} />,
+            toolbar: () => <CustomToolbar onAdd={onAdd} />,
           }}
           disableRowSelectionOnClick
           autoHeight
           sx={{
             border: 'none',
             '& .MuiDataGrid-columnHeaders': {
-              bgcolor: theme.palette.mode === 'dark'
-                ? theme.palette.grey[800]
-                : '#f8f9fa',
+              bgcolor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#f8f9fa',
               borderBottom: `2px solid ${theme.palette.divider}`,
               '& .MuiDataGrid-columnHeaderTitle': {
                 fontWeight: 800,
@@ -318,8 +280,6 @@ export function DocumentTable({
             },
             '& .MuiDataGrid-cell': {
               borderBottom: `1px solid ${theme.palette.divider}`,
-              display: 'flex',
-              alignItems: 'center',
             },
           }}
         />

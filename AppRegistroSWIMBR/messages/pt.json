@@ -52,14 +52,14 @@
       "export": "Exportar",
       "quickFilter": "Buscar...",
       "noRows": "Nenhum documento encontrado",
+      "rowsPerPage": "Linhas por página:",
+      "of": "de",
+      "moreThan": "mais de",
       "sortAsc": "Ordenar crescente",
       "sortDesc": "Ordenar decrescente",
       "filter": "Filtrar",
       "hide": "Ocultar",
-      "showColumns": "Mostrar colunas",
-      "rowsPerPage": "Linhas por página:",
-      "of": "de",
-      "moreThan": "mais de"
+      "showColumns": "Mostrar colunas"
     },
     "docCount": "{count} documento(s) encontrado(s)",
     "loading": "Carregando…",
@@ -124,6 +124,60 @@
       "loadError": "Erro ao carregar documentos.",
       "noResultsHint": "Tente ajustar os filtros de busca.",
       "download": "Download"
+    }
+  },
+  "contacts": {
+    "title": "Pontos de Contato",
+    "managementTitle": "Gestão de Pontos de Contato",
+    "newContact": "Novo Ponto de Contato",
+    "columns": {
+      "name": "Nome",
+      "email": "E-mail",
+      "role": "Função",
+      "phone": "Telefone",
+      "organization": "Organização",
+      "actions": "Ações"
+    },
+    "tooltips": {
+      "edit": "Editar Contato",
+      "delete": "Excluir Contato"
+    },
+    "dataGrid": {
+      "noRows": "Nenhum ponto de contato encontrado"
+    },
+    "count": "{count} contato(s) encontrado(s)",
+    "messages": {
+      "created": "Ponto de contato criado com sucesso!",
+      "updated": "Ponto de contato atualizado com sucesso!",
+      "deleted": "Ponto de contato excluído com sucesso!",
+      "createError": "Erro ao criar ponto de contato",
+      "updateError": "Erro ao atualizar ponto de contato",
+      "deleteError": "Erro ao excluir ponto de contato",
+      "confirmDelete": "Confirmar Exclusão",
+      "deleteWarning": "Tem certeza que deseja excluir o contato \"{name}\"?",
+      "addSubtitle": "Cadastrar novo ponto de contato para a organização",
+      "editSubtitle": "Atualizar dados do contato selecionado",
+      "discard": "Descartar",
+      "saveChanges": "Salvar Alterações",
+      "create": "Criar Contato"
+    },
+    "form": {
+      "nameLabel": "Nome Completo",
+      "namePlaceholder": "Ex: João da Silva",
+      "emailLabel": "E-mail Corporativo",
+      "emailPlaceholder": "Ex: joao@organizacao.com",
+      "roleLabel": "Função / Cargo",
+      "rolePlaceholder": "Ex: Gerente de Operações",
+      "phoneLabel": "Telefone de Contato",
+      "phonePlaceholder": "Ex: (11) 98888-7777",
+      "organizationLabel": "Organização Responsável",
+      "organizationPlaceholder": "Selecione a organização..."
+    },
+    "validation": {
+      "nameRequired": "Nome é obrigatório",
+      "emailRequired": "E-mail é obrigatório",
+      "emailInvalid": "E-mail inválido",
+      "organizationRequired": "Organização é obrigatória"
     }
   },
   "actions": {

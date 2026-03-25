@@ -52,14 +52,14 @@
       "export": "Export",
       "quickFilter": "Search...",
       "noRows": "No documents found",
+      "rowsPerPage": "Rows per page:",
+      "of": "of",
+      "moreThan": "more than",
       "sortAsc": "Sort ascending",
       "sortDesc": "Sort descending",
       "filter": "Filter",
       "hide": "Hide",
-      "showColumns": "Show columns",
-      "rowsPerPage": "Rows per page:",
-      "of": "of",
-      "moreThan": "more than"
+      "showColumns": "Show columns"
     },
     "docCount": "{count} document(s) found",
     "loading": "Loading…",
@@ -125,6 +125,60 @@
       "loadError": "Error loading documents.",
       "noResultsHint": "Try adjusting the search filters.",
       "download": "Download"
+    }
+  },
+  "contacts": {
+    "title": "Points of Contact",
+    "managementTitle": "Points of Contact Management",
+    "newContact": "New Point of Contact",
+    "columns": {
+      "name": "Name",
+      "email": "E-mail",
+      "role": "Role",
+      "phone": "Phone",
+      "organization": "Organization",
+      "actions": "Actions"
+    },
+    "tooltips": {
+      "edit": "Edit Contact",
+      "delete": "Delete Contact"
+    },
+    "dataGrid": {
+      "noRows": "No points of contact found"
+    },
+    "count": "{count} contact(s) found",
+    "messages": {
+      "created": "Point of contact created successfully!",
+      "updated": "Point of contact updated successfully!",
+      "deleted": "Point of contact deleted successfully!",
+      "createError": "Error creating point of contact",
+      "updateError": "Error updating point of contact",
+      "deleteError": "Error deleting point of contact",
+      "confirmDelete": "Confirm Deletion",
+      "deleteWarning": "Are you sure you want to delete the contact \"{name}\"?",
+      "addSubtitle": "Register new point of contact for the organization",
+      "editSubtitle": "Update selected contact details",
+      "discard": "Discard",
+      "saveChanges": "Save Changes",
+      "create": "Create Contact"
+    },
+    "form": {
+      "nameLabel": "Full Name",
+      "namePlaceholder": "Ex: John Doe",
+      "emailLabel": "Corporate E-mail",
+      "emailPlaceholder": "Ex: john@organization.com",
+      "roleLabel": "Role / Position",
+      "rolePlaceholder": "Ex: Operations Manager",
+      "phoneLabel": "Contact Phone",
+      "phonePlaceholder": "Ex: +1 (555) 123-4567",
+      "organizationLabel": "Responsible Organization",
+      "organizationPlaceholder": "Select organization..."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "E-mail is required",
+      "emailInvalid": "Invalid e-mail",
+      "organizationRequired": "Organization is required"
     }
   },
   "actions": {
