@@ -1,10 +1,11 @@
 """
 Testes de integração para autenticação e rotas de usuários.
 """
-from schemas.user import UserCreate
-from models.user import UserType, UserLevelAuth
-from core.security import create_access_token
+
 import crud
+from core.security import create_access_token
+from models.user import UserLevelAuth, UserType
+from schemas.user import UserCreate
 
 
 def test_create_user_and_login(client, db):

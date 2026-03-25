@@ -1,7 +1,8 @@
-from pydantic import BaseModel, field_validator, ConfigDict
 from typing import Optional
 
-from models.organization import OrganizationTipo, OrganizationStatus
+from pydantic import BaseModel, ConfigDict, field_validator
+
+from models.organization import OrganizationStatus, OrganizationTipo
 
 
 class OrganizationBase(BaseModel):

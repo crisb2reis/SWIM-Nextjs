@@ -6,12 +6,17 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from db.session import get_db
-from schemas.document import DocumentCreate, DocumentRead, DocumentUpdate, DocumentListResponse
-from api.dependencies import get_current_active_user
-from models.user import User
-from core.config import settings
 import crud
+from api.dependencies import get_current_active_user
+from core.config import settings
+from db.session import get_db
+from models.user import User
+from schemas.document import (
+    DocumentCreate,
+    DocumentListResponse,
+    DocumentRead,
+    DocumentUpdate,
+)
 
 router = APIRouter(prefix="/documents", tags=["Documentos"])
 
@@ -45,6 +50,7 @@ def create_document(
 ):
     """Aceita `multipart/form-data` combinando metadados textuais e arquivo binário opcional."""
     from datetime import date as date_type
+
     uploadfile_id = None
     if file and file.filename:
         file_path = _save_upload(file)
@@ -56,7 +62,9 @@ def create_document(
         try:
             parsed_date = date_type.fromisoformat(date_issued)
         except ValueError:
-            raise HTTPException(status_code=422, detail="date_issued inválido. Use formato YYYY-MM-DD.")
+            raise HTTPException(
+                status_code=422, detail="date_issued inválido. Use formato YYYY-MM-DD."
+            )
 
     doc_in = DocumentCreate(
         title=title,
@@ -83,7 +91,9 @@ def list_documents(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    docs, total = crud.get_documents(db, skip=skip, limit=limit, title=title, publish=publish)
+    docs, total = crud.get_documents(
+        db, skip=skip, limit=limit, title=title, publish=publish
+    )
     return DocumentListResponse(total=total, skip=skip, limit=limit, data=docs)
 
 
@@ -130,6 +140,8 @@ def delete_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    doc = crud.delete_document(db, document_id)
+    doc = crud.get_document(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Documento não encontrado.")
+    crud.delete_document(db, db_doc=doc)
+

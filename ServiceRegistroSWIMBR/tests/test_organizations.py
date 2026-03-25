@@ -1,17 +1,18 @@
 """
 Testes de integração para os endpoints de Organização.
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from models.organization import Organization
-from models.user import User
 from api.dependencies import get_current_active_user
 from main import app
-
+from models.organization import Organization
+from models.user import User
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture(autouse=True)
 def clean_db(db: Session):
@@ -31,10 +32,17 @@ def override_auth():
 
 @pytest.fixture
 def org_data():
-    return {"name": "Autoridade de Aviação Civil", "acronym": "AAC", "description": "Regulador.", "tipo": "PROVEDOR", "status": "ATIVO"}
+    return {
+        "name": "Autoridade de Aviação Civil",
+        "acronym": "AAC",
+        "description": "Regulador.",
+        "tipo": "PROVEDOR",
+        "status": "ATIVO",
+    }
 
 
 # ── CREATE ────────────────────────────────────────────────────────────────────
+
 
 def test_create_organization(client: TestClient, org_data):
     response = client.post("/api/v1/organizations/", data=org_data)
@@ -61,6 +69,7 @@ def test_create_empty_name_fails(client: TestClient):
 
 # ── LIST ──────────────────────────────────────────────────────────────────────
 
+
 def test_list_organizations_empty(client: TestClient):
     response = client.get("/api/v1/organizations/")
     assert response.status_code == 200
@@ -68,10 +77,12 @@ def test_list_organizations_empty(client: TestClient):
 
 
 def test_list_organizations_with_data(client: TestClient, db: Session):
-    db.add_all([
-        Organization(name="Org Alpha"),
-        Organization(name="Org Beta"),
-    ])
+    db.add_all(
+        [
+            Organization(name="Org Alpha"),
+            Organization(name="Org Beta"),
+        ]
+    )
     db.commit()
     response = client.get("/api/v1/organizations/")
     assert response.status_code == 200
@@ -79,10 +90,12 @@ def test_list_organizations_with_data(client: TestClient, db: Session):
 
 
 def test_list_organizations_search(client: TestClient, db: Session):
-    db.add_all([
-        Organization(name="DECEA"),
-        Organization(name="ANAC"),
-    ])
+    db.add_all(
+        [
+            Organization(name="DECEA"),
+            Organization(name="ANAC"),
+        ]
+    )
     db.commit()
     response = client.get("/api/v1/organizations/?search=dec")
     assert response.status_code == 200
@@ -92,6 +105,7 @@ def test_list_organizations_search(client: TestClient, db: Session):
 
 
 # ── GET BY ID ─────────────────────────────────────────────────────────────────
+
 
 def test_get_organization_by_id(client: TestClient, db: Session):
     org = Organization(name="ICEA", acronym="ICEA")
@@ -111,6 +125,7 @@ def test_get_organization_not_found(client: TestClient):
 
 # ── UPDATE ────────────────────────────────────────────────────────────────────
 
+
 def test_update_organization(client: TestClient, db: Session):
     org = Organization(name="Org Original", acronym="OO")
     db.add(org)
@@ -119,7 +134,7 @@ def test_update_organization(client: TestClient, db: Session):
 
     response = client.put(
         f"/api/v1/organizations/{org.id}",
-        data={"name": "Org Atualizada", "acronym": "OA"}
+        data={"name": "Org Atualizada", "acronym": "OA"},
     )
     assert response.status_code == 200
     assert response.json()["name"] == "Org Atualizada"
@@ -127,10 +142,12 @@ def test_update_organization(client: TestClient, db: Session):
 
 
 def test_update_to_duplicate_name_fails(client: TestClient, db: Session):
-    db.add_all([
-        Organization(name="Org A"),
-        Organization(name="Org B"),
-    ])
+    db.add_all(
+        [
+            Organization(name="Org A"),
+            Organization(name="Org B"),
+        ]
+    )
     db.commit()
     orgs = db.query(Organization).all()
     org_a, org_b = orgs[0], orgs[1]
@@ -140,6 +157,7 @@ def test_update_to_duplicate_name_fails(client: TestClient, db: Session):
 
 
 # ── DELETE ────────────────────────────────────────────────────────────────────
+
 
 def test_delete_organization(client: TestClient, db: Session):
     org = Organization(name="Para Deletar")
@@ -161,12 +179,16 @@ def test_delete_not_found(client: TestClient):
 
 # ── NOVOS CAMPOS: TIPO E STATUS ───────────────────────────────────────────────
 
+
 def test_create_with_tipo_and_status(client: TestClient):
-    response = client.post("/api/v1/organizations/", data={
-        "name": "Org Tipo Teste",
-        "tipo": "CONSUMIDOR",
-        "status": "INATIVO",
-    })
+    response = client.post(
+        "/api/v1/organizations/",
+        data={
+            "name": "Org Tipo Teste",
+            "tipo": "CONSUMIDOR",
+            "status": "INATIVO",
+        },
+    )
     assert response.status_code == 201
     data = response.json()
     assert data["tipo"] == "CONSUMIDOR"
@@ -174,16 +196,24 @@ def test_create_with_tipo_and_status(client: TestClient):
 
 
 def test_update_tipo_and_status(client: TestClient, db: Session):
-    from models.organization import OrganizationTipo, OrganizationStatus
-    org = Organization(name="Org Para Update Tipo", tipo=OrganizationTipo.PROVEDOR, status=OrganizationStatus.ATIVO)
+    from models.organization import OrganizationStatus, OrganizationTipo
+
+    org = Organization(
+        name="Org Para Update Tipo",
+        tipo=OrganizationTipo.PROVEDOR,
+        status=OrganizationStatus.ATIVO,
+    )
     db.add(org)
     db.commit()
     db.refresh(org)
 
-    response = client.put(f"/api/v1/organizations/{org.id}", data={
-        "tipo": "PARCEIRO",
-        "status": "EM_APROVACAO",
-    })
+    response = client.put(
+        f"/api/v1/organizations/{org.id}",
+        data={
+            "tipo": "PARCEIRO",
+            "status": "EM_APROVACAO",
+        },
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["tipo"] == "PARCEIRO"

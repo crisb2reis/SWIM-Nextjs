@@ -1,16 +1,20 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
 from datetime import datetime
-from models.user import UserType, UserLevelAuth
+from typing import Optional
 
+from pydantic import BaseModel, EmailStr, Field
+
+from models.user import UserLevelAuth, UserType
 
 # --- Organization ---
+
 
 class OrganizationBase(BaseModel):
     name: str = Field(..., max_length=255)
 
+
 class OrganizationCreate(OrganizationBase):
     pass
+
 
 class OrganizationRead(OrganizationBase):
     id: int
@@ -19,6 +23,7 @@ class OrganizationRead(OrganizationBase):
 
 
 # --- User ---
+
 
 class UserBase(BaseModel):
     username: str = Field(..., max_length=150)
@@ -60,6 +65,7 @@ class UserRead(UserBase):
 
 
 # --- Token ---
+
 
 class Token(BaseModel):
     access_token: str

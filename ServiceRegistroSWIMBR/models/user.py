@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SAEnum
-from sqlalchemy.orm import relationship
-from datetime import datetime
 import enum
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 from db.base import Base
 
@@ -33,7 +36,9 @@ class User(Base):
     phone_number = Column(String(30), nullable=True)
 
     user_type = Column(SAEnum(UserType), default=UserType.viewer, nullable=False)
-    user_level_auth = Column(SAEnum(UserLevelAuth), default=UserLevelAuth.level_1, nullable=False)
+    user_level_auth = Column(
+        SAEnum(UserLevelAuth), default=UserLevelAuth.level_1, nullable=False
+    )
 
     is_active = Column(Boolean, default=True)
     is_staff = Column(Boolean, default=False)

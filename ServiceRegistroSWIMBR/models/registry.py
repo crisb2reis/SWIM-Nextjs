@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String, Text
 
 from db.base import Base
 
@@ -10,7 +11,7 @@ class GeographicalExtent(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False, index=True)
     description = Column(Text, nullable=True)
-    geometry = Column(Text, nullable=True)   # WKT ou GeoJSON string
+    geometry = Column(Text, nullable=True)  # WKT ou GeoJSON string
     profile_id = Column(Integer, nullable=True)
     source_id = Column(Integer, nullable=True)
     created_on = Column(DateTime, default=datetime.utcnow)

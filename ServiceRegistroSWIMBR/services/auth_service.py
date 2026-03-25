@@ -1,14 +1,16 @@
 """
 Serviço de autenticação e gestão de usuários: regras de negócio.
 """
+
 from typing import Optional
 
 from sqlalchemy.orm import Session
 
+import crud
+from core.security import create_access_token
+
 from models.user import User
 from schemas.user import UserCreate
-from core.security import create_access_token, verify_password, get_password_hash
-import crud
 
 
 def register_user(db: Session, user_in: UserCreate) -> User:

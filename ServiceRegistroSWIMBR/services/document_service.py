@@ -1,6 +1,7 @@
 """
 Serviço de documentos: regras de negócio que orquestram CRUD + upload.
 """
+
 import os
 import shutil
 from pathlib import Path
@@ -9,11 +10,11 @@ from typing import Optional
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
+import crud
 from core.config import settings
 from models.document import Document
 from models.uploaded_file import UploadedFile as UploadedFileModel
 from schemas.document import DocumentCreate, DocumentUpdate
-import crud
 
 
 def handle_file_upload(db: Session, file: UploadFile) -> UploadedFileModel:

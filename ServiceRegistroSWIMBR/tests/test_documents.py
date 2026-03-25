@@ -1,10 +1,11 @@
 """
 Testes de integração para o módulo de documentos com autenticação JWT.
 """
-from schemas.user import UserCreate
-from models.user import UserType, UserLevelAuth
-from core.security import create_access_token
+
 import crud
+from core.security import create_access_token
+from models.user import UserLevelAuth, UserType
+from schemas.user import UserCreate
 
 
 def _create_admin_and_get_headers(db):

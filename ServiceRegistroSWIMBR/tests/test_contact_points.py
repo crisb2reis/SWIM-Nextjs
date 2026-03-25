@@ -2,13 +2,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from models.organization import Organization
-from models.contact_point import ContactPoint
-from models.user import User
-
-
 from api.dependencies import get_current_active_user
 from main import app
+from models.contact_point import ContactPoint
+from models.organization import Organization
+from models.user import User
+
 
 @pytest.fixture(autouse=True)
 def clean_db(db: Session):
@@ -17,6 +16,7 @@ def clean_db(db: Session):
     db.query(Organization).delete()
     db.commit()
     yield
+
 
 @pytest.fixture(autouse=True)
 def override_auth():
@@ -45,8 +45,8 @@ def test_create_contact_point(client: TestClient, test_org: Organization):
             "email": "joao@teste.com",
             "role": "Gerente",
             "phone": "11999999999",
-            "organization_id": test_org.id
-        }
+            "organization_id": test_org.id,
+        },
     )
     assert response.status_code == 201
     data = response.json()
@@ -63,8 +63,8 @@ def test_create_duplicate_email_same_org(client: TestClient, test_org: Organizat
         json={
             "name": "João Silva",
             "email": "joao@teste.com",
-            "organization_id": test_org.id
-        }
+            "organization_id": test_org.id,
+        },
     )
     # Tenta criar o segundo com mesmo email na mesma org
     response = client.post(
@@ -72,8 +72,8 @@ def test_create_duplicate_email_same_org(client: TestClient, test_org: Organizat
         json={
             "name": "Outro João",
             "email": "joao@teste.com",
-            "organization_id": test_org.id
-        }
+            "organization_id": test_org.id,
+        },
     )
     assert response.status_code == 400
     assert "Já existe um ponto de contato" in response.json()["detail"]
@@ -87,28 +87,31 @@ def test_read_contact_points(client: TestClient, test_org: Organization):
 
 def test_update_contact_point(client: TestClient, test_org: Organization, db: Session):
     # Criar um contato via DB para testar update
-    contact = ContactPoint(name="Old Name", email="old@test.com", organization_id=test_org.id)
+    contact = ContactPoint(
+        name="Old Name", email="old@test.com", organization_id=test_org.id
+    )
     db.add(contact)
     db.commit()
     db.refresh(contact)
 
     response = client.put(
-        f"/api/v1/contact-points/{contact.id}",
-        json={"name": "New Name"}
+        f"/api/v1/contact-points/{contact.id}", json={"name": "New Name"}
     )
     assert response.status_code == 200
     assert response.json()["name"] == "New Name"
 
 
 def test_delete_contact_point(client: TestClient, test_org: Organization, db: Session):
-    contact = ContactPoint(name="To be deleted", email="del@test.com", organization_id=test_org.id)
+    contact = ContactPoint(
+        name="To be deleted", email="del@test.com", organization_id=test_org.id
+    )
     db.add(contact)
     db.commit()
     db.refresh(contact)
 
     response = client.delete(f"/api/v1/contact-points/{contact.id}")
     assert response.status_code == 204
-    
+
     # Verificar se sumiu
     response_get = client.get(f"/api/v1/contact-points/{contact.id}")
     assert response_get.status_code == 404

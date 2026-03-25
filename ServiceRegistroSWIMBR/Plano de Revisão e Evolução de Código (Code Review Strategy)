@@ -1,0 +1,93 @@
+Plano de Revisão e Evolução de Código (Code Review Strategy)
+Fase 1: Reconhecimento e Análise Estática (Discovery & Baseline)
+Objetivo: Compreender o estado atual do projeto, identificar dívidas técnicas imediatas e estabelecer métricas de base (baseline) sem fazer qualquer alteração lógica no código.
+
+Atividades Detalhadas:
+Mapear o fluxo de dados e a árvore de dependências do projeto.
+Levantar métricas atuais do projeto (complexidade ciclomática, code smells, duplicações).
+Verificar a saúde das dependências (pacotes desatualizados ou com vulnerabilidades conhecidas).
+Ajustar e configurar rigidamente ferramentas linting e de formatação.
+Ferramentas e Técnicas Recomendas:
+ESLint e Prettier (padronização de sintaxe).
+SonarQube ou SonarCloud (para extração do baseline de qualidade).
+npm audit ou Snyk (para análise de vulnerabilidades de bibliotecas).
+Madge ou Dependency Cruiser (para detectar conexões circulares e entender acoplamento).
+Critérios de Validação:
+Geração de um relatório documentando o estado atual (baseline) do código.
+Fixação de um painel estático no CI (ex: bloqueio de PRs que piorem a nota atual do Sonar).
+Fase 2: Avaliação Arquitetural e Design Patterns
+Objetivo: Avaliar o quão bem o código está estruturado para suportar o crescimento do projeto, identificando forte acoplamento e violação de responsabilidades.
+
+Atividades Detalhadas:
+Avaliar a separação de responsabilidades (ex: Componentes de UI que acessam o banco de dados diretamente misturando lógicas de visualização com de negócios).
+Localizar as famosas God Classes ou God Components (componentes com milhares de linhas e muitas responsabilidades contrariando o Single Responsibility Principle do SOLID).
+Verificar quão acoplado o sistema está a serviços de terceiros e propor camadas de abstração/interfaces (Dependency Inversion).
+Padronizar a estrutura de pastas e a modularização corporativa (Feature-based vs Type-based).
+Ferramentas e Técnicas Recomendas:
+Análise manual do fluxo de pastas (ex: /components, /hooks, /services, /utils, /types).
+Uso de padrões como Repository Pattern para acesso a dados e desacoplamento do frontend via BFF (Backend For Frontend).
+Modelo C4 (apenas para documentar de forma macro as interações se for complexo).
+Critérios de Validação:
+Mapeamento de propostas de refatoração para separar camada de apresentação, regras de negócio e acesso a dados.
+Aprovação de uma nova taxonomia de diretórios pela equipe.
+Fase 3: Qualidade de Código e Refatoração Limpa (Clean Code)
+Objetivo: Aumentar a legibilidade, facilidade de manutenção e reaproveitamento de componentes operando em pequenas Pull Requests para não afetar o sistema rodando.
+
+Atividades Detalhadas:
+Identificar blocos de código altamente duplicados e abstraí-los em funções genéricas (/utils) ou Hooks customizados (/hooks).
+Padronizar nomenclatura de variáveis e funções (ex: usar nomes descritivos, verbos em ações de funções como handleUserLogin, fetchData).
+Reduzir o grau de aninhamento e If-Else hell no código (usar Early Returns e Polymorphism).
+Aprimorar e forçar a tipagem (reduzir ou eliminar o uso do tipo any em TypeScript).
+Ferramentas e Técnicas Recomendas:
+Extensão jscpd (para detecção de código clonado).
+TypeScript Strict Mode (habilitar aos poucos, focado em novas PRs).
+Aplicação da "Regra do Escoteiro" (deixe o código que você tocou para fazer uma feature melhor do que você o encontrou).
+Critérios de Validação:
+Diminuição substancial de alertas de linter relacionados a complexidade cognitiva.
+Diminuição de any e melhor inteligência de código (IntelliSense) na IDE.
+Fase 4: Boas Práticas Específicas do Stack (React / Next.js e Backend)
+Objetivo: Garantir que as funcionalidades e as melhores práticas do ecossistema escolhido estão sendo implementadas corretamente.
+
+Atividades Detalhadas:
+Frontend (React/Next.js): Revisão de estratégias de renderização (Client Components vs Server Components no App Router). Eliminação de vazamento de memória e useEffect mal aplicados. Checagem do uso correto de abordagens de otimização de imagem (next/image), fontes genéricas e scripts dinâmicos de terceiros.
+Backend/BFF/APIs: Validação rigorosa dos dados de entrada antes de chegar às regras de negócio. Tratamento estruturado de erros.
+Verificar otimizações e o tamanho final do Bundle (Code Splitting/Lazy loading).
+Ferramentas e Técnicas Recomendas:
+Next.js Bundle Analyzer.
+React Developer Tools (Profiler) para mapear re-renderizações desnecessárias em tela.
+Biblioteca de Schemas como Zod ou Yup (para validação sólida de Inbound payload).
+Lighthouse / Web Vitals para métricas de performance front-end.
+Critérios de Validação:
+Performance, Acessibilidade e SEO no Lighthouse atingindo o verde (>90).
+Zero hydration mismatch errors ao iniciar aplicação.
+Múltiplos testes de estresse comprovando que Payload de entrada malformado é rejeitado apropriadamente na API.
+Fase 5: Checagem Básica de Segurança
+Objetivo: Prevenir as principais vulnerabilidades listadas pela OWASP e vazamentos acidentais.
+
+Atividades Detalhadas:
+Garantir a não exposição de segredos/chaves de API no cliente (no Next.js, garantir que apenas o essencial tenha o prefixo NEXT_PUBLIC_).
+Auditar o processo de Autenticação e Gestão de Sessão (expiração de tokens JWT, armazenamento seguro de sessão usando cookies HttpOnly).
+Assegurar a sanitização no input e no output (Proteção contra XSS, revisar a existência e real necessidade de atributos como dangerouslySetInnerHTML).
+Verificar blindagem em requisições contra CSRF e injeções de SQL/NoSQL onde ocorrer integração de dados.
+Ferramentas e Técnicas Recomendas:
+Extensão de Linting de segurança: eslint-plugin-security.
+Ferramenta SAST integrada no Github (como CodeQL).
+Critérios de Validação:
+Nenhum dado sensível em tela ou repositório de código, e passagem limpa das flags estáticas de segurança nas actions do Github/Gitlab.
+Fase 6: Testes e Estratégia de Redução de Riscos
+Objetivo: Construir uma infraestrutura que valide a refatoração e impeça regressões futuras. Como é em produção, não fazemos refatoração ampla e arriscada sem antes ter segurança por testes.
+
+Atividades Detalhadas:
+Não buscar coberturas irreais (como 100% de imediato). Iniciar identificando os "Caminhos Críticos" (ex: Cadastro, Login, Fluxo de Pagamento).
+Adicionar Testes Unitários nas regras de negócio limpas e funções utilitárias que são altamente utilizadas em todo os arquivos.
+Desenvolver Testes de Integração / E2E cobrindo fluxos completos da aplicação de ponta a ponta.
+Automatizar essa verificação, bloqueando merges (aprovações de PR de novos códigos) caso esses testes falhem.
+Ferramentas e Técnicas Recomendas:
+Vitest ou Jest associados com React Testing Library (Unitários/Componentes).
+Playwright ou Cypress para automação de browser (E2E).
+Critérios de Validação:
+Aumento percentual da cobertura monitorada (ex: Codecov).
+Todas as novas features críticas exigirem, obrigatoriamente, E2E ou Teste Unitário antes subirem num ambiente de Staging.
+Recomendações Táticas Finais para Aplicações em Produção
+Refatoração Oportunista vs Estruturada: Não crie uma "Task de Refatorar". Refatore áreas enquanto desenvolve uma feature nova (Oportunista). Para a arquitetura maior, use Padrões de Estrangulamento (Strangler Fig Pattern): crie o código "novo limpo" ao lado do antigo, vá migrando partes do sistema aos poucos, e só apague o antigo após comprovar eficiência.
+Uso de Feature Flags: Libere código refatorado ou modificado escondido em "chaves" lógicas. Se houver falhas críticas em produção, o rollback pode ser feito instantaneamente por ambiente, desativando a flag, mitigando o risco sem ter de fazer revert via Git de imediato.
