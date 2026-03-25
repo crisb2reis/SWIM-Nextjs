@@ -26,7 +26,8 @@ import type {
   OrganizationStatus,
 } from '../types/organization.types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8001';
+import { BASE_URL } from '@/lib/axios';
+const API_BASE = BASE_URL;
 
 const TIPOS: OrganizationTipo[] = ['PROVEDOR', 'CONSUMIDOR', 'PARCEIRO', 'OUTRO'];
 const STATUSES: OrganizationStatus[] = ['ATIVO', 'INATIVO', 'EM_APROVACAO'];

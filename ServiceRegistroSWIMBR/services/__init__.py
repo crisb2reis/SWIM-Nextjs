@@ -1,11 +1,8 @@
+from services.auth_service import authenticate_and_generate_token, register_user
 from services.document_service import (
-    handle_file_upload,
     create_document_with_file,
+    handle_file_upload,
     remove_document_and_file,
-)
-from services.auth_service import (
-    register_user,
-    authenticate_and_generate_token,
 )
 
 __all__ = [

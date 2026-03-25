@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class RegistryBase(BaseModel):
@@ -14,6 +15,7 @@ class RegistryBase(BaseModel):
 
 # GeographicalExtent
 
+
 class GeographicalExtentCreate(RegistryBase):
     geometry: Optional[str] = None
     profile_id: Optional[int] = None
@@ -26,6 +28,7 @@ class GeographicalExtentRead(GeographicalExtentCreate):
 
 # Policy
 
+
 class PolicyCreate(RegistryBase):
     profile_id: Optional[int] = None
     source_id: Optional[int] = None
@@ -36,6 +39,7 @@ class PolicyRead(PolicyCreate):
 
 
 # SecurityMechanism
+
 
 class SecurityMechanismCreate(RegistryBase):
     category_id: Optional[int] = None

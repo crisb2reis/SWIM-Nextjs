@@ -1,12 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from db.session import get_db
-from schemas.contact_point import ContactPointCreate, ContactPointUpdate, ContactPointRead
-from crud import contact_point as crud
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
 from api.dependencies import get_current_active_user
+from crud import contact_point as crud
+from db.session import get_db
 from models.user import User
+from schemas.contact_point import (
+    ContactPointCreate,
+    ContactPointRead,
+    ContactPointUpdate,
+)
 
 router = APIRouter(prefix="/contact-points", tags=["contact-points"])
 

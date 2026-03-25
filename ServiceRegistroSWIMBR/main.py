@@ -1,15 +1,14 @@
 from fastapi import FastAPI, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-
-from core.config import settings
-from api.v1.router import api_router
 
 # Importa todos os models para que o Alembic os detecte
 import models  # noqa: F401
+from api.v1.router import api_router
+from core.config import settings
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -24,6 +23,7 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+
 # --- ReDoc Customizado ---
 @app.get("/redoc", include_in_schema=False)
 async def redoc_html():
@@ -33,8 +33,10 @@ async def redoc_html():
         redoc_js_url="/static/redoc.standalone.js",
     )
 
+
 # --- Static files ---
 import os
+
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -49,6 +51,7 @@ app.add_middleware(
 
 
 # --- Global Exception Handlers ---
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):

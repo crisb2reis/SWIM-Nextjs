@@ -1,12 +1,13 @@
-from sqlalchemy.orm import Session
 from typing import Optional
+
+from sqlalchemy.orm import Session
 
 from models.document import Document
 from models.uploaded_file import UploadedFile
 from schemas.document import DocumentCreate, DocumentUpdate
 
-
 # --- UploadedFile CRUD ---
+
 
 def create_uploaded_file(db: Session, file_path: str) -> UploadedFile:
     db_file = UploadedFile(file=file_path)
@@ -30,6 +31,7 @@ def delete_uploaded_file(db: Session, file_id: int) -> Optional[UploadedFile]:
 
 # --- Document CRUD ---
 
+
 def get_document(db: Session, doc_id: int) -> Optional[Document]:
     return db.query(Document).filter(Document.id == doc_id).first()
 
@@ -46,13 +48,14 @@ def get_documents(
         query = query.filter(Document.title.ilike(f"%{title}%"))
     if publish:
         query = query.filter(Document.publish.ilike(f"%{publish}%"))
+
     total = query.count()
     results = query.order_by(Document.created_at.desc()).offset(skip).limit(limit).all()
     return results, total
 
 
-def create_document(db: Session, doc: DocumentCreate) -> Document:
-    db_doc = Document(**doc.model_dump())
+def create_document(db: Session, doc_in: DocumentCreate) -> Document:
+    db_doc = Document(**doc_in.model_dump())
     db.add(db_doc)
     db.commit()
     db.refresh(db_doc)
@@ -63,14 +66,14 @@ def update_document(db: Session, db_doc: Document, doc_in: DocumentUpdate) -> Do
     update_data = doc_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_doc, field, value)
+
+    db.add(db_doc)
     db.commit()
     db.refresh(db_doc)
     return db_doc
 
 
-def delete_document(db: Session, doc_id: int) -> Optional[Document]:
-    doc = get_document(db, doc_id)
-    if doc:
-        db.delete(doc)
-        db.commit()
-    return doc
+def delete_document(db: Session, db_doc: Document) -> None:
+    db.delete(db_doc)
+    db.commit()
+

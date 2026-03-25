@@ -30,10 +30,12 @@ export const serviceService = {
   },
 };
 
+import { AxiosError } from 'axios';
+
 export function extractServiceErrorMessage(err: unknown): string {
   if (err instanceof Error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const msg = (err as any)?.response?.data?.detail;
+    const axiosErr = err as AxiosError<{ detail: string | { msg?: string }[] }>;
+    const msg = axiosErr.response?.data?.detail;
     if (typeof msg === 'string') return msg;
     if (Array.isArray(msg) && msg.length > 0 && msg[0].msg) return msg[0].msg;
     return err.message;

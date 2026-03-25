@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from datetime import date, datetime
 from typing import Optional
-from datetime import datetime, date
+
+from pydantic import BaseModel, Field
 
 
 class UploadedFileRead(BaseModel):
@@ -12,6 +13,7 @@ class UploadedFileRead(BaseModel):
 
 
 # --- Document ---
+
 
 class DocumentBase(BaseModel):
     title: str = Field(..., max_length=255)

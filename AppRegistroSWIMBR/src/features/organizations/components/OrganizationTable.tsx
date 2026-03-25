@@ -18,7 +18,8 @@ import { useTranslations } from 'next-intl';
 
 import type { Organization, OrganizationStatus, OrganizationTipo } from '../types/organization.types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8001';
+import { BASE_URL } from '@/lib/axios';
+const API_BASE = BASE_URL;
 
 // ─── Mapeamento de cores para Status ─────────────────────────────────────────
 
@@ -57,7 +58,6 @@ function CustomToolbar({ onAdd }: { onAdd: () => void }) {
       </Button>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         <GridToolbarQuickFilter
-          placeholder={t('dataGrid.quickFilter')}
           sx={{ '& .MuiInputBase-root': { borderRadius: 1, fontSize: 13 } }}
         />
         <GridToolbarExport />
@@ -212,8 +212,7 @@ export function OrganizationTable({
         hideFooter
         disableRowSelectionOnClick
         autoHeight
-        slots={{ toolbar: CustomToolbar }}
-        slotProps={{ toolbar: { onAdd: handleAdd } }}
+        slots={{ toolbar: () => <CustomToolbar onAdd={handleAdd} /> }}
         localeText={{
           toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
           noRowsLabel: t('dataGrid.noRows'),

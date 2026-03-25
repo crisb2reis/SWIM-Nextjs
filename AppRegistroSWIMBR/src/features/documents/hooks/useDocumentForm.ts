@@ -12,7 +12,7 @@ import type { Document } from '../types/document.types';
 
 // ─── Schema Zod Factory ───────────────────────────────────────────────────────
 
-export const getDocumentSchema = (t: any) => z.object({
+export const getDocumentSchema = (t: ReturnType<typeof useTranslations<'documents'>>) => z.object({
   title: z
     .string()
     .min(1, t('validation.titleRequired'))

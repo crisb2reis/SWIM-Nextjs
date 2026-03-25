@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useState }  from 'react';
 import useSWR        from 'swr';
 import { Box, Typography, Breadcrumbs, Link as MuiLink, Snackbar, Alert } from '@mui/material';
@@ -8,10 +8,16 @@ import HomeIcon             from '@mui/icons-material/Home';
 import CorporateFareIcon    from '@mui/icons-material/CorporateFare';
 import { useTranslations }  from 'next-intl';
 
-import { ContactPointFormDialog } from '@/features/contacts/components/ContactPointFormDialog';
+import dynamic from 'next/dynamic';
 import { contactService, extractErrorMessage } from '@/features/contacts/services/contactService';
 import { organizationService }    from '@/features/organizations/services/organizationService';
 import type { ContactPointFormValues } from '@/features/contacts/hooks/useContactPointForm';
+import type { ContactPointCreate } from '@/features/contacts/types/contact.types';
+
+const ContactPointFormDialog = dynamic(
+  () => import('@/features/contacts/components/ContactPointFormDialog').then((mod) => mod.ContactPointFormDialog),
+  { ssr: false }
+);
 
 export default function ContactsAddPage() {
   const router = useRouter();
@@ -28,7 +34,7 @@ export default function ContactsAddPage() {
   const handleSubmit = async (values: ContactPointFormValues) => {
     setIsSubmitting(true);
     try {
-      await contactService.create(values as any);
+      await contactService.create(values as unknown as ContactPointCreate);
       router.push('/utility/contacts/manage');
     } catch (err) {
       setToast({ message: extractErrorMessage(err), severity: 'error' });

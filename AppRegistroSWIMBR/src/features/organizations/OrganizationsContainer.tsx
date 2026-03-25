@@ -12,7 +12,8 @@ import {
   parseOrganizationError,
   ApiError
 } from './services/organizationService';
-import { OrganizationTable } from './components/OrganizationTable';
+import dynamic from 'next/dynamic';
+const OrganizationTable = dynamic(() => import('./components/OrganizationTable').then(mod => mod.OrganizationTable), { ssr: false });
 import { OrganizationFormDialog } from './components/OrganizationFormDialog';
 import type { Organization, OrganizationFormValues } from './types/organization.types';
 

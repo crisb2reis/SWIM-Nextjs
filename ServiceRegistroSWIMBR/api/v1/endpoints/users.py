@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from db.session import get_db
-from schemas.user import UserCreate, UserRead, UserUpdate, OrganizationCreate, OrganizationRead
-from api.dependencies import get_current_active_user, get_current_superuser
-from models.user import User
 import crud
+from api.dependencies import get_current_active_user, get_current_superuser
+from db.session import get_db
+from models.user import User
+from schemas.user import (
+    UserCreate,
+    UserRead,
+    UserUpdate,
+)
+
 
 router = APIRouter(prefix="/users", tags=["Usuários"])
 
@@ -77,6 +82,8 @@ def update_user(user_id: int, user_in: UserUpdate, db: Session = Depends(get_db)
     dependencies=[Depends(get_current_superuser)],
 )
 def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user = crud.delete_user(db, user_id)
+    user = crud.get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    crud.delete_user(db, db_user=user)
+

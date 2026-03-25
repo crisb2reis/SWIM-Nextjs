@@ -6,15 +6,20 @@
  *             Usa o mesmo DocumentFormDialog em modo standalone.
  */
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useState }  from 'react';
 import { Box, Typography, Breadcrumbs, Link as MuiLink } from '@mui/material';
 import HomeIcon       from '@mui/icons-material/Home';
 import ArticleIcon    from '@mui/icons-material/Article';
 
-import { DocumentFormDialog }   from '@/features/documents/components/DocumentFormDialog';
+import dynamic from 'next/dynamic';
 import { useDocumentMutations } from '@/features/documents/hooks/useDocumentMutations';
 import type { DocumentFormValues } from '@/features/documents/hooks/useDocumentForm';
+
+const DocumentFormDialog = dynamic(
+  () => import('@/features/documents/components/DocumentFormDialog').then(mod => mod.DocumentFormDialog),
+  { ssr: false }
+);
 
 export default function AddDocumentPage() {
   const router  = useRouter();

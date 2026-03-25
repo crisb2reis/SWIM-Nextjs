@@ -2,21 +2,22 @@
 Script para criar o superusuário inicial no banco de dados.
 Execute: python scripts/seed.py
 """
+
 import sys
 from pathlib import Path
 
 # Adiciona root do projeto ao path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from db.session import SessionLocal
-from db.base import Base
-from db.session import engine
-from schemas.user import UserCreate
-from models.user import User, UserType, UserLevelAuth
 import crud
 
 # Garante que as tabelas existem (útil em dev local sem Alembic)
 import models  # noqa: F401
+from db.base import Base
+from db.session import SessionLocal, engine
+from models.user import User, UserLevelAuth, UserType
+from schemas.user import UserCreate
+
 Base.metadata.create_all(bind=engine)
 
 
@@ -24,9 +25,7 @@ def seed_superuser():
     db = SessionLocal()
     try:
         # 🔥 Remove usuário existente
-        existing = db.query(User).filter(
-            User.email == "admin@swim.com"
-        ).first()
+        existing = db.query(User).filter(User.email == "admin@swim.com").first()
 
         if existing:
             db.delete(existing)

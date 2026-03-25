@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
 import { Box, CircularProgress } from '@mui/material';
 
 const PUBLIC_ROUTES = ['/login', '/register'];
@@ -15,7 +15,7 @@ const PUBLIC_ROUTES = ['/login', '/register'];
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -23,29 +23,23 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       const isPublicPath = PUBLIC_ROUTES.includes(pathname);
 
       if (!token && !isPublicPath) {
-        setIsAuthorized(false);
-        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
       } else {
-        setIsAuthorized(true);
+        setIsChecking(false);
       }
     };
 
     checkAuth();
   }, [pathname, router]);
 
-  if (!isAuthorized && !PUBLIC_ROUTES.includes(pathname)) {
-    return (
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          height: '100vh', 
-          alignItems: 'center', 
-          justifyContent: 'center' 
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+  // Enquanto verifica o token no client side, renderizamos a casca da página (MainLayout) 
+  // Opcional: Se quiser esconder conteúdo sensível muito rápido, podes retornar null,
+  // mas retornar {children} permite que o Next.js faça o SSR do Layout Skeletons.
+  
+  if (isChecking && typeof window !== 'undefined' && !PUBLIC_ROUTES.includes(pathname)) {
+     // Evita hydration mismatch mantendo a renderização igual ao SSR
+     // Mas se o JS já carregou e está verificando, escondemos se preferir, ou apenas deixamos renderizar Skeletons.
+     // Aqui vamos deixar o SSR processar garantindo {children} no initial render
   }
 
   return <>{children}</>;

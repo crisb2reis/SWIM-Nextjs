@@ -1,22 +1,21 @@
-import sys
 import os
+import sys
 from logging.config import fileConfig
 from pathlib import Path
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
 # Garante que o root do projeto está no sys.path para importar os módulos
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+# Importa todos os models para que o Alembic os detecte no autogenerate
+import models  # noqa: E402, F401
+
 # Importa settings e Base ANTES de qualquer model para evitar circular imports
 from core.config import settings  # noqa: E402
 from db.base import Base  # noqa: E402
-
-# Importa todos os models para que o Alembic os detecte no autogenerate
-import models  # noqa: E402, F401
 
 # ---------------------------------------------------------------------------
 config = context.config

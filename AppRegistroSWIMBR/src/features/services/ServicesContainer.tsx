@@ -15,7 +15,7 @@ import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 
-import { ServiceTable } from './components/ServiceTable';
+const ServiceTable = dynamic(() => import('./components/ServiceTable').then(mod => mod.ServiceTable), { ssr: false });
 import { serviceService, extractServiceErrorMessage } from './services/serviceService';
 import type { Service, ServiceFormValues } from './types/service.types';
 

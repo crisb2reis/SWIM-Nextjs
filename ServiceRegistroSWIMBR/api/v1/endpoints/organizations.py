@@ -1,15 +1,16 @@
 import os
 import shutil
 import uuid
-
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
-from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from db.session import get_db
-from schemas.organization import OrganizationCreate, OrganizationUpdate, OrganizationRead
-from models.organization import Organization, OrganizationTipo, OrganizationStatus
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
+
+import crud
 from api.dependencies import get_current_active_user
+from db.session import get_db
+from models.organization import OrganizationStatus, OrganizationTipo
+from schemas.organization import OrganizationCreate, OrganizationRead, OrganizationUpdate
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
 
@@ -36,10 +37,7 @@ def list_organizations(
     current_user=Depends(get_current_active_user),
 ):
     """Lista organizações com suporte a busca e paginação."""
-    query = db.query(Organization)
-    if search:
-        query = query.filter(Organization.name.ilike(f"%{search}%"))
-    return query.offset(skip).limit(limit).all()
+    return crud.get_organizations(db, skip=skip, limit=limit, search=search)
 
 
 # ── GET BY ID ─────────────────────────────────────────────────────────────────
@@ -49,7 +47,7 @@ def get_organization(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user),
 ):
-    org = db.query(Organization).filter(Organization.id == org_id).first()
+    org = crud.get_organization(db, org_id=org_id)
     if not org:
         raise HTTPException(status_code=404, detail="Organização não encontrada")
     return org
@@ -72,19 +70,29 @@ def create_organization(
     if not name_stripped:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=[{"loc": ["body", "name"], "msg": "Nome não pode ser vazio", "type": "value_error"}]
+            detail=[
+                {
+                    "loc": ["body", "name"],
+                    "msg": "Nome não pode ser vazio",
+                    "type": "value_error",
+                }
+            ],
         )
 
-    existing = db.query(Organization).filter(Organization.name == name_stripped).first()
+    existing = crud.get_organization_by_name(db, name=name_stripped)
     if existing:
-        raise HTTPException(status_code=400, detail="Já existe uma organização com este nome")
+        raise HTTPException(
+            status_code=400, detail="Já existe uma organização com este nome"
+        )
 
     logo_url = _save_logo(logo) if logo and logo.filename else None
 
     tipo_enum = OrganizationTipo(tipo) if tipo else OrganizationTipo.OUTRO
-    status_enum = OrganizationStatus(org_status) if org_status else OrganizationStatus.ATIVO
+    status_enum = (
+        OrganizationStatus(org_status) if org_status else OrganizationStatus.ATIVO
+    )
 
-    org = Organization(
+    org_in = OrganizationCreate(
         name=name_stripped,
         acronym=acronym,
         description=description,
@@ -92,10 +100,7 @@ def create_organization(
         tipo=tipo_enum,
         status=status_enum,
     )
-    db.add(org)
-    db.commit()
-    db.refresh(org)
-    return org
+    return crud.create_organization(db, org_in=org_in)
 
 
 # ── UPDATE ────────────────────────────────────────────────────────────────────
@@ -111,40 +116,52 @@ def update_organization(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user),
 ):
-    org = db.query(Organization).filter(Organization.id == org_id).first()
+    org = crud.get_organization(db, org_id=org_id)
     if not org:
         raise HTTPException(status_code=404, detail="Organização não encontrada")
 
+    logo_url = None
+    if logo and logo.filename:
+        logo_url = _save_logo(logo)
+
+    # Coleta apenas os campos que foram realmente enviados no formulário
+    update_data = {}
     if name is not None:
-        name_stripped = name.strip()
+        update_data["name"] = name
+    if acronym is not None:
+        update_data["acronym"] = acronym
+    if description is not None:
+        update_data["description"] = description
+    if tipo:
+        update_data["tipo"] = OrganizationTipo(tipo)
+    if org_status:
+        update_data["status"] = OrganizationStatus(org_status)
+    if logo_url:
+        update_data["logo_url"] = logo_url
+
+    org_in = OrganizationUpdate(**update_data)
+
+
+    if org_in.name is not None:
+        name_stripped = org_in.name.strip()
         if not name_stripped:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=[{"loc": ["body", "name"], "msg": "Nome não pode ser vazio", "type": "value_error"}]
+                detail=[
+                    {
+                        "loc": ["body", "name"],
+                        "msg": "Nome não pode ser vazio",
+                        "type": "value_error",
+                    }
+                ],
             )
-        conflict = (
-            db.query(Organization)
-            .filter(Organization.name == name_stripped, Organization.id != org_id)
-            .first()
-        )
-        if conflict:
-            raise HTTPException(status_code=400, detail="Já existe uma organização com este nome")
-        org.name = name_stripped
+        conflict = crud.get_organization_by_name(db, name=name_stripped)
+        if conflict and conflict.id != org_id:
+            raise HTTPException(
+                status_code=400, detail="Já existe uma organização com este nome"
+            )
 
-    if acronym is not None:
-        org.acronym = acronym
-    if description is not None:
-        org.description = description
-    if tipo is not None:
-        org.tipo = OrganizationTipo(tipo)
-    if org_status is not None:
-        org.status = OrganizationStatus(org_status)
-    if logo and logo.filename:
-        org.logo_url = _save_logo(logo)
-
-    db.commit()
-    db.refresh(org)
-    return org
+    return crud.update_organization(db, db_org=org, org_in=org_in)
 
 
 # ── DELETE ────────────────────────────────────────────────────────────────────
@@ -154,8 +171,8 @@ def delete_organization(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user),
 ):
-    org = db.query(Organization).filter(Organization.id == org_id).first()
+    org = crud.get_organization(db, org_id=org_id)
     if not org:
         raise HTTPException(status_code=404, detail="Organização não encontrada")
-    db.delete(org)
-    db.commit()
+    crud.delete_organization(db, db_org=org)
+
