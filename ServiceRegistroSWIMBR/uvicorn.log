@@ -667,3 +667,133 @@ INFO:     Finished server process [399403]
 INFO:     Started server process [399924]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+INFO:     127.0.0.1:50076 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50090 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50076 - "GET /api/v1/users/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:50090 - "GET /api/v1/users/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:58660 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58660 - "OPTIONS /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58660 - "GET /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58672 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58660 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53304 - "OPTIONS /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53304 - "GET /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38148 - "GET /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38150 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38150 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46618 - "POST /api/v1/organizations/ HTTP/1.1" 201 Created
+INFO:     127.0.0.1:46634 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46648 - "GET /static/logos/f769edba88414b4dbde5ec43ef8c2818.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58018 - "GET /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54376 - "POST /api/v1/documents/ HTTP/1.1" 201 Created
+INFO:     127.0.0.1:54376 - "GET /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41226 - "OPTIONS /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41226 - "GET /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:41226 - "GET /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33166 - "GET /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33166 - "GET /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:39564 - "GET /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:41808 - "GET /api/v1/documents/Varga_SeaDronesSee_A_Maritime_Benchmark_for_Detecting_Humans_in_Open_Water_WACV_2022_paper.pdf/file HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50934 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50934 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50936 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50934 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38122 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38122 - "POST /api/v1/contact-points/ HTTP/1.1" 201 Created
+INFO:     127.0.0.1:38122 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38134 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33820 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33822 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33802 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33812 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33820 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33812 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60732 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60726 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60732 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39606 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39614 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39606 - "GET /api/v1/contact-points/ HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:39614 - "GET /api/v1/organizations/ HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:51162 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51162 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51162 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35142 - "HEAD / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:37872 - "HEAD /api/v1/docs HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52890 - "HEAD /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33792 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33808 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33792 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33808 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51932 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51932 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32802 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32802 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32802 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42478 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42488 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33768 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33784 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46232 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46218 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55614 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55608 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45404 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45394 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45402 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45404 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45614 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45630 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45620 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58856 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58856 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58866 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58856 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58866 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34390 - "HEAD /api/v1/services/ HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:37326 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37326 - "GET /api/v1/users/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:37326 - "GET /api/v1/documents/ HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55654 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55654 - "OPTIONS /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55654 - "GET /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55736 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55654 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53250 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53256 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53250 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53256 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53266 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59168 - "GET /static/logos/f769edba88414b4dbde5ec43ef8c2818.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:36786 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54076 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54076 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54076 - "OPTIONS /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54076 - "GET /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34664 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34664 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60294 - "OPTIONS /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60294 - "GET /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34160 - "GET /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40464 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40472 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40472 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40464 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36096 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50312 - "OPTIONS /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50318 - "OPTIONS /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50312 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50318 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50384 - "GET /static/logos/f769edba88414b4dbde5ec43ef8c2818.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:50386 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59342 - "GET /api/v1/organizations/ HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:59342 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59342 - "OPTIONS /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59342 - "GET /api/v1/documents/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59342 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59342 - "OPTIONS /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59346 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59346 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49910 - "GET /api/v1/contact-points/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49914 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50544 - "GET /api/v1/organizations/ HTTP/1.1" 200 OK

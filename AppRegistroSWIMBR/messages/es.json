@@ -7,9 +7,14 @@
     "logout": "Cerrar sesión",
     "loading": "Cargando...",
     "errorOccurred": "Ocurrió un error",
-    "noResults": "No se encontraron resultados"
+    "noResults": "No se encontraron resultados",
+    "home": "Inicio",
+    "messages": {
+      "error": "Ocurrió un error inesperado"
+    }
   },
   "navigation": {
+    "home": "Inicio",
     "servicos": "SERVICIOS",
     "gerenciamento": "GESTIÓN",
     "informacoes": "INFORMACIÓN",

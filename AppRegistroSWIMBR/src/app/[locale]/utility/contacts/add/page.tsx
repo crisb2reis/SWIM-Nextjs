@@ -1,89 +1,63 @@
 'use client';
 
-import { useRouter } from '@/i18n/navigation';
-import { useState }  from 'react';
-import useSWR        from 'swr';
-import { Box, Typography, Breadcrumbs, Link as MuiLink, Snackbar, Alert } from '@mui/material';
-import HomeIcon             from '@mui/icons-material/Home';
-import CorporateFareIcon    from '@mui/icons-material/CorporateFare';
-import { useTranslations }  from 'next-intl';
-
 import dynamic from 'next/dynamic';
-import { contactService, extractErrorMessage } from '@/features/contacts/services/contactService';
-import { organizationService }    from '@/features/organizations/services/organizationService';
-import type { ContactPointFormValues } from '@/features/contacts/hooks/useContactPointForm';
-import type { ContactPointCreate } from '@/features/contacts/types/contact.types';
+import useSWR from 'swr';
+import { useTranslations } from 'next-intl';
+import CorporateFareIcon from '@mui/icons-material/CorporateFare';
+import { CircularProgress } from '@mui/material';
 
+import { contactService, extractErrorMessage } from '@/features/contacts/services/contactService';
+import { organizationService } from '@/features/organizations/services/organizationService';
+import { AddEntityPage, type GenericFormDialogProps } from '@/components/common/AddEntityPage';
+import type { ContactPointFormValues } from '@/features/contacts/hooks/useContactPointForm';
+import { ROUTES } from '@/lib/routes';
+
+// Loading fallback para o diálogo dinâmico
 const ContactPointFormDialog = dynamic(
   () => import('@/features/contacts/components/ContactPointFormDialog').then((mod) => mod.ContactPointFormDialog),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <CircularProgress size={24} />
+  }
+);
+
+// Adapter customizável para injetar organizations no diálogo
+const ContactPointDialogAdapter = ({ organizations, ...props }: GenericFormDialogProps<ContactPointFormValues> & { organizations: any[] }) => (
+  <ContactPointFormDialog 
+    {...props} 
+    contact={null} 
+    organizations={organizations} 
+  />
 );
 
 export default function ContactsAddPage() {
-  const router = useRouter();
   const t = useTranslations('contacts');
-  
-  // O modal deve estar sempre aberto nesta rota dedicada
-  const [open] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
 
-  // Busca as organizações originais para o autocomplete (como no gerenciador)
+  // Busca as organizações para o autocomplete
   const { data: organizations = [] } = useSWR('organizations', () => organizationService.list());
 
-  const handleSubmit = async (values: ContactPointFormValues) => {
-    setIsSubmitting(true);
-    try {
-      await contactService.create(values as unknown as ContactPointCreate);
-      router.push('/utility/contacts/manage');
-    } catch (err) {
-      setToast({ message: extractErrorMessage(err), severity: 'error' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleClose = () => {
-    router.push('/utility/contacts/manage');
-  };
+  const handleSubmit = (values: ContactPointFormValues) =>
+    contactService.create(values as any).catch((err) => {
+      const message = extractErrorMessage(err);
+      const error: any = new Error(message);
+      if (typeof err === 'object' && err !== null && 'fieldErrors' in err) {
+        error.fieldErrors = (err as any).fieldErrors;
+      }
+      throw error;
+    });
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
-      {/* Breadcrumbs de referência (visível atrás do overlay do modal MuiDialog) */}
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <MuiLink underline="hover" href="/" display="flex" alignItems="center" gap={0.5} color="inherit">
-          <HomeIcon fontSize="small" />
-          Home
-        </MuiLink>
-        <MuiLink underline="hover" href="/utility/contacts/manage" color="inherit">
-          {t('title')}
-        </MuiLink>
-        <Typography color="text.primary" display="flex" alignItems="center" gap={0.5}>
-          <CorporateFareIcon fontSize="small" />
-          {t('newContact')}
-        </Typography>
-      </Breadcrumbs>
-
-      <ContactPointFormDialog
-        open={open}
-        contact={null}
-        organizations={organizations}
-        isSubmitting={isSubmitting}
-        onClose={handleClose}
-        onSubmit={handleSubmit}
-      />
-
-      <Snackbar
-        open={!!toast}
-        autoHideDuration={6000}
-        onClose={() => setToast(null)}
-      >
-        {toast ? (
-          <Alert severity={toast.severity} sx={{ width: '100%' }}>
-            {toast.message}
-          </Alert>
-        ) : <Box />}
-      </Snackbar>
-    </Box>
+    <AddEntityPage
+      breadcrumbs={[
+        { label: t('title'), href: ROUTES.contacts.manage },
+        { label: t('newContact'), active: true, icon: <CorporateFareIcon fontSize="small" /> },
+      ]}
+      title={t('newContact')}
+      subtitle={t('messages.addSubtitle')}
+      successMessage={t('messages.created')}
+      redirectRoute={ROUTES.contacts.manage}
+      onSubmit={handleSubmit}
+      FormDialog={(props) => <ContactPointDialogAdapter {...props} organizations={organizations} />}
+    />
   );
 }

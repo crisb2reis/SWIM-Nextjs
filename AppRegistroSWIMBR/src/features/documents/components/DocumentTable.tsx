@@ -6,7 +6,7 @@
  *            Segue o padrão Presentation Component: recebe dados e callbacks via props.
  */
 
-import { useMemo, useState, useCallback } from 'react';
+import { memo, useMemo, useState } from 'react';
 import {
   Box,
   Card,
@@ -20,11 +20,11 @@ import {
   useMediaQuery,
   useTheme,
   Avatar,
+  Button,
 } from '@mui/material';
 import {
   DataGrid,
   type GridColDef,
-  type GridRenderCellParams,
   GridToolbarQuickFilter,
   GridToolbarContainer,
   GridToolbarExport,
@@ -34,8 +34,6 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArticleIcon from '@mui/icons-material/Article';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import Button from '@mui/material/Button';
-import { TablePagination } from '@mui/material';
 
 import type { Document } from '../types/document.types';
 
@@ -56,7 +54,7 @@ interface DocumentTableProps {
 
 // ─── Toolbar customizada ──────────────────────────────────────────────────────
 
-function CustomToolbar({ onAdd }: { onAdd: () => void }) {
+const CustomToolbar = memo(function CustomToolbar({ onAdd }: { onAdd: () => void }) {
   const t = useTranslations('documents');
   return (
     <GridToolbarContainer sx={{ p: 1.5, gap: 1, justifyContent: 'space-between' }}>
@@ -77,15 +75,15 @@ function CustomToolbar({ onAdd }: { onAdd: () => void }) {
       </Box>
     </GridToolbarContainer>
   );
-}
+});
 
 // ─── Skeleton de carregamento ─────────────────────────────────────────────────
 
 function TableSkeleton() {
   return (
     <Box sx={{ p: 2 }}>
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Skeleton key={i} variant="rectangular" height={52} sx={{ mb: 1, borderRadius: 1 }} />
+      {Array.from({ length: 8 }, (_, i) => (
+        <Skeleton key={`skeleton-row-${i}`} variant="rectangular" height={52} sx={{ mb: 1, borderRadius: 1 }} />
       ))}
     </Box>
   );
@@ -105,9 +103,24 @@ export function DocumentTable({
 }: DocumentTableProps) {
   const t = useTranslations('documents');
   const theme = useTheme();
+  const { palette } = theme;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+
+  const Toolbar = useMemo(() => () => <CustomToolbar onAdd={onAdd} />, [onAdd]);
+
+  const localeText = useMemo(() => ({
+    toolbarFilters: t('dataGrid.filters'),
+    toolbarExport: t('dataGrid.export'),
+    toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
+    noRowsLabel: t('dataGrid.noRows'),
+    columnMenuSortAsc: t('dataGrid.sortAsc'),
+    columnMenuSortDesc: t('dataGrid.sortDesc'),
+    columnMenuFilter: t('dataGrid.filter'),
+    columnMenuHideColumn: t('dataGrid.hide'),
+    columnMenuShowColumns: t('dataGrid.showColumns'),
+  }), [t]);
 
   // ─── Definição das colunas ────────────────────────────────────────────────
 
@@ -117,20 +130,20 @@ export function DocumentTable({
       headerName: t('columns.title'),
       flex: 2,
       minWidth: 200,
-      renderCell: (params: GridRenderCellParams<Document>) => (
+      renderCell: ({ row }) => (
         <Box display="flex" alignItems="center" gap={1.5}>
           <Avatar
             sx={{
               width: 32,
               height: 32,
-              bgcolor: theme.palette.primary.light,
-              color: theme.palette.primary.contrastText,
+              bgcolor: palette.primary.light,
+              color: palette.primary.contrastText,
             }}
           >
             <ArticleIcon fontSize="small" />
           </Avatar>
           <Typography variant="body2" fontWeight={500}>
-            {params.value as string}
+            {row.title}
           </Typography>
         </Box>
       ),
@@ -140,9 +153,9 @@ export function DocumentTable({
       headerName: t('columns.publisher'),
       flex: 1.5,
       minWidth: 160,
-      renderCell: (params: GridRenderCellParams<Document>) => (
+      renderCell: ({ row }) => (
         <Typography variant="body2" color="text.primary" fontWeight={500}>
-          {(params.value as string) ?? '—'}
+          {row.publish ?? '—'}
         </Typography>
       ),
     },
@@ -150,9 +163,9 @@ export function DocumentTable({
       field: 'date_issued',
       headerName: t('columns.date'),
       width: 140,
-      renderCell: (params: GridRenderCellParams<Document>) => (
+      renderCell: ({ row }) => (
         <Typography variant="body2" color="text.primary">
-          {params.row.date_issued ?? params.row.dateIssued ?? '—'}
+          {row.date_issued ?? row.dateIssued ?? '—'}
         </Typography>
       ),
     },
@@ -162,10 +175,10 @@ export function DocumentTable({
       width: 100,
       align: 'center',
       headerAlign: 'center',
-      renderCell: (params: GridRenderCellParams<Document>) =>
-        params.value ? (
+      renderCell: ({ row }) =>
+        row.version ? (
           <Chip
-            label={params.value as string}
+            label={row.version}
             size="small"
             color="primary"
             variant="outlined"
@@ -174,20 +187,20 @@ export function DocumentTable({
         ) : null,
     },
     {
-      field: '__actions__',
+      field: 'actions',
       headerName: t('columns.actions'),
       width: 130,
       sortable: false,
       filterable: false,
       align: 'center',
       headerAlign: 'center',
-      renderCell: (params: GridRenderCellParams<Document>) => (
+      renderCell: ({ row }) => (
         <Box display="flex" gap={0.5} justifyContent="center">
           <Tooltip title={t('tooltips.view')}>
             <IconButton
               size="small"
-              onClick={() => onView(params.row)}
-              sx={{ color: theme.palette.info.main }}
+              onClick={() => onView(row)}
+              sx={{ color: palette.info.main }}
             >
               <VisibilityIcon fontSize="small" />
             </IconButton>
@@ -195,10 +208,10 @@ export function DocumentTable({
           <Tooltip title={t('tooltips.edit')}>
             <IconButton
               size="small"
-              onClick={() => onEdit(params.row)}
+              onClick={() => onEdit(row)}
               sx={{
-                color: theme.palette.primary.main,
-                '&:hover': { bgcolor: theme.palette.primary.light },
+                color: palette.primary.main,
+                '&:hover': { bgcolor: palette.primary.light },
               }}
             >
               <EditTwoToneIcon fontSize="small" />
@@ -207,10 +220,10 @@ export function DocumentTable({
           <Tooltip title={t('tooltips.delete')}>
             <IconButton
               size="small"
-              onClick={() => onDelete(params.row)}
+              onClick={() => onDelete(row)}
               sx={{
-                color: theme.palette.error.main,
-                '&:hover': { bgcolor: theme.palette.error.light },
+                color: palette.error.main,
+                '&:hover': { bgcolor: palette.error.light },
               }}
             >
               <DeleteTwoToneIcon fontSize="small" />
@@ -219,14 +232,12 @@ export function DocumentTable({
         </Box>
       ),
     },
-  ], [theme, onView, onEdit, onDelete, t]);
+  ], [palette.primary, palette.error, palette.info, onView, onEdit, onDelete, t]);
 
   const mobileColumns = useMemo<GridColDef<Document>[]>(
-    () => columns.filter(c => ['title', '__actions__'].includes(c.field as string)),
+    () => columns.filter(c => ['title', 'actions'].includes(c.field)),
     [columns],
   );
-
-  const handleToolbarAdd = useCallback(onAdd, [onAdd]);
 
   // ─── Estados de UI ────────────────────────────────────────────────────────
 
@@ -242,7 +253,7 @@ export function DocumentTable({
     <Card
       elevation={0}
       sx={{
-        border: `1px solid ${theme.palette.divider}`,
+        border: `1px solid ${palette.divider}`,
         borderRadius: 3,
         overflow: 'hidden',
       }}
@@ -271,53 +282,40 @@ export function DocumentTable({
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
-          localeText={{
-            toolbarFilters: t('dataGrid.filters'),
-            toolbarExport: t('dataGrid.export'),
-            toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
-            noRowsLabel: t('dataGrid.noRows'),
-            columnMenuSortAsc: t('dataGrid.sortAsc'),
-            columnMenuSortDesc: t('dataGrid.sortDesc'),
-            columnMenuFilter: t('dataGrid.filter'),
-            columnMenuHideColumn: t('dataGrid.hide'),
-            columnMenuShowColumns: t('dataGrid.showColumns'),
-          }}
+          localeText={localeText}
           slotProps={{
             toolbar: {
               showQuickFilter: true,
               quickFilterProps: { debounceMs: 500 },
             },
             pagination: {
-                labelRowsPerPage: t('dataGrid.rowsPerPage'),
-                labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
-                  `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
+              labelRowsPerPage: t('dataGrid.rowsPerPage'),
+              labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
+                `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
             }
           }}
-          slots={{
-            toolbar: () => <CustomToolbar onAdd={handleToolbarAdd} />,
-          }}
+          slots={{ toolbar: Toolbar }}
           disableRowSelectionOnClick
-          autoHeight
           sx={{
             border: 'none',
             '& .MuiDataGrid-columnHeaders': {
-              bgcolor: theme.palette.mode === 'dark'
-                ? theme.palette.grey[800]
+              bgcolor: palette.mode === 'dark'
+                ? palette.grey[800]
                 : '#f8f9fa',
-              borderBottom: `2px solid ${theme.palette.divider}`,
+              borderBottom: `2px solid ${palette.divider}`,
               '& .MuiDataGrid-columnHeaderTitle': {
                 fontWeight: 800,
-                color: theme.palette.primary.main,
+                color: palette.primary.main,
                 textTransform: 'uppercase',
                 fontSize: '0.75rem',
                 letterSpacing: '0.05rem',
               },
             },
             '& .MuiDataGrid-row:hover': {
-              bgcolor: theme.palette.action.hover,
+              bgcolor: palette.action.hover,
             },
             '& .MuiDataGrid-cell': {
-              borderBottom: `1px solid ${theme.palette.divider}`,
+              borderBottom: `1px solid ${palette.divider}`,
               display: 'flex',
               alignItems: 'center',
             },
