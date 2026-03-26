@@ -32,7 +32,7 @@ export default function OrganizationAddPage() {
 
   // Contrato simplificado: retorna a Promise transformada via .catch()
   const handleSubmit = (values: OrganizationFormValues) => 
-    organizationService.create(values).catch((err) => {
+    organizationService.create(values).then(() => {}).catch((err) => {
       throw parseOrganizationError(err);
     });
 

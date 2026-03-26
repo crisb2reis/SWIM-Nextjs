@@ -2,42 +2,136 @@
 
 /**
  * Módulo: features/documents/components/DocumentTable.tsx
- * Descrição: Tabela de documentos responsiva com DataGrid (MUI) e ações inline.
- *            Segue o padrão Presentation Component: recebe dados e callbacks via props.
+ * Tabela de documentos responsiva usando BaseDataTable compartilhado.
  */
 
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo } from 'react';
 import {
   Box,
-  Card,
-  CardHeader,
   Typography,
   Tooltip,
   IconButton,
   Chip,
-  Skeleton,
-  Alert,
-  useMediaQuery,
-  useTheme,
   Avatar,
-  Button,
+  useTheme,
+  type Palette,
 } from '@mui/material';
-import {
-  DataGrid,
-  type GridColDef,
-  GridToolbarQuickFilter,
-  GridToolbarContainer,
-  GridToolbarExport,
-} from '@mui/x-data-grid';
+import type { GridColDef } from '@mui/x-data-grid';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArticleIcon from '@mui/icons-material/Article';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { useTranslations } from 'next-intl';
 
 import type { Document } from '../types/document.types';
+import { BaseDataTable } from '@/components/common/table';
 
-import { useTranslations } from 'next-intl';
+// ─── Células memoizadas ───────────────────────────────────────────────────────
+
+const TitleCell = memo(function TitleCell({
+  row,
+  palette,
+}: {
+  row: Document;
+  palette: Palette;
+}) {
+  return (
+    <Box display="flex" alignItems="center" gap={1.5}>
+      <Avatar
+        sx={{
+          width: 32,
+          height: 32,
+          bgcolor: palette.primary.light,
+          color: palette.primary.contrastText,
+        }}
+      >
+        <ArticleIcon fontSize="small" />
+      </Avatar>
+      <Typography variant="body2" fontWeight={500}>
+        {row.title}
+      </Typography>
+    </Box>
+  );
+});
+
+const VersionChip = memo(function VersionChip({ version }: { version?: string }) {
+  if (!version) return null;
+  return (
+    <Chip
+      label={version}
+      size="small"
+      color="primary"
+      variant="outlined"
+      sx={{ fontWeight: 600, fontSize: 11 }}
+    />
+  );
+});
+
+/**
+ * Célula de ações customizada para documentos (inclui View).
+ * Como tem 3 ações, não usamos useTableActions (que só tem 2).
+ */
+const DocumentActionsCell = memo(function DocumentActionsCell({
+  row,
+  onView,
+  onEdit,
+  onDeleteRequest,
+  viewLabel,
+  editLabel,
+  deleteLabel,
+}: {
+  row: Document;
+  onView: (row: Document) => void;
+  onEdit: (row: Document) => void;
+  onDeleteRequest: (row: Document) => void;
+  viewLabel: string;
+  editLabel: string;
+  deleteLabel: string;
+}) {
+  const { palette } = useTheme();
+  const rowName = row.title || '';
+
+  return (
+    <Box display="flex" gap={0.5} justifyContent="center">
+      <Tooltip title={viewLabel}>
+        <IconButton
+          size="small"
+          onClick={() => onView(row)}
+          aria-label={`${viewLabel} ${rowName}`}
+          sx={{ color: palette.info.main }}
+        >
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={editLabel}>
+        <IconButton
+          size="small"
+          onClick={() => onEdit(row)}
+          aria-label={`${editLabel} ${rowName}`}
+          sx={{
+            color: palette.primary.main,
+            '&:hover': { bgcolor: palette.primary.light },
+          }}
+        >
+          <EditTwoToneIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={deleteLabel}>
+        <IconButton
+          size="small"
+          onClick={() => onDeleteRequest(row)}
+          aria-label={`${deleteLabel} ${rowName}`}
+          sx={{
+            color: palette.error.main,
+            '&:hover': { bgcolor: palette.error.light },
+          }}
+        >
+          <DeleteTwoToneIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
+});
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -48,45 +142,8 @@ interface DocumentTableProps {
   errorMessage?: string;
   onAdd: () => void;
   onEdit: (doc: Document) => void;
-  onDelete: (doc: Document) => void;
+  onDeleteRequest: (doc: Document) => void;
   onView: (doc: Document) => void;
-}
-
-// ─── Toolbar customizada ──────────────────────────────────────────────────────
-
-const CustomToolbar = memo(function CustomToolbar({ onAdd }: { onAdd: () => void }) {
-  const t = useTranslations('documents');
-  return (
-    <GridToolbarContainer sx={{ p: 1.5, gap: 1, justifyContent: 'space-between' }}>
-      <Button
-        variant="contained"
-        size="small"
-        startIcon={<AddCircleOutlineIcon />}
-        onClick={onAdd}
-        sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-      >
-        {t('newDocument')}
-      </Button>
-      <Box display="flex" gap={1} alignItems="center">
-        <Box sx={{ '& .MuiInputBase-root': { borderRadius: 2 } }}>
-          <GridToolbarQuickFilter />
-        </Box>
-        <GridToolbarExport />
-      </Box>
-    </GridToolbarContainer>
-  );
-});
-
-// ─── Skeleton de carregamento ─────────────────────────────────────────────────
-
-function TableSkeleton() {
-  return (
-    <Box sx={{ p: 2 }}>
-      {Array.from({ length: 8 }, (_, i) => (
-        <Skeleton key={`skeleton-row-${i}`} variant="rectangular" height={52} sx={{ mb: 1, borderRadius: 1 }} />
-      ))}
-    </Box>
-  );
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -98,230 +155,109 @@ export function DocumentTable({
   errorMessage,
   onAdd,
   onEdit,
-  onDelete,
+  onDeleteRequest,
   onView,
 }: DocumentTableProps) {
   const t = useTranslations('documents');
-  const theme = useTheme();
-  const { palette } = theme;
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { palette } = useTheme();
 
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-
-  const Toolbar = useMemo(() => () => <CustomToolbar onAdd={onAdd} />, [onAdd]);
-
-  const localeText = useMemo(() => ({
-    toolbarFilters: t('dataGrid.filters'),
-    toolbarExport: t('dataGrid.export'),
-    toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
-    noRowsLabel: t('dataGrid.noRows'),
-    columnMenuSortAsc: t('dataGrid.sortAsc'),
-    columnMenuSortDesc: t('dataGrid.sortDesc'),
-    columnMenuFilter: t('dataGrid.filter'),
-    columnMenuHideColumn: t('dataGrid.hide'),
-    columnMenuShowColumns: t('dataGrid.showColumns'),
-  }), [t]);
-
-  // ─── Definição das colunas ────────────────────────────────────────────────
-
-  const columns = useMemo<GridColDef<Document>[]>(() => [
-    {
-      field: 'title',
-      headerName: t('columns.title'),
-      flex: 2,
-      minWidth: 200,
-      renderCell: ({ row }) => (
-        <Box display="flex" alignItems="center" gap={1.5}>
-          <Avatar
-            sx={{
-              width: 32,
-              height: 32,
-              bgcolor: palette.primary.light,
-              color: palette.primary.contrastText,
-            }}
-          >
-            <ArticleIcon fontSize="small" />
-          </Avatar>
-          <Typography variant="body2" fontWeight={500}>
-            {row.title}
+  const columns = useMemo<GridColDef<Document>[]>(
+    () => [
+      {
+        field: 'title',
+        headerName: t('columns.title'),
+        flex: 2,
+        minWidth: 200,
+        renderCell: ({ row }) => <TitleCell row={row} palette={palette} />,
+      },
+      {
+        field: 'publish',
+        headerName: t('columns.publisher'),
+        flex: 1.5,
+        minWidth: 160,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" color="text.primary" fontWeight={500}>
+            {row.publish ?? '—'}
           </Typography>
-        </Box>
-      ),
-    },
-    {
-      field: 'publish',
-      headerName: t('columns.publisher'),
-      flex: 1.5,
-      minWidth: 160,
-      renderCell: ({ row }) => (
-        <Typography variant="body2" color="text.primary" fontWeight={500}>
-          {row.publish ?? '—'}
-        </Typography>
-      ),
-    },
-    {
-      field: 'date_issued',
-      headerName: t('columns.date'),
-      width: 140,
-      renderCell: ({ row }) => (
-        <Typography variant="body2" color="text.primary">
-          {row.date_issued ?? row.dateIssued ?? '—'}
-        </Typography>
-      ),
-    },
-    {
-      field: 'version',
-      headerName: t('columns.version'),
-      width: 100,
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: ({ row }) =>
-        row.version ? (
-          <Chip
-            label={row.version}
-            size="small"
-            color="primary"
-            variant="outlined"
-            sx={{ fontWeight: 600, fontSize: 11 }}
+        ),
+      },
+      {
+        field: 'date_issued',
+        headerName: t('columns.date'),
+        width: 140,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" color="text.primary">
+            {row.date_issued ?? row.dateIssued ?? '—'}
+          </Typography>
+        ),
+      },
+      {
+        field: 'version',
+        headerName: t('columns.version'),
+        width: 100,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: ({ row }) => <VersionChip version={row.version} />,
+      },
+      {
+        field: 'actions',
+        headerName: t('columns.actions'),
+        width: 130,
+        sortable: false,
+        filterable: false,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: ({ row }) => (
+          <DocumentActionsCell
+            row={row}
+            onView={onView}
+            onEdit={onEdit}
+            onDeleteRequest={onDeleteRequest}
+            viewLabel={t('tooltips.view')}
+            editLabel={t('tooltips.edit')}
+            deleteLabel={t('tooltips.delete')}
           />
-        ) : null,
-    },
-    {
-      field: 'actions',
-      headerName: t('columns.actions'),
-      width: 130,
-      sortable: false,
-      filterable: false,
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: ({ row }) => (
-        <Box display="flex" gap={0.5} justifyContent="center">
-          <Tooltip title={t('tooltips.view')}>
-            <IconButton
-              size="small"
-              onClick={() => onView(row)}
-              sx={{ color: palette.info.main }}
-            >
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.edit')}>
-            <IconButton
-              size="small"
-              onClick={() => onEdit(row)}
-              sx={{
-                color: palette.primary.main,
-                '&:hover': { bgcolor: palette.primary.light },
-              }}
-            >
-              <EditTwoToneIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('tooltips.delete')}>
-            <IconButton
-              size="small"
-              onClick={() => onDelete(row)}
-              sx={{
-                color: palette.error.main,
-                '&:hover': { bgcolor: palette.error.light },
-              }}
-            >
-              <DeleteTwoToneIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ], [palette.primary, palette.error, palette.info, onView, onEdit, onDelete, t]);
-
-  const mobileColumns = useMemo<GridColDef<Document>[]>(
-    () => columns.filter(c => ['title', 'actions'].includes(c.field)),
-    [columns],
+        ),
+      },
+    ],
+    [palette, onView, onEdit, onDeleteRequest, t],
   );
 
-  // ─── Estados de UI ────────────────────────────────────────────────────────
-
-  if (isError) {
-    return (
-      <Alert severity="error" sx={{ m: 2 }}>
-        {errorMessage ?? t('tableLoadError')}
-      </Alert>
-    );
-  }
+  const localeText = useMemo(
+    () => ({
+      toolbarFilters: t('dataGrid.filters'),
+      toolbarExport: t('dataGrid.export'),
+      toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
+      noRowsLabel: t('dataGrid.noRows'),
+      columnMenuSortAsc: t('dataGrid.sortAsc'),
+      columnMenuSortDesc: t('dataGrid.sortDesc'),
+      columnMenuFilter: t('dataGrid.filter'),
+      columnMenuHideColumn: t('dataGrid.hide'),
+      columnMenuShowColumns: t('dataGrid.showColumns'),
+    }),
+    [t],
+  );
 
   return (
-    <Card
-      elevation={0}
-      sx={{
-        border: `1px solid ${palette.divider}`,
-        borderRadius: 3,
-        overflow: 'hidden',
-      }}
-    >
-      <CardHeader
-        title={
-          <Typography variant="h6" fontWeight={700}>
-            {t('managementTitle')}
-          </Typography>
-        }
-        subheader={
-          <Typography variant="body2" color="text.secondary">
-            {isLoading ? t('loading') : t('docCount', { count: documents.length })}
-          </Typography>
-        }
-        sx={{ px: 2.5, pt: 2.5, pb: 0 }}
-      />
-
-      {isLoading ? (
-        <TableSkeleton />
-      ) : (
-        <DataGrid<Document>
-          rows={documents}
-          columns={isMobile ? mobileColumns : columns}
-          getRowId={(row) => row.id ?? Math.random()}
-          paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel}
-          pageSizeOptions={[10, 25, 50]}
-          localeText={localeText}
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-              quickFilterProps: { debounceMs: 500 },
-            },
-            pagination: {
-              labelRowsPerPage: t('dataGrid.rowsPerPage'),
-              labelDisplayedRows: ({ from, to, count }: { from: number; to: number; count: number }) =>
-                `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
-            }
-          }}
-          slots={{ toolbar: Toolbar }}
-          disableRowSelectionOnClick
-          sx={{
-            border: 'none',
-            '& .MuiDataGrid-columnHeaders': {
-              bgcolor: palette.mode === 'dark'
-                ? palette.grey[800]
-                : '#f8f9fa',
-              borderBottom: `2px solid ${palette.divider}`,
-              '& .MuiDataGrid-columnHeaderTitle': {
-                fontWeight: 800,
-                color: palette.primary.main,
-                textTransform: 'uppercase',
-                fontSize: '0.75rem',
-                letterSpacing: '0.05rem',
-              },
-            },
-            '& .MuiDataGrid-row:hover': {
-              bgcolor: palette.action.hover,
-            },
-            '& .MuiDataGrid-cell': {
-              borderBottom: `1px solid ${palette.divider}`,
-              display: 'flex',
-              alignItems: 'center',
-            },
-          }}
-        />
-      )}
-    </Card>
+    <BaseDataTable<Document>
+      rows={documents}
+      columns={columns}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={errorMessage ?? t('tableLoadError')}
+      title={t('managementTitle')}
+      subtitle={t('docCount', { count: documents.length })}
+      loadingText={t('loading')}
+      onAdd={onAdd}
+      addLabel={t('newDocument')}
+      canExport={false}
+      mobileFields={['title', 'actions']}
+      localeText={localeText}
+      getRowId={(row) => row.id ?? Math.random()}
+      rowsPerPageLabel={t('dataGrid.rowsPerPage')}
+      labelDisplayedRows={({ from, to, count }) =>
+        `${from}-${to} ${t('dataGrid.of')} ${count !== -1 ? count : `${t('dataGrid.moreThan')} ${to}`}`
+      }
+    />
   );
 }

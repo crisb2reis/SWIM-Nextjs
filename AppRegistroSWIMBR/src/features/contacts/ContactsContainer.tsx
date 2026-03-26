@@ -106,7 +106,7 @@ export function ContactsContainer() {
         errorMessage={extractErrorMessage(error)}
         onAdd={handleAdd}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDeleteRequest={handleDelete}
       />
 
       {/* Modal de Formulário */}
