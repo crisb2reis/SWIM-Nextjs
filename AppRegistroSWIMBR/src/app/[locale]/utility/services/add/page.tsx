@@ -1,93 +1,54 @@
 'use client';
 
-import { useRouter } from '@/i18n/navigation';
-import { useState } from 'react';
-import { Box, Typography, Breadcrumbs, Link as MuiLink, Snackbar, Alert, Container } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
-import { useTranslations } from 'next-intl';
-
 import dynamic from 'next/dynamic';
-import { serviceService, extractServiceErrorMessage } from '@/features/services/services/serviceService';
+import { useTranslations } from 'next-intl';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import { CircularProgress } from '@mui/material';
 
+import { serviceService, extractServiceErrorMessage } from '@/features/services/services/serviceService';
+import { AddEntityPage, type GenericFormDialogProps } from '@/components/common/AddEntityPage';
+import type { ServiceFormValues } from '@/features/services/types/service.types';
+import { ROUTES } from '@/lib/routes';
+
+// Loading fallback para o diálogo dinâmico
 const ServiceFormDialog = dynamic(
   () => import('@/features/services/components/ServiceFormDialog').then((mod) => mod.ServiceFormDialog),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <CircularProgress size={24} />
+  }
 );
-import type { ServiceFormValues } from '@/features/services/types/service.types';
+
+// Adapter para evitar a criação de funções anônimas no render
+const ServiceDialogAdapter = (props: GenericFormDialogProps<ServiceFormValues>) => (
+  <ServiceFormDialog {...props} service={null} />
+);
 
 export default function ServicesAddPage() {
-  const router = useRouter();
   const t = useTranslations('services');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
 
-  const handleSubmit = async (values: ServiceFormValues) => {
-    setIsSubmitting(true);
-    try {
-      await serviceService.create(values);
-      setToast({ message: t('messages.created'), severity: 'success' });
-      // Pequeno delay para o usuário ver o sucesso antes de redirecionar
-      setTimeout(() => {
-        router.push('/utility/services/manage');
-      }, 1500);
-    } catch (err) {
-      console.error(err);
-      setToast({ 
-        message: extractServiceErrorMessage(err), 
-        severity: 'error' 
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleClose = () => router.push('/utility/services/manage');
+  const handleSubmit = (values: ServiceFormValues) =>
+    serviceService.create(values).catch((err) => {
+      const message = extractServiceErrorMessage(err);
+      const error: any = new Error(message);
+      if (typeof err === 'object' && err !== null && 'fieldErrors' in err) {
+        error.fieldErrors = (err as any).fieldErrors;
+      }
+      throw error;
+    });
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box mb={4}>
-        <Breadcrumbs sx={{ mb: 2 }}>
-          <MuiLink underline="hover" href="/" display="flex" alignItems="center" gap={0.5} color="inherit">
-            <HomeIcon fontSize="small" />
-            Home
-          </MuiLink>
-          <MuiLink underline="hover" href="/utility/services/manage" color="inherit">
-            {t('managementTitle')}
-          </MuiLink>
-          <Typography color="text.primary" display="flex" alignItems="center" gap={0.5}>
-            <MiscellaneousServicesIcon fontSize="small" />
-            {t('newService')}
-          </Typography>
-        </Breadcrumbs>
-        
-        <Typography variant="h4" fontWeight={800} gutterBottom>
-           {t('newService')}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-           {t('messages.addSubtitle')}
-        </Typography>
-      </Box>
-
-      {/* Dialog aberto permanentemente nesta rota */}
-      <ServiceFormDialog
-        open={true}
-        service={null}
-        isSubmitting={isSubmitting}
-        onClose={handleClose}
-        onSubmit={handleSubmit}
-      />
-
-      <Snackbar 
-        open={!!toast} 
-        autoHideDuration={4000} 
-        onClose={() => setToast(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        {toast ? (
-          <Alert severity={toast.severity} variant="filled" sx={{ width: '100%' }}>{toast.message}</Alert>
-        ) : <Box />}
-      </Snackbar>
-    </Container>
+    <AddEntityPage
+      breadcrumbs={[
+        { label: t('managementTitle'), href: ROUTES.services.manage },
+        { label: t('newService'), active: true, icon: <MiscellaneousServicesIcon fontSize="small" /> },
+      ]}
+      title={t('newService')}
+      subtitle={t('messages.addSubtitle')}
+      successMessage={t('messages.created')}
+      redirectRoute={ROUTES.services.manage}
+      onSubmit={handleSubmit}
+      FormDialog={ServiceDialogAdapter}
+    />
   );
 }

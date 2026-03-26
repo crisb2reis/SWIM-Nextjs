@@ -9,6 +9,7 @@ export interface ContactPoint {
   role: string | null;
   phone: string | null;
   organization_id: number;
+  organization_name?: string | null;
   created_at?: string;
   updated_at?: string;
 }

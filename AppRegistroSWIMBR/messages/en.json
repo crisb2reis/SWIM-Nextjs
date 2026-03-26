@@ -7,9 +7,14 @@
     "logout": "Logout",
     "loading": "Loading...",
     "errorOccurred": "An error occurred",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "home": "Home",
+    "messages": {
+      "error": "An unexpected error occurred"
+    }
   },
   "navigation": {
+    "home": "Home",
     "servicos": "SERVICES",
     "gerenciamento": "MANAGEMENT",
     "informacoes": "INFORMATION",

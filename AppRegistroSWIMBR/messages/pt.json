@@ -7,9 +7,14 @@
     "logout": "Sair",
     "loading": "Carregando...",
     "errorOccurred": "Ocorreu um erro",
-    "noResults": "Nenhum resultado encontrado"
+    "noResults": "Nenhum resultado encontrado",
+    "home": "Início",
+    "messages": {
+      "error": "Ocorreu um erro inesperado"
+    }
   },
   "navigation": {
+    "home": "Início",
     "servicos": "SERVIÇOS",
     "gerenciamento": "GERENCIAMENTO",
     "informacoes": "INFORMAÇÕES",

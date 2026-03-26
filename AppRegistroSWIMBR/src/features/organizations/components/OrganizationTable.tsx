@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { memo, useMemo, useState } from 'react';
 import {
   Box, Card, Typography, Tooltip, IconButton,
   Chip, Skeleton, Alert, useMediaQuery, useTheme,
   Avatar, Button, TablePagination,
 } from '@mui/material';
 import {
-  DataGrid, type GridColDef, type GridRenderCellParams,
+  DataGrid, type GridColDef,
   GridToolbarQuickFilter, GridToolbarContainer, GridToolbarExport,
 } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
@@ -43,7 +43,7 @@ interface OrganizationTableProps {
 
 // ─── Toolbar ──────────────────────────────────────────────────────────────────
 
-function CustomToolbar({ onAdd }: { onAdd: () => void }) {
+const CustomToolbar = memo(function CustomToolbar({ onAdd }: { onAdd: () => void }) {
   const t = useTranslations('organizations');
   return (
     <GridToolbarContainer sx={{ p: 1.5, gap: 1, justifyContent: 'space-between' }}>
@@ -57,14 +57,14 @@ function CustomToolbar({ onAdd }: { onAdd: () => void }) {
         {t('newOrganization')}
       </Button>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <GridToolbarQuickFilter
-          sx={{ '& .MuiInputBase-root': { borderRadius: 1, fontSize: 13 } }}
-        />
+        <Box sx={{ '& .MuiInputBase-root': { borderRadius: 1, fontSize: 13 } }}>
+          <GridToolbarQuickFilter />
+        </Box>
         <GridToolbarExport />
       </Box>
     </GridToolbarContainer>
   );
-}
+});
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -73,13 +73,26 @@ export function OrganizationTable({
 }: OrganizationTableProps) {
   const t = useTranslations('organizations');
   const theme = useTheme();
+  const { palette } = theme;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(8);
 
-  const handleAdd = useCallback(onAdd, [onAdd]);
+  const Toolbar = useMemo(() => () => <CustomToolbar onAdd={onAdd} />, [onAdd]);
 
-  const columns = useMemo<GridColDef[]>(() => [
+  const localeText = useMemo(() => ({
+    toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
+    noRowsLabel: t('dataGrid.noRows'),
+    columnMenuSortAsc: t('dataGrid.sortAsc'),
+    columnMenuSortDesc: t('dataGrid.sortDesc'),
+    columnMenuFilter: t('dataGrid.filter'),
+    columnMenuHideColumn: t('dataGrid.hide'),
+    columnMenuShowColumns: t('dataGrid.showColumns'),
+    toolbarExport: t('dataGrid.export'),
+    toolbarFilters: t('dataGrid.filters'),
+  }), [t]);
+
+  const columns = useMemo<GridColDef<Organization>[]>(() => [
     // ── Logo ──
     {
       field: 'logo_url',
@@ -87,10 +100,10 @@ export function OrganizationTable({
       width: 64,
       sortable: false,
       filterable: false,
-      renderCell: (params: GridRenderCellParams<Organization>) => (
+      renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
           <Avatar
-            src={params.value ? `${API_BASE}${params.value}` : undefined}
+            src={row.logo_url ? `${API_BASE}${row.logo_url}` : undefined}
             sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}
           >
             <BusinessIcon sx={{ fontSize: 18 }} />
@@ -104,9 +117,9 @@ export function OrganizationTable({
       headerName: t('columns.name'),
       flex: 2,
       minWidth: 180,
-      renderCell: (params: GridRenderCellParams<Organization>) => (
+      renderCell: ({ row }) => (
         <Typography variant="body2" fontWeight={500}>
-          {params.value as string}
+          {row.name}
         </Typography>
       ),
     },
@@ -115,10 +128,10 @@ export function OrganizationTable({
       field: 'acronym',
       headerName: t('columns.acronym'),
       width: 110,
-      renderCell: (params: GridRenderCellParams<Organization>) =>
-        params.value ? (
+      renderCell: ({ row }) =>
+        row.acronym ? (
           <Chip
-            label={params.value as string}
+            label={row.acronym}
             size="small"
             variant="outlined"
             color="primary"
@@ -133,22 +146,22 @@ export function OrganizationTable({
       field: 'tipo',
       headerName: t('columns.tipo'),
       width: 130,
-      renderCell: (params: GridRenderCellParams<Organization>) => {
-        const tipo = params.value as OrganizationTipo | null;
+      renderCell: ({ row }: { row: Organization }) => {
+        const tipo = row.tipo as OrganizationTipo | null;
         return tipo ? (
           <Typography variant="body2">{t(`tipo.${tipo}`)}</Typography>
         ) : (
           <Typography variant="body2" color="text.disabled">—</Typography>
         );
       },
-    } as GridColDef] : []),
+    } as GridColDef<Organization>] : []),
     // ── Status ──
     {
       field: 'status',
       headerName: t('columns.status'),
       width: 140,
-      renderCell: (params: GridRenderCellParams<Organization>) => {
-        const st = params.value as OrganizationStatus | null;
+      renderCell: ({ row }) => {
+        const st = row.status as OrganizationStatus | null;
         if (!st) return <Typography variant="body2" color="text.disabled">—</Typography>;
         return (
           <Chip
@@ -162,22 +175,22 @@ export function OrganizationTable({
     },
     // ── Ações ──
     {
-      field: '__actions__',
+      field: 'actions',
       headerName: t('columns.actions'),
       width: 90,
       sortable: false,
       filterable: false,
       align: 'center',
       headerAlign: 'center',
-      renderCell: (params: GridRenderCellParams<Organization>) => (
+      renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>
           <Tooltip title={t('tooltips.edit')}>
-            <IconButton size="small" color="primary" onClick={() => onEdit(params.row)}>
+            <IconButton size="small" color="primary" onClick={() => onEdit(row)}>
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title={t('tooltips.delete')}>
-            <IconButton size="small" color="error" onClick={() => onDelete(params.row)}>
+            <IconButton size="small" color="error" onClick={() => onDelete(row)}>
               <DeleteTwoToneIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -189,7 +202,7 @@ export function OrganizationTable({
   if (isLoading) {
     return (
       <Card sx={{ borderRadius: 2, p: 2, border: '1px solid', borderColor: 'divider' }}>
-        {[...Array(8)].map((_, i) => <Skeleton key={i} height={48} sx={{ mb: 0.5 }} />)}
+        {[...Array(8)].map((_, i) => <Skeleton key={`skeleton-row-${i}`} height={48} sx={{ mb: 0.5 }} />)}
       </Card>
     );
   }
@@ -205,29 +218,18 @@ export function OrganizationTable({
       elevation={0}
       sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}
     >
-      <DataGrid
+      <DataGrid<Organization>
         rows={paginated}
         columns={columns}
         getRowId={(row) => row.id}
         hideFooter
         disableRowSelectionOnClick
-        autoHeight
-        slots={{ toolbar: () => <CustomToolbar onAdd={handleAdd} /> }}
-        localeText={{
-          toolbarQuickFilterPlaceholder: t('dataGrid.quickFilter'),
-          noRowsLabel: t('dataGrid.noRows'),
-          columnMenuSortAsc: t('dataGrid.sortAsc'),
-          columnMenuSortDesc: t('dataGrid.sortDesc'),
-          columnMenuFilter: t('dataGrid.filter'),
-          columnMenuHideColumn: t('dataGrid.hide'),
-          columnMenuShowColumns: t('dataGrid.showColumns'),
-          toolbarExport: t('dataGrid.export'),
-          toolbarFilters: t('dataGrid.filters'),
-        }}
+        slots={{ toolbar: Toolbar }}
+        localeText={localeText}
         sx={{
           border: 0,
           '& .MuiDataGrid-columnHeaders': {
-            bgcolor: '#f8f9fa',
+            bgcolor: palette.mode === 'dark' ? palette.grey[800] : '#f8f9fa',
             borderBottom: '2px solid',
             borderColor: 'divider',
             '& .MuiDataGrid-columnHeaderTitle': {
