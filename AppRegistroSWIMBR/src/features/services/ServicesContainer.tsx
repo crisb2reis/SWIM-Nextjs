@@ -127,7 +127,7 @@ export function ServicesContainer() {
         isError={!!error}
         onAdd={openAdd}
         onEdit={openEdit}
-        onDelete={openDelete}
+        onDeleteRequest={openDelete}
       />
 
       {/* Dialog de criação / edição */}

@@ -37,7 +37,7 @@ export default function ContactsAddPage() {
   const { data: organizations = [] } = useSWR('organizations', () => organizationService.list());
 
   const handleSubmit = (values: ContactPointFormValues) =>
-    contactService.create(values as any).catch((err) => {
+    contactService.create(values as any).then(() => {}).catch((err) => {
       const message = extractErrorMessage(err);
       const error: any = new Error(message);
       if (typeof err === 'object' && err !== null && 'fieldErrors' in err) {

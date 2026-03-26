@@ -16,10 +16,11 @@ export { DeleteConfirmDialog } from './components/DeleteConfirmDialog';
 // Hooks
 export { useDocuments }         from './hooks/useDocuments';
 export { useDocumentMutations } from './hooks/useDocumentMutations';
-export { useDocumentForm, documentSchema } from './hooks/useDocumentForm';
+export { getDocumentSchema } from './hooks/useDocumentForm';
 
 // Service
-export { documentService, BASE_URL } from './services/documentService';
+export { documentService } from './services/documentService';
+export { BASE_URL } from '@/lib/axios';
 
 // Types
 export type {

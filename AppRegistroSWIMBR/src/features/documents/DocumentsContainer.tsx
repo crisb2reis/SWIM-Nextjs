@@ -126,7 +126,7 @@ export function DocumentsContainer() {
         errorMessage={errorMessage}
         onAdd={openAdd}
         onEdit={openEdit}
-        onDelete={openDelete}
+        onDeleteRequest={openDelete}
         onView={openView}
       />
 

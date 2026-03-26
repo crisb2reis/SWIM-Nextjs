@@ -105,7 +105,7 @@ export function OrganizationsContainer() {
         errorMessage={error ? parseOrganizationError(error).message : undefined}
         onAdd={handleAdd}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDeleteRequest={handleDelete}
       />
 
       {/* Modal de Formulário */}

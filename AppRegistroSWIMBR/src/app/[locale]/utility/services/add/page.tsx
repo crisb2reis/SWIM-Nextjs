@@ -28,7 +28,7 @@ export default function ServicesAddPage() {
   const t = useTranslations('services');
 
   const handleSubmit = (values: ServiceFormValues) =>
-    serviceService.create(values).catch((err) => {
+    serviceService.create(values).then(() => {}).catch((err) => {
       const message = extractServiceErrorMessage(err);
       const error: any = new Error(message);
       if (typeof err === 'object' && err !== null && 'fieldErrors' in err) {

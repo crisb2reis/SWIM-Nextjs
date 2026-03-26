@@ -2,46 +2,38 @@
 
 API REST do sistema **SWIM Registry** para o CRM **AppRegistroSWIMBR**.
 
-## 🚀 Setup Rápido
+## 🚀 Guia de Execução (Passo a Passo)
 
-### 1. Pré-requisitos
-- Python 3.10+
-- Docker + Docker Compose
+Siga estas etapas na ordem exata para rodar o backend localmente:
 
-### 2. Instalar dependências
-
+### 1. Preparar o Ambiente Python
+Crie e ative o ambiente virtual para isolar as dependências.
 ```bash
+# Criar ambiente virtual (apenas a primeira vez)
 python3 -m venv .venv
+
+# Ativar o ambiente (IMPORTANTE: use sempre 'source')
 source .venv/bin/activate
+
+# Instalar dependências
 pip install -r requirements.txt
 ```
 
-### 3. Configurar variáveis de ambiente
-
+### 2. Configuração e Banco de Dados
+Certifique-se de que o Docker está rodando e configure o banco.
 ```bash
-cp .env.example .env
-# Edite o .env com sua SECRET_KEY e dados do banco
-```
+# 1. Criar arquivo de configuração .env (se já não existir)
+cp -n .env.example .env
 
-> **Gerar SECRET_KEY segura:**
-> ```bash
-> openssl rand -hex 32
-> ```
-
-### 4. Subir o banco de dados (PostgreSQL via Docker)
-
-```bash
+# 2. Subir o PostgreSQL via Docker
 docker-compose up -d
-```
 
-### 5. Executar migrações (Alembic)
-
-```bash
+# 3. Rodar as migrações para criar as tabelas
 alembic upgrade head
 ```
 
-### 6. Iniciar o servidor
-
+### 3. Iniciar o Servidor FastAPI
+Com o ambiente ativado e o banco rodando:
 ```bash
 uvicorn main:app --reload
 ```
