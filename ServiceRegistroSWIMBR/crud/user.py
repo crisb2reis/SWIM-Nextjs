@@ -29,6 +29,11 @@ def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
 def create_user(db: Session, user_in: UserCreate) -> User:
     obj_in_data = user_in.model_dump()
     password = obj_in_data.pop("password")
+    
+    # Se o username não estiver explicitamente diferente do email, usamos o email como username
+    if not obj_in_data.get("username"):
+        obj_in_data["username"] = obj_in_data["email"]
+
     db_user = User(**obj_in_data, hashed_password=get_password_hash(password))
     db.add(db_user)
     db.commit()

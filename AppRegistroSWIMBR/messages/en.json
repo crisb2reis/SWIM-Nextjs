@@ -387,5 +387,26 @@
     "edit": "Edit",
     "delete": "Delete",
     "view": "View"
+  },
+  "registration": {
+    "title": "Register User",
+    "subtitle": "Create a new user account in the system",
+    "success": "User registered successfully!",
+    "error": "Error registering user",
+    "labels": {
+      "nome": "Name *",
+      "email": "Email *",
+      "senha": "Password *",
+      "militar": "Military?",
+      "ativar": "Activate user?",
+      "tipoUsuario": "User Type *",
+      "organizacao": "Organization",
+      "tipoAutorizacao": "Authorization Type *",
+      "telefone": "Phone"
+    },
+    "placeholders": {
+      "nome": "Enter full name",
+      "email": "magno@decsa.gov.br"
+    }
   }
 }

@@ -11,14 +11,14 @@ from db.base import Base
 
 class UserType(str, enum.Enum):
     admin = "admin"
-    operator = "operator"
-    viewer = "viewer"
+    gestor = "gestor"
+    usuario = "usuario"
 
 
 class UserLevelAuth(str, enum.Enum):
-    level_1 = "level_1"
-    level_2 = "level_2"
-    level_3 = "level_3"
+    total = "total"
+    parcial = "parcial"
+    restrita = "restrita"
 
 
 class User(Base):
@@ -31,13 +31,12 @@ class User(Base):
     email = Column(String(254), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
 
-    first_name = Column(String(100), nullable=True)
-    last_name = Column(String(100), nullable=True)
+    nome = Column(String(200), nullable=False)
     phone_number = Column(String(30), nullable=True)
 
-    user_type = Column(SAEnum(UserType), default=UserType.viewer, nullable=False)
+    user_type = Column(SAEnum(UserType), default=UserType.usuario, nullable=False)
     user_level_auth = Column(
-        SAEnum(UserLevelAuth), default=UserLevelAuth.level_1, nullable=False
+        SAEnum(UserLevelAuth), default=UserLevelAuth.restrita, nullable=False
     )
 
     is_active = Column(Boolean, default=True)

@@ -3,8 +3,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+import crud
 from api.dependencies import get_current_active_user
-from crud import contact_point as crud
 from db.session import get_db
 from models.user import User
 from schemas.contact_point import (
