@@ -37,13 +37,14 @@ def seed_superuser():
             username="admin@swim.com",
             email="admin@swim.com",
             password="admin1234",
-            first_name="Admin",
-            last_name="SWIM",
+            nome="Administrador do Sistema",
+            phone_number="11999999999",
             user_type=UserType.admin,
-            user_level_auth=UserLevelAuth.level_3,
+            user_level_auth=UserLevelAuth.total,
             is_active=True,
             is_staff=True,
             is_superuser=True,
+            is_military=False,
         )
 
         user = crud.create_user(db, admin_in)
