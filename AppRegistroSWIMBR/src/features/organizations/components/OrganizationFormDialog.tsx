@@ -16,6 +16,7 @@ import {
   InputAdornment,
   Alert,
 } from '@mui/material';
+import { Theme } from '@mui/material/styles';
 import BusinessIcon from '@mui/icons-material/Business';
 import SaveIcon from '@mui/icons-material/Save';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -35,6 +36,7 @@ import type {
 import { BASE_URL } from '@/lib/axios';
 import { BaseFormDialog } from '@/components/common/BaseFormDialog';
 import { FormField } from '@/components/common/FormField';
+import { logger } from '@/lib/logger';
 
 const TIPOS: OrganizationTipo[] = ['PROVEDOR', 'CONSUMIDOR', 'PARCEIRO', 'OUTRO'];
 const STATUSES: OrganizationStatus[] = ['ATIVO', 'INATIVO', 'EM_APROVACAO'];
@@ -52,7 +54,7 @@ const uploadAreaSx = (logoFile: File | null) => ({
   textAlign: { xs: 'center', sm: 'left' },
   gap: 3,
   bgcolor: logoFile
-    ? (theme: any) =>
+    ? (theme: Theme) =>
         theme.palette.mode === 'light'
           ? 'rgba(37, 56, 101, 0.04)'
           : 'rgba(74, 120, 255, 0.08)'
@@ -61,7 +63,7 @@ const uploadAreaSx = (logoFile: File | null) => ({
   transition: 'all .25s ease',
   '&:hover': {
     borderColor: 'primary.main',
-    bgcolor: (theme: any) =>
+    bgcolor: (theme: Theme) =>
       theme.palette.mode === 'light'
         ? 'rgba(37, 56, 101, 0.08)'
         : 'rgba(74, 120, 255, 0.12)',
@@ -73,7 +75,7 @@ const avatarSx = {
   height: 56,
   bgcolor: 'primary.main',
   color: '#fff',
-  boxShadow: (theme: any) =>
+  boxShadow: (theme: Theme) =>
     `0 4px 10px ${
       theme.palette.mode === 'light'
         ? 'rgba(37, 56, 101, 0.25)'
@@ -102,6 +104,7 @@ export function OrganizationFormDialog({
 }: Props) {
   const t = useTranslations('organizations');
   const commonT = useTranslations('common');
+  const actionT = useTranslations('actions');
   const isEditing = !!organization;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -126,6 +129,9 @@ export function OrganizationFormDialog({
   });
 
   const logoFile = watch('logo');
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 
   useEffect(() => {
     if (open) {
@@ -154,8 +160,12 @@ export function OrganizationFormDialog({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert(t('validation.logoMax') || 'Arquivo muito grande (máx 2MB)');
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        setError('logo', { message: t('validation.logoType') });
+        return;
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        setError('logo', { message: t('validation.logoMax') });
         return;
       }
       setValue('logo', file, { shouldValidate: true });
@@ -163,24 +173,46 @@ export function OrganizationFormDialog({
   };
 
   const onInternalSubmit = useCallback(
-    handleSubmit(async (values: OrganizationFormValues) => {
-      try {
-        await onSubmit(values);
-      } catch (err: any) {
-        if (err.fieldErrors) {
-          err.fieldErrors.forEach((fe: { field: string; message: string }) => {
-            // @ts-ignore
-            setError(fe.field, { type: 'manual', message: fe.message });
-          });
-        } else {
-          // Erro global caso não seja array de campos
-          setError('root', {
-            message: t('messages.submitError') || 'Erro ao enviar os dados.',
-          });
+    handleSubmit(
+      async (values: OrganizationFormValues) => {
+        try {
+          await onSubmit(values);
+        } catch (err: any) {
+          if (err.fieldErrors) {
+            type OrgField = keyof OrganizationFormValues;
+            const knownFields = new Set<OrgField>(['name', 'acronym', 'description', 'tipo', 'status', 'logo']);
+
+            err.fieldErrors.forEach((fe: { field: string; message: string }) => {
+              if (knownFields.has(fe.field as OrgField)) {
+                setError(fe.field as OrgField, { type: 'manual', message: fe.message });
+              } else {
+                setError('root', { message: fe.message });
+              }
+            });
+          } else {
+            // Erro global caso não seja array de campos
+            setError('root', {
+              message: t('messages.submitError') || commonT('messages.error'),
+            });
+          }
         }
-      }
-    }),
-    [handleSubmit, onSubmit, setError, t],
+      },
+      (validationErrors) => {
+        logger.error('Falha na validação do formulário de Organização', null, {
+          event_type: 'FRONTEND_VALIDATION_ERROR',
+          action: isEditing ? 'UPDATE_ORG_VALIDATION' : 'CREATE_ORG_VALIDATION',
+          metadata: {
+            invalidFields: Object.keys(validationErrors),
+            errors: Object.entries(validationErrors).map(([field, err]) => ({
+              field,
+              message: err?.message,
+              type: err?.type,
+            })),
+          },
+        });
+      },
+    ),
+    [handleSubmit, onSubmit, setError, t, isEditing, commonT],
   );
 
   return (
@@ -193,9 +225,9 @@ export function OrganizationFormDialog({
       icon={isEditing ? <SaveIcon /> : <BusinessIcon />}
       title={isEditing ? (organization?.name ?? '') : t('newOrganization')}
       subtitle={isEditing ? t('messages.editSubtitle') : t('messages.addSubtitle')}
-      discardLabel={t('messages.discard') || commonT('discard')}
-      saveLabel={isEditing ? t('messages.saveChanges') : t('messages.create')}
-      savingLabel={t('messages.saving')}
+      discardLabel={actionT('cancel')}
+      saveLabel={isEditing ? actionT('save') : actionT('confirm')}
+      savingLabel={commonT('loading')}
       dialogId="organization-form-dialog"
     >
       {errors.root && (
@@ -207,20 +239,14 @@ export function OrganizationFormDialog({
       <Grid container spacing={4} sx={{ mt: 2 }}>
         {/* Nome e Sigla */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Controller
+          <FormField
             name="name"
             control={control}
             rules={{ required: t('validation.nameRequired') }}
-            render={({ field }) => (
-              <FormField
-                name={field.name}
-                control={control}
-                label={`${t('form.nameLabel')} *`}
-                placeholder={t('form.namePlaceholder')}
-                icon={<BusinessIcon />}
-                error={errors.name}
-              />
-            )}
+            label={`${t('form.nameLabel')} *`}
+            placeholder={t('form.namePlaceholder')}
+            icon={<BusinessIcon />}
+            error={errors.name}
           />
         </Grid>
 
@@ -321,11 +347,16 @@ export function OrganizationFormDialog({
               <Typography variant="subtitle2" fontWeight={700}>
                 {logoFile ? t('form.logoLabel') : t('form.chooseLogo')}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" display="block">
                 {logoFile
                   ? logoFile.name
                   : t('form.logoHint') || 'Clique para selecionar o logotipo (máx 2MB)'}
               </Typography>
+              {errors.logo && (
+                <Typography variant="caption" color="error" display="block" sx={{ mt: 0.5 }}>
+                  {errors.logo.message}
+                </Typography>
+              )}
             </Box>
 
             {logoFile && (

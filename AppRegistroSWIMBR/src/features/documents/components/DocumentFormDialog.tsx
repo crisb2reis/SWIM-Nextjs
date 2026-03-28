@@ -9,6 +9,7 @@ import {
   Chip,
   Alert,
 } from '@mui/material';
+import { Theme } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SaveIcon from '@mui/icons-material/Save';
 import TitleIcon from '@mui/icons-material/Title';
@@ -24,12 +25,13 @@ import { useDocumentForm, type DocumentFormValues } from '../hooks/useDocumentFo
 import type { Document } from '../types/document.types';
 import { BaseFormDialog } from '@/components/common/BaseFormDialog';
 import { FormField } from '@/components/common/FormField';
+import { logger } from '@/lib/logger';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface DocumentFormDialogProps {
   open: boolean;
-  document?: Document | null;
+  doc?: Document | null;
   isSubmitting: boolean;
   onClose: () => void;
   onSubmit: (values: DocumentFormValues) => Promise<void>;
@@ -48,7 +50,7 @@ const uploadAreaSx = (uploadedFile: File | null) => ({
   textAlign: { xs: 'center', sm: 'left' },
   gap: 3,
   bgcolor: uploadedFile
-    ? (theme: any) =>
+    ? (theme: Theme) =>
         theme.palette.mode === 'light'
           ? 'rgba(37, 56, 101, 0.04)'
           : 'rgba(74, 120, 255, 0.08)'
@@ -57,7 +59,7 @@ const uploadAreaSx = (uploadedFile: File | null) => ({
   transition: 'all .25s ease',
   '&:hover': {
     borderColor: 'primary.main',
-    bgcolor: (theme: any) =>
+    bgcolor: (theme: Theme) =>
       theme.palette.mode === 'light'
         ? 'rgba(37, 56, 101, 0.08)'
         : 'rgba(74, 120, 255, 0.12)',
@@ -70,7 +72,7 @@ const uploadIconWrapSx = {
   borderRadius: 2,
   p: 1.5,
   display: 'flex',
-  boxShadow: (theme: any) =>
+  boxShadow: (theme: Theme) =>
     `0 4px 10px ${
       theme.palette.mode === 'light'
         ? 'rgba(37, 56, 101, 0.25)'
@@ -82,17 +84,18 @@ const uploadIconWrapSx = {
 
 export function DocumentFormDialog({
   open,
-  document,
+  doc,
   isSubmitting,
   onClose,
   onSubmit,
 }: DocumentFormDialogProps) {
   const t = useTranslations('documents');
   const commonT = useTranslations('common');
-  const isEditing = !!document;
+  const actionT = useTranslations('actions');
+  const isEditing = !!doc;
 
   const { control, handleSubmit, reset, setValue, watch, setError, formState: { errors } } =
-    useDocumentForm(document ?? undefined);
+    useDocumentForm(doc ?? undefined);
 
   const uploadedFile = watch('uploadfile');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -102,34 +105,65 @@ export function DocumentFormDialog({
   // No entanto, podemos forçar o remount via `key` externamente ao chamar o dialog,
   // mas para garantir (como o uploadfile não é padrão de texto simples), deixamos um effect
   // focado apenas em resetar tudo quando `open` muda E mantemos os dados do documento.
+const ALLOWED_DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const MAX_DOC_SIZE = 10 * 1024 * 1024;  // 10MB
+
   useEffect(() => {
     if (open) {
       reset({
-        title: document?.title ?? '',
-        description: document?.description ?? '',
-        publish: document?.publish ?? '',
-        date_issued: document?.dateIssued ?? document?.date_issued ?? '',
-        version: document?.version ?? '',
-        location: document?.location ?? '',
+        title: doc?.title ?? '',
+        description: doc?.description ?? '',
+        publish: doc?.publish ?? '',
+        date_issued: doc?.dateIssued ?? doc?.date_issued ?? '',
+        version: doc?.version ?? '',
+        location: doc?.location ?? '',
         uploadfile: null,
       });
     }
-  }, [open, document, reset]);
+  }, [open, doc, reset]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    setValue('uploadfile', file, { shouldValidate: true });
+    if (file) {
+      if (!ALLOWED_DOC_TYPES.includes(file.type)) {
+        setError('uploadfile', { message: t('validation.fileType') });
+        return;
+      }
+      if (file.size > MAX_DOC_SIZE) {
+        setError('uploadfile', { message: t('validation.fileMax') });
+        return;
+      }
+      setValue('uploadfile', file, { shouldValidate: true });
+    }
   };
 
   const handleSave = useCallback(
-    handleSubmit(async (values) => {
-      try {
-        await onSubmit(values);
-      } catch (err) {
-        setError('root', { message: t('messages.submitError') || 'Erro ao enviar os dados.' });
-      }
-    }),
-    [handleSubmit, onSubmit, setError, t],
+    handleSubmit(
+      async (values) => {
+        try {
+          await onSubmit(values);
+        } catch (err: any) {
+          setError('root', {
+            message: t('messages.submitError') || commonT('messages.error'),
+          });
+        }
+      },
+      (validationErrors) => {
+        logger.error('Falha na validação do formulário de Documento', null, {
+          event_type: 'FRONTEND_VALIDATION_ERROR',
+          action: isEditing ? 'UPDATE_DOC_VALIDATION' : 'CREATE_DOC_VALIDATION',
+          metadata: {
+            invalidFields: Object.keys(validationErrors),
+            errors: Object.entries(validationErrors).map(([field, err]) => ({
+              field,
+              message: err?.message,
+              type: err?.type,
+            })),
+          },
+        });
+      },
+    ),
+    [handleSubmit, onSubmit, setError, t, isEditing, commonT],
   );
 
   return (
@@ -140,11 +174,11 @@ export function DocumentFormDialog({
       onClose={onClose}
       onSave={handleSave}
       icon={isEditing ? <SaveIcon /> : <CloudUploadIcon />}
-      title={isEditing ? `${document?.title} - v${document?.version}` : t('newDocument')}
+      title={isEditing ? `${doc?.title} - v${doc?.version}` : t('newDocument')}
       subtitle={isEditing ? t('messages.editSubtitle') : t('messages.addSubtitle')}
-      discardLabel={t('messages.discard') || commonT('discard')}
-      saveLabel={isEditing ? t('messages.saveChanges') : t('messages.create')}
-      savingLabel={t('messages.saving')}
+      discardLabel={actionT('cancel')}
+      saveLabel={isEditing ? actionT('save') : actionT('confirm')}
+      savingLabel={commonT('loading')}
       dialogId="document-form-dialog"
     >
       {errors.root && (
@@ -257,7 +291,7 @@ export function DocumentFormDialog({
               />
             )}
 
-            {isEditing && document?.uploadfile && !uploadedFile && (
+            {isEditing && doc?.uploadfile && !uploadedFile && (
               <Typography
                 variant="caption"
                 sx={{
@@ -268,7 +302,7 @@ export function DocumentFormDialog({
                 }}
               >
                 {t('form.upload.current', {
-                  name: String(document.uploadfile.name ?? t('messages.view')),
+                  name: String(doc.uploadfile.name ?? t('messages.view')),
                 })}
               </Typography>
             )}

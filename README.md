@@ -1,295 +1,329 @@
-Você é um arquiteto de software sênior especializado em sistemas de auditoria e logging.
-Preciso que você projete e implemente um sistema completo de Gerenciamento de Logs e 
-Eventos para uma aplicação fullstack (Next.js + FastAPI + PostgreSQL).
+# Plano de Implantação — Grafana no Projeto SWIM
 
-# CONTEXTO DO PROJETO
-
-- **Frontend**: Next.js 14 (App Router), TypeScript, Material UI, next-intl
-- **Backend**: FastAPI, SQLAlchemy, PostgreSQL, Alembic
-- **Arquitetura**: Clean Architecture com separação clara de camadas
-- **Estrutura atual**: # Projeto SWIM - Sistema de Registro (CRM)
-
-Este repositório contém o sistema completo de registro da SWIM, composto por um frontend moderno em Next.js e um backend robusto em FastAPI. Este documento fornece uma visão geral da estrutura de pastas e arquivos para auxiliar no desenvolvimento da funcionalidade de **Gerenciamento de Logs e Eventos do Sistema**.
+> **CRM SWIM** · Next.js + FastAPI + PostgreSQL · Observabilidade em 3 Fases
 
 ---
 
-## 🏗 Estrutura de Pastas de Alto Nível
+## Índice
 
-```text
-.
-├── AppRegistroSWIMBR/       # Frontend (Next.js 14 / App Router)
-├── ServiceRegistroSWIMBR/   # Backend (FastAPI / PostgreSQL)
-├── README.md                # Este arquivo
-└── static/                  # Arquivos estáticos compartilhados
+1. [Contexto e Justificativa](#1-contexto-e-justificativa)
+2. [Limitações da Solução Atual](#2-limitações-da-solução-atual)
+3. [Valor do Grafana para o SWIM](#3-valor-do-grafana-para-o-swim)
+4. [Roadmap de Implantação](#4-roadmap-de-implantação)
+   - [Fase 1 — Dashboards no PostgreSQL](#fase-1--dashboards-no-postgresql-semanas-12)
+   - [Fase 2 — Métricas de Infraestrutura](#fase-2--métricas-de-infraestrutura-semanas-35)
+   - [Fase 3 — Centralização com Loki](#fase-3--centralização-com-loki-mês-2)
+5. [Checklist de Implantação — Fase 1](#5-checklist-de-implantação--fase-1)
+6. [Configuração](#6-configuração)
+   - [docker-compose.yml](#61-bloco-para-docker-composeyml)
+   - [Queries para os Dashboards](#62-queries-para-os-dashboards)
+7. [Alertas Recomendados](#7-alertas-recomendados)
+8. [Recomendação Final](#8-recomendação-final)
+
+---
+
+## 1. Contexto e Justificativa
+
+O projeto SWIM utiliza atualmente uma infraestrutura de logging sob demanda:
+
+- **Backend:** salva eventos na tabela `system_logs` (PostgreSQL).
+- **Frontend:** possui a tela `LogTable.tsx` para consulta direta de registros.
+- **Uso atual:** auditoria manual de ações de usuários e depuração de erros pontuais.
+
+Embora funcional para o estágio inicial, essa abordagem não atende às necessidades de um ambiente de produção com usuários externos, requisitos de conformidade ou SLAs de estabilidade da API.
+
+---
+
+## 2. Limitações da Solução Atual
+
+| Limitação | Impacto |
+|-----------|---------|
+| **Falta de agregação** | Não é possível visualizar tendências (ex: "os erros aumentaram na última hora?") |
+| **Ausência de alertas** | O sistema depende de alguém olhar a tela para descobrir que algo quebrou |
+| **Performance** | Consultas complexas (`COUNT`/`GROUP BY`) diretamente no banco de produção podem causar lentidão |
+| **Visibilidade de infra** | CPU, memória e latência de rede/API não são monitoradas de forma visual |
+
+---
+
+## 3. Valor do Grafana para o SWIM
+
+### Observabilidade de negócio e UX
+
+Com os campos `event_type` e `metadata` já existentes na tabela `system_logs`, o Grafana pode gerar:
+
+- **Mapa de calor de erros** — identificar quais módulos (Usuários, Contatos, Documentos) geram mais `FRONTEND_VALIDATION_ERROR`.
+- **Taxa de sucesso de login** — monitorar tentativas de login sem sucesso para detectar ataques de força bruta.
+- **Adoção de funcionalidades** — ver quais recursos são mais usados por tipo de usuário.
+
+### Monitoramento de performance
+
+O campo `response_time_ms` no modelo `SystemLog` permite visualizar:
+
+- **Percentis de latência (P95, P99)** — garantir que 99% das requisições respondam em tempo aceitável.
+- **Gargalos de endpoint** — identificar APIs que ficaram lentas após um deploy específico.
+
+### Alertas automáticos
+
+- **Slack / Discord / Email** — notificar a equipe técnica instantaneamente se a taxa de erros `CRITICAL` ultrapassar um limite.
+- **Detecção de inatividade** — alertar se o sistema parar de receber logs (indicativo de queda total).
+
+---
+
+## 4. Roadmap de Implantação
+
+```
+Semana 1–2          Semana 3–5          Mês 2+
+──────────          ──────────          ──────
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   FASE 1    │ ──► │   FASE 2    │ ──► │   FASE 3    │
+│ Dashboards  │     │  Métricas   │     │    Loki      │
+│ PostgreSQL  │     │   de Infra  │     │ (Scale-up)  │
+└─────────────┘     └─────────────┘     └─────────────┘
+Custo: zero         Node Exporter +     Migração de
+código novo         Prometheus          logs textuais
 ```
 
 ---
 
-## 🎨 Frontend (AppRegistroSWIMBR)
+### Fase 1 — Dashboards no PostgreSQL (Semanas 1–2)
 
-O frontend utiliza Next.js com TypeScript, Material UI (MUI) para componentes, e `next-intl` para internacionalização.
+**Objetivo:** adicionar o Grafana via Docker sem alterar nenhuma linha do código existente. Conectar diretamente à tabela `system_logs` usando o plugin nativo do PostgreSQL.
 
-### Estrutura `src/`
+**Vantagem:** custo zero de mudança no código; ganho imediato de visualização e alertas.
 
-- **`app/[locale]/`**: Contém as rotas da aplicação (App Router).
-  - `layout.tsx`: Layout raiz com provedores (Context, Theme, Auth).
-  - `page.tsx`: Landing page ou Dashboard principal.
-  - `utility/`: Módulos de utilidade (Ex: `/users/manage` para gestão de usuários).
-- **`components/`**: Componentes reutilizáveis.
-  - `common/`: Componentes genéricos (Botões, Tabela padrão, Diálogos de formulário).
-    - `BaseFormDialog.tsx`: Base para todos os diálogos de CRUD.
-    - `DeleteConfirmDialog.tsx`: Confirmação de exclusão padronizada.
-- **`features/`**: Lógica de negócio organizada por domínio (Padrão recomendado).
-  - `users/`: Componentes, hooks e serviços específicos de usuários.
-    - `components/UserTable.tsx`: Tabela de listagem de usuários.
-    - `hooks/useUserMutations.ts`: Gerencia Create/Update/Delete de usuários com feedback.
-    - `services/user.service.ts`: Chamadas de API via Axios.
-  - `organizations/`, `documents/`, `contacts/`: Outros domínios do sistema.
-- **`lib/`**: Utilitários e configurações compartilhadas.
-  - **`logger.ts`**: Utilitário de log atual. Alvo central para expansão do sistema de eventos.
-  - `axios.ts`: Configuração da instância de API com interceptores (Ideal para logar erros de rede).
-- **`messages/`**: Arquivos JSON de tradução (PT, EN, ES). Todas as mensagens de log visíveis ao usuário devem estar aqui.
+#### Passos
+
+1. Adicionar o container Grafana ao `docker-compose.yml`
+2. Criar usuário read-only no PostgreSQL para o Grafana
+3. Configurar datasource PostgreSQL no Grafana (porta 5432, SSL conforme o ambiente)
+4. Criar dashboard de **mapa de calor de erros** por `event_type`
+5. Criar dashboard de **autenticação** (taxa login_success vs login_fail)
+6. Criar painel de **latência de API** (P95/P99) usando `response_time_ms`
+7. Configurar alerta básico por email para erros `CRITICAL`
 
 ---
 
-## ⚙️ Backend (ServiceRegistroSWIMBR)
+### Fase 2 — Métricas de Infraestrutura (Semanas 3–5)
 
-O backend segue os princípios de Clean Architecture adaptados para FastAPI.
+**Objetivo:** monitorar a saúde do servidor sem depender do banco de dados.
 
-### Estrutura Principal
+**Componentes a adicionar:** Node Exporter + Prometheus (containers adicionais no compose).
 
-- **`main.py`**: Ponto de entrada da aplicação. Onde as exceções globais e middlewares de logging podem ser injetados.
-- **`api/v1/`**: Definição das rotas e endpoints.
-  - `router.py`: Agrupador de rotas.
-  - `endpoints/`: Arquivos Python com as rotas de cada módulo (Ex: `users.py`, `documents.py`).
-- **`core/`**: Configurações centrais do sistema.
-  - `config.py`: Variáveis de ambiente e segredos.
-  - `security.py`: Tokens JWT e hashing de senhas.
-- **`crud/`**: Camada de persistência (Create, Read, Update, Delete).
-  - `user.py`, `organization.py`, etc. É o local ideal para disparar **eventos de auditoria** (ex: "usuário X alterou registro Y").
-- **`models/`**: Definições das tabelas do banco de dados (SQLAlchemy).
-  - Onde deve ser criado o model de `SystemLog` ou `AuditEvent`.
-- **`schemas/`**: Esquemas de validação (Pydantic).
-  - Onde devem ser definidos os contratos de entrada/saída para os logs.
-- **`db/`**: Sessão do banco de dados e configuração do motor SQL.
-- **`alembic/`**: Gerenciamento de migrações de banco de dados.
+#### Passos
+
+1. Adicionar container **Node Exporter** — CPU, RAM, disco, processos
+2. Adicionar container **Prometheus** — scraping de métricas a cada 15s, retenção de 30 dias
+3. Expor métricas da FastAPI via `/metrics` usando `prometheus-fastapi-instrumentator`
+4. Configurar datasource Prometheus no Grafana
+5. Criar dashboard de **saúde do servidor**
+6. Configurar alertas de infra: disco > 80%, RAM > 90%, CPU sustentada > 85% por 5 min
 
 ---
 
-## 🪵 Roadmap: Gerenciamento de Logs e Eventos
+### Fase 3 — Centralização com Loki (Mês 2+)
 
-Para implementar a funcionalidade de logs, considere os seguintes pontos de integração:
+**Objetivo:** migrar logs textuais para o Grafana Loki, desafogando o PostgreSQL e habilitando retenção de longo prazo com baixo custo.
 
-1.  **Auditoria de Banco (Backend/CRUD)**:
-    - Adicionar um decorator ou utilitário na camada `crud/` para registrar toda alteração feita em registros sensíveis.
-2.  **Logs de Acesso (Backend/Middleware)**:
-    - Implementar um Middleware no FastAPI (`main.py`) para logar quem acessou qual endpoint e o tempo de resposta.
-3.  **Logs de Erro Frontend (lib/logger.ts)**:
-    - Expandir `lib/logger.ts` para que, em produção, erros capturados via `error()` sejam enviados para um endpoint de log no backend.
-4.  **Interface de Visualização (Frontend/Features)**:
-    - Criar `src/features/logs/` com uma tabela para que administradores possam visualizar e filtrar os eventos do sistema.
+**Gatilho:** crescimento de usuários externos ou necessidade de retenção de logs por mais de 30 dias.
+
+#### Passos
+
+1. Adicionar container **Grafana Loki** — indexação por labels, retenção configurável (90–365 dias)
+2. Configurar **Promtail** (ou SDK da FastAPI) para envio de logs ao Loki
+3. Explorar correlação **Prometheus ↔ Loki** na mesma tela do Grafana
+4. Definir separação: logs de auditoria de negócio permanecem no Postgres; logs de debug migram para o Loki
 
 ---
 
-## 🚀 Como Executar
+## 5. Checklist de Implantação — Fase 1
 
-Consulte o arquivo [ServiceRegistroSWIMBR_Plano_Arquitetura.md](./ServiceRegistroSWIMBR_Plano_Arquitetura.md) para detalhes de instalação do ambiente de desenvolvimento.
+### Pré-requisitos
 
+- [ ] Docker Compose disponível no servidor (`docker compose version` ≥ 2.x)
+- [ ] Usuário read-only criado no PostgreSQL para o Grafana
+- [ ] Porta 3000 disponível no firewall (ou reverse proxy configurado)
 
-# REQUISITOS FUNCIONAIS
+### Instalação
 
-## 1. TIPOS DE EVENTOS A REGISTRAR
+- [ ] Bloco do Grafana adicionado ao `docker-compose.yml`
+- [ ] Container Grafana subido e acessível (`docker compose up -d grafana`)
+- [ ] Senha admin alterada no primeiro acesso
+- [ ] Datasource PostgreSQL configurado e testado no Grafana
 
-### Auditoria de Dados (Prioridade Alta)
-- [ ] CREATE: Criação de novos registros (usuários, organizações, documentos, contatos)
-- [ ] UPDATE: Modificações em registros existentes (incluir campo alterado, valor anterior e novo)
-- [ ] DELETE: Exclusões lógicas ou físicas
-- [ ] BULK_OPERATIONS: Operações em lote
+### Dashboards
 
-### Autenticação e Autorização (Prioridade Alta)
-- [ ] LOGIN_SUCCESS / LOGIN_FAILURE
-- [ ] LOGOUT
-- [ ] PASSWORD_CHANGE / PASSWORD_RESET
-- [ ] TOKEN_REFRESH
-- [ ] PERMISSION_DENIED (tentativas de acesso não autorizado)
+- [ ] Dashboard de visão geral de erros (agrupamento por `event_type` e hora)
+- [ ] Dashboard de autenticação (login_success vs login_fail com janela de 1 min)
+- [ ] Painel de latência de API (P95/P99 por endpoint)
 
-### Eventos de Sistema (Prioridade Média)
-- [ ] API_ERROR: Erros 500, exceções não tratadas
-- [ ] VALIDATION_ERROR: Falhas de validação de dados
-- [ ] RATE_LIMIT_EXCEEDED: Limite de requisições atingido
-- [ ] FILE_UPLOAD / FILE_DOWNLOAD
-- [ ] EXPORT_DATA / IMPORT_DATA
+### Alertas
 
-### Métricas de Performance (Prioridade Baixa)
-- [ ] SLOW_QUERY: Queries com tempo > threshold
-- [ ] HIGH_MEMORY_USAGE
-- [ ] API_RESPONSE_TIME
+- [ ] Canal de notificação configurado (email ou Slack) em `Alerting → Contact Points`
+- [ ] Alerta de taxa de erros CRITICAL ativado e testado
 
-## 2. ESTRUTURA DE DADOS DO LOG
+---
 
-Cada evento deve conter **no mínimo**:
-```typescript
-{
-  id: string;                    // UUID
-  timestamp: DateTime;           // ISO 8601
-  event_type: EventType;         // Enum dos tipos acima
-  severity: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  
-  // Contexto do Usuário
-  user_id?: string;
-  user_email?: string;
-  user_ip: string;
-  user_agent?: string;
-  
-  // Contexto da Operação
-  resource_type?: string;        // 'user', 'organization', 'document'
-  resource_id?: string;
-  action: string;                // 'create', 'update', 'delete', 'view'
-  
-  // Detalhes Técnicos
-  endpoint?: string;             // '/api/v1/users'
-  method?: string;               // 'POST', 'GET', 'PUT', 'DELETE'
-  status_code?: number;
-  response_time_ms?: number;
-  
-  // Payload de Dados
-  changes?: {
-    field: string;
-    old_value: any;
-    new_value: any;
-  }[];
-  metadata?: Record<string, any>;
-  error_message?: string;
-  stack_trace?: string;
-}
+## 6. Configuração
+
+### 6.1 Bloco para `docker-compose.yml`
+
+Adicionar dentro do bloco `services:` do compose existente. Substitua os valores de conexão pelo banco real.
+
+```yaml
+# Adicionar ao docker-compose.yml existente
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: swim_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - swim_network
+    depends_on:
+      - postgres
+
+volumes:
+  grafana_data:
 ```
 
-## 3. ARQUITETURA BACKEND
+> **Dica de segurança:** nunca coloque a senha diretamente no arquivo. Use um arquivo `.env` com `GRAFANA_PASSWORD=sua_senha_aqui` e adicione `.env` ao `.gitignore`.
 
-Implemente seguindo estas diretrizes:
+---
 
-### A. Model de Banco de Dados (`models/system_log.py`)
-- Tabela `system_logs` com índices otimizados (timestamp, user_id, event_type)
-- Particionamento por data (se aplicável)
-- Política de retenção (ex: 90 dias para INFO, 1 ano para CRITICAL)
+### 6.2 Queries para os Dashboards
 
-### B. Schema Pydantic (`schemas/system_log.py`)
-- `SystemLogCreate`: Validação de entrada
-- `SystemLogResponse`: Resposta da API
-- `SystemLogFilter`: Filtros de busca
+#### Criação do usuário read-only no PostgreSQL
 
-### C. CRUD Operations (`crud/system_log.py`)
-- `create_log()`: Inserção assíncrona
-- `get_logs()`: Busca com paginação e filtros
-- `get_log_statistics()`: Agregações (eventos por tipo, usuários mais ativos)
-
-### D. Middleware de Logging (`main.py`)
-```python
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    # Capturar request_id, tempo de resposta, status code
-    # Logar automaticamente todas as requisições
+```sql
+CREATE USER grafana_ro WITH PASSWORD 'senha_segura_aqui';
+GRANT CONNECT ON DATABASE swim_db TO grafana_ro;
+GRANT USAGE ON SCHEMA public TO grafana_ro;
+GRANT SELECT ON system_logs TO grafana_ro;
 ```
 
-### E. Decorator de Auditoria (`core/audit.py`)
-```python
-def audit_log(event_type: EventType, resource_type: str):
-    """Decorator para logar automaticamente operações CRUD"""
-    # Aplicar em funções CRUD sensíveis
+#### Query: Erros por hora
+
+Usar no painel de **Time Series**. Retorna contagem de erros agrupada por tipo nas últimas horas selecionadas.
+
+```sql
+SELECT
+  date_trunc('hour', created_at) AS time,
+  event_type,
+  COUNT(*) AS total
+FROM system_logs
+WHERE
+  created_at >= $__timeFrom()
+  AND created_at <= $__timeTo()
+  AND level = 'ERROR'
+GROUP BY 1, 2
+ORDER BY 1 ASC
 ```
 
-### F. Endpoints de API (`api/v1/endpoints/logs.py`)
-- `GET /api/v1/logs`: Listar logs (admin only)
-- `GET /api/v1/logs/statistics`: Dashboard de métricas
-- `GET /api/v1/logs/export`: Exportar logs (CSV/JSON)
+#### Query: Taxa de falhas de login (1 minuto)
 
-## 4. ARQUITETURA FRONTEND
+Usar no painel de **Stat** com alerta. Detecta picos de falha de autenticação.
 
-### A. Service Layer (`features/logs/services/log.service.ts`)
-```typescript
-export const logService = {
-  getLogs: (filters: LogFilter, pagination: Pagination) => Promise<LogPage>;
-  getStatistics: (dateRange: DateRange) => Promise<LogStatistics>;
-  exportLogs: (filters: LogFilter, format: 'csv' | 'json') => Promise<Blob>;
-}
+```sql
+SELECT
+  date_trunc('minute', created_at) AS time,
+  event_type,
+  COUNT(*) AS total
+FROM system_logs
+WHERE
+  created_at >= $__timeFrom()
+  AND created_at <= $__timeTo()
+  AND event_type IN ('LOGIN_SUCCESS', 'LOGIN_FAIL')
+GROUP BY 1, 2
+ORDER BY 1 ASC
 ```
 
-### B. Components (`features/logs/components/`)
-- `LogTable.tsx`: Tabela com filtros avançados (data, tipo, usuário, severidade)
-- `LogDetailDialog.tsx`: Modal com detalhes completos do evento
-- `LogStatisticsPanel.tsx`: Cards com métricas (total eventos, erros, usuários ativos)
-- `LogFilters.tsx`: Barra de filtros com autocomplete
+#### Query: Latência P95/P99 por endpoint
 
-### C. Hooks (`features/logs/hooks/`)
-- `useLogQuery.ts`: React Query para buscar logs
-- `useLogFilters.ts`: Gerenciamento de estado dos filtros
+Usar no painel de **Table** ou **Bar Chart**. Identifica os endpoints mais lentos.
 
-### D. Página de Administração (`app/[locale]/admin/logs/page.tsx`)
-- Rota protegida (apenas admin)
-- Layout com tabela + estatísticas
-
-### E. Logger Frontend (`lib/logger.ts`)
-Expandir o utilitário atual:
-```typescript
-class Logger {
-  // Modo desenvolvimento: console.log
-  // Modo produção: enviar para backend via POST /api/v1/logs/frontend
-  
-  error(message: string, error: Error, context?: Record<string, any>): void;
-  warn(message: string, context?: Record<string, any>): void;
-  info(message: string, context?: Record<string, any>): void;
-}
+```sql
+SELECT
+  endpoint,
+  ROUND(percentile_cont(0.95) WITHIN GROUP (ORDER BY response_time_ms)) AS p95_ms,
+  ROUND(percentile_cont(0.99) WITHIN GROUP (ORDER BY response_time_ms)) AS p99_ms,
+  COUNT(*) AS total_requests
+FROM system_logs
+WHERE
+  created_at >= $__timeFrom()
+  AND response_time_ms IS NOT NULL
+GROUP BY endpoint
+ORDER BY p99_ms DESC
+LIMIT 20
 ```
 
-## 5. CASOS DE USO PRÁTICOS
+#### Query: Volume geral de eventos (adoção de funcionalidades)
 
-Implemente exemplos concretos:
+Usar no painel de **Pie Chart** ou **Bar Gauge**.
 
-1. **Auditoria de Usuário**: Ao atualizar um usuário via `crud/user.py`, 
-   logar quais campos foram alterados
-   
-2. **Tentativa de Login Falha**: Capturar no endpoint de auth e logar com IP
+```sql
+SELECT
+  event_type,
+  COUNT(*) AS total
+FROM system_logs
+WHERE
+  created_at >= $__timeFrom()
+  AND created_at <= $__timeTo()
+GROUP BY event_type
+ORDER BY total DESC
+LIMIT 15
+```
 
-3. **Erro de Frontend**: Ao capturar erro no boundary, enviar para backend com stack trace
+---
 
-4. **Operação em Lote**: Ao deletar múltiplos registros, criar um único log agregado
+## 7. Alertas Recomendados
 
-## 6. SEGURANÇA E PRIVACIDADE
+### 🔴 Críticos — notificar imediatamente
 
-- [ ] Não logar senhas, tokens ou dados sensíveis (LGPD/GDPR compliant)
-- [ ] Implementar hash ou mascaramento de PII (emails parciais: j***@example.com)
-- [ ] Controle de acesso: apenas admins visualizam logs
-- [ ] Rate limiting no endpoint de logs
+| Alerta | Condição | Canal |
+|--------|----------|-------|
+| **Taxa de erros CRITICAL elevada** | `COUNT(*) WHERE level = 'CRITICAL'` nos últimos 5 min > 10 | Email + Slack |
+| **Sistema parou de registrar logs** | Nenhum evento em `system_logs` nos últimos 10 min durante horário de pico | Email + Slack |
+| **Tentativas de login suspeitas** | `login_fail` > 20 em 1 minuto por IP ou usuário | Email + Slack |
 
-## 7. PERFORMANCE
+### 🟡 Avisos — monitorar com atenção
 
-- [ ] Índices compostos no banco (timestamp + event_type)
-- [ ] Paginação obrigatória (máx 100 registros por página)
-- [ ] Cache de estatísticas (Redis - opcional)
-- [ ] Inserção assíncrona de logs (não bloquear request principal)
+| Alerta | Condição | Canal |
+|--------|----------|-------|
+| **Latência P99 elevada** | P99 de `response_time_ms` > 3000ms por mais de 5 minutos consecutivos | Email |
+| **Pico de erros de validação** | `FRONTEND_VALIDATION_ERROR` > 50 em 15 min | Email |
 
-## 8. INTERNACIONALIZAÇÃO
+### 🟢 Informativos — acompanhamento diário
 
-- [ ] Mensagens de log em `messages/pt.json`, `en.json`, `es.json`
-- [ ] Tipos de evento traduzidos na UI
+| Alerta | Condição | Canal |
+|--------|----------|-------|
+| **Relatório diário de adoção** | Resumo por tipo de usuário dos eventos mais frequentes | Email (08h) |
 
-# ENTREGÁVEIS ESPERADOS
+---
 
-Para cada componente, forneça:
+## 8. Recomendação Final
 
-1. **Código completo** com comentários explicativos
-2. **Migration Alembic** para criar a tabela de logs
-3. **Testes unitários** (pelo menos para CRUD de logs)
-4. **Documentação** de como usar o sistema (README.md)
-5. **Exemplo de integração** em um CRUD existente (ex: users)
+> **Recomendamos a implantação imediata da Fase 1.**
 
-# ORDEM DE IMPLEMENTAÇÃO SUGERIDA
+O projeto SWIM já possui uma estrutura de logs madura o suficiente para alimentar dashboards valiosos. A Fase 1 pode ser executada em **1 a 2 dias de trabalho** sem alterar nenhuma linha do código da aplicação — apenas adicionando o container Grafana e configurando as queries.
 
-1. Backend: Model + Schema + CRUD básico
-2. Backend: Migration + testes de inserção
-3. Backend: Middleware de logging automático
-4. Backend: Endpoints de API
-5. Frontend: Service layer + hooks
-6. Frontend: Componentes de visualização
-7. Integração: Aplicar auditoria em 1-2 CRUDs existentes
-8. Testes e refinamento
+**A implantação é indispensável se:**
+
+- O sistema for aberto para usuários externos
+- Houver requisitos de conformidade ou auditoria rígidos
+- A estabilidade da API for crítica para o negócio
+
+**As Fases 2 e 3 devem ser priorizadas quando:**
+
+- O volume de usuários crescer e as queries de agregação começarem a impactar o banco de produção (Fase 2)
+- Houver necessidade de retenção de logs por mais de 30 dias ou análise de logs textuais em larga escala (Fase 3)
+
+---
+
+*Documento gerado para o projeto SWIM · Revisão: Fase 1 imediata recomendada*

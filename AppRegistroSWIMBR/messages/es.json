@@ -35,7 +35,8 @@
     "todos": "Todos los Servicios",
     "gerenciar": "Gestionar",
     "adicionar": "Agregar",
-    "manage": "Gestionar"
+    "manage": "Gestionar",
+    "logs": "Logs del Sistema"
   },
   "documents": {
     "title": "Documentos",
@@ -128,7 +129,11 @@
       "versionFormat": "Utilice el formato X.Y.Z (ej: 1.0.0)",
       "locationRequired": "La ubicación é obligatoria",
       "locationMax": "Máximo de 200 caracteres",
-      "urlInvalid": "URL inválida"
+      "urlInvalid": "URL no válida",
+      "logoType": "Formato no válido. Use JPG, PNG, WebP o SVG.",
+      "logoMax": "Archivo demasiado grande. Máximo permitido: 2 MB.",
+      "fileType": "Formato no válido. Use PDF o DOCX.",
+      "fileMax": "Archivo demasiado grande. Máximo permitido: 10 MB."
     },
     "gallery": {
       "access": "Acceder al documento →",

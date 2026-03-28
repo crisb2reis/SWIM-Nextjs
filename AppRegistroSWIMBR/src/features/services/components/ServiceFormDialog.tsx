@@ -33,6 +33,7 @@ import type {
 
 import { BaseFormDialog } from '@/components/common/BaseFormDialog';
 import { FormField } from '@/components/common/FormField';
+import { logger } from '@/lib/logger';
 
 // Opções dos selects
 const STATUSES: ServiceStatus[] = ['EM_APROVACAO', 'ATIVO', 'INATIVO', 'SUSPENSO'];
@@ -67,6 +68,7 @@ export function ServiceFormDialog({
 }: Props) {
   const t = useTranslations('services');
   const commonT = useTranslations('common');
+  const actionT = useTranslations('actions');
   const isEditing = !!service;
 
   const {
@@ -102,21 +104,47 @@ export function ServiceFormDialog({
   }, [open, service, reset]);
 
   const onInternalSubmit = useCallback(
-    handleSubmit(async (values: ServiceFormValues) => {
-      try {
-        await onSubmit(values);
-      } catch (err: any) {
-        if (err.fieldErrors) {
-          err.fieldErrors.forEach((fe: { field: string; message: string }) => {
-            // @ts-ignore
-            setError(fe.field, { type: 'manual', message: fe.message });
-          });
-        } else {
-          setError('root', { message: t('messages.submitError') || 'Erro ao enviar dados.' });
+    handleSubmit(
+      async (values: ServiceFormValues) => {
+        try {
+          await onSubmit(values);
+        } catch (err: any) {
+          if (err.fieldErrors) {
+            type ServiceField = keyof ServiceFormValues;
+            const knownFields = new Set<ServiceField>([
+              'name', 'organization', 'version', 'status', 'life_cycle', 'tipo', 'publish_status'
+            ]);
+
+            err.fieldErrors.forEach((fe: { field: string; message: string }) => {
+              if (knownFields.has(fe.field as ServiceField)) {
+                setError(fe.field as ServiceField, { type: 'manual', message: fe.message });
+              } else {
+                setError('root', { message: fe.message });
+              }
+            });
+          } else {
+            setError('root', {
+              message: t('messages.submitError') || commonT('messages.error'),
+            });
+          }
         }
-      }
-    }),
-    [handleSubmit, onSubmit, setError, t],
+      },
+      (validationErrors) => {
+        logger.error('Falha na validação do formulário de Serviço', null, {
+          event_type: 'FRONTEND_VALIDATION_ERROR',
+          action: isEditing ? 'UPDATE_SERVICE_VALIDATION' : 'CREATE_SERVICE_VALIDATION',
+          metadata: {
+            invalidFields: Object.keys(validationErrors),
+            errors: Object.entries(validationErrors).map(([field, err]) => ({
+              field,
+              message: err?.message,
+              type: err?.type,
+            })),
+          },
+        });
+      },
+    ),
+    [handleSubmit, onSubmit, setError, t, isEditing, commonT],
   );
 
   return (
@@ -129,9 +157,9 @@ export function ServiceFormDialog({
       icon={isEditing ? <SaveIcon /> : <MiscellaneousServicesIcon />}
       title={isEditing ? (service?.name ?? '') : t('newService')}
       subtitle={isEditing ? t('messages.editSubtitle') : t('messages.addSubtitle')}
-      discardLabel={t('messages.discard') || commonT('discard')}
-      saveLabel={isEditing ? t('messages.saveChanges') : t('messages.create')}
-      savingLabel={t('messages.saving')}
+      discardLabel={actionT('cancel')}
+      saveLabel={isEditing ? actionT('save') : actionT('confirm')}
+      savingLabel={commonT('loading')}
       dialogId="service-form-dialog"
     >
       {errors.root && (
@@ -143,20 +171,14 @@ export function ServiceFormDialog({
       <Grid container spacing={4} sx={{ mt: 2 }}>
         {/* Nome do Serviço */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Controller
+          <FormField
             name="name"
             control={control}
             rules={{ required: t('validation.nameRequired') }}
-            render={({ field }) => (
-              <FormField
-                name={field.name}
-                control={control}
-                label={`${t('form.nameLabel')} *`}
-                placeholder={t('form.namePlaceholder')}
-                icon={<MiscellaneousServicesIcon />}
-                error={errors.name}
-              />
-            )}
+            label={`${t('form.nameLabel')} *`}
+            placeholder={t('form.namePlaceholder')}
+            icon={<MiscellaneousServicesIcon />}
+            error={errors.name}
           />
         </Grid>
 

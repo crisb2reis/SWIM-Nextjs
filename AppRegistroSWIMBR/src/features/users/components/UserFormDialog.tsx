@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import GroupIcon from '@mui/icons-material/Group';
 import { Alert } from '@mui/material';
@@ -10,6 +10,7 @@ import { useUserForm } from '../hooks/useUserForm';
 import { UserForm } from './UserForm';
 import { User, UserFormValues } from '../types/user.types';
 import { useOrganizations } from '@/features/organizations/hooks/useOrganizations';
+import { logger } from '@/lib/logger';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -45,9 +46,10 @@ export function UserFormDialog({
   onSubmit,
 }: UserFormDialogProps) {
   const t = useTranslations('registration');
-  const commonT = useTranslations('common.messages');
-  const commonBaseT = useTranslations('common'); // Hook no nível raiz (NOVO-01)
+  const commonT = useTranslations('common');
   const actionT = useTranslations('actions');
+
+  const isEditing = !!user;
 
   // SEC-04 & PERF-01: Usando hook centralizado com SWR para cache e controle de ciclo de vida
   const { organizations, isLoading: isLoadingOrgs } = useOrganizations();
@@ -78,19 +80,38 @@ export function UserFormDialog({
     }
   }, [open, user, reset]);
 
-  const handleSave = handleSubmit(async (values) => {
-    setErrorMsg(null);
-    try {
-      await onSubmit(values);
-      // Se onSubmit resolveu, o container já tratou o sucesso/erro com Toast.
-      // Se Houvesse um erro crítico não tratado no container, cairia no catch abaixo.
-    } catch (err: unknown) {
-      // INC-02: Garantindo que mensagens técnicas não vazem se ocorrer um erro inesperado
-      setErrorMsg(commonT('error'));
-    }
-  });
+  const handleSave = useCallback(
+    handleSubmit(
+      async (values) => {
+        setErrorMsg(null);
+        try {
+          await onSubmit(values);
+        } catch (err: unknown) {
+          // INC-02: Exibindo erro específico da API se disponível
+          const msg = (err as any)?.response?.data?.detail || commonT('messages.error');
+          setErrorMsg(msg);
+        }
+      },
+      (validationErrors) => {
+        // Logar falhas de validação para análise de UX
+        logger.error('Falha na validação do formulário de usuário', null, {
+          event_type: 'FRONTEND_VALIDATION_ERROR',
+          action: isEditing ? 'UPDATE_USER_VALIDATION' : 'CREATE_USER_VALIDATION',
+          metadata: {
+            invalidFields: Object.keys(validationErrors),
+            errors: Object.entries(validationErrors).map(([field, err]) => ({
+              field,
+              message: err?.message,
+              type: err?.type
+            }))
+          }
+        });
+      }
+    ),
+    [handleSubmit, onSubmit, commonT, isEditing]
+  );
 
-  const isEditing = !!user;
+  // Removido hoisting problemático (isEditing movido para o topo do componente)
 
   /**
    * QUAL-02: Títulos e labels internacionalizados, removendo strings hardcoded.
@@ -101,7 +122,7 @@ export function UserFormDialog({
     ? t('editSubtitle', { name: user?.nome || 'Usuário' }) 
     : t('subtitle');
   const saveLabel = isEditing ? t('saveChanges') : t('title');
-  const savingLabel = commonBaseT('loading'); // Resolvido (NOVO-01)
+  const savingLabel = commonT('loading'); // Consolidado (NOVO-01)
 
   return (
     <BaseFormDialog

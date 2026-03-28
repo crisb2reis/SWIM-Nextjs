@@ -20,6 +20,8 @@ interface FormFieldProps<T extends FieldValues> {
   slotProps?: Partial<TextFieldProps>;
   /** sx extra para o InputAdornment (ex: { alignSelf: 'flex-start', mt: 1.5 }) */
   adornmentSx?: object;
+  /** Regras de validação do React Hook Form (ex: { required: 'Obrigatório' }) */
+  rules?: object;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -33,6 +35,7 @@ export function FormField<T extends FieldValues>({
   error,
   slotProps,
   adornmentSx,
+  rules,
 }: FormFieldProps<T>) {
   const styledIcon = isValidElement(icon)
     ? cloneElement(icon as React.ReactElement<{ color?: string; fontSize?: string }>, {
@@ -45,6 +48,7 @@ export function FormField<T extends FieldValues>({
     <Controller
       name={name}
       control={control}
+      rules={rules}
       render={({ field }) => (
         <TextField
           {...field}
