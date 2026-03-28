@@ -10,7 +10,13 @@
     "noResults": "No results found",
     "home": "Home",
     "messages": {
-      "error": "An unexpected error occurred"
+      "error": "An unexpected error occurred",
+      "confirmDelete": "Confirm Deletion",
+      "deleteWarning": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "success": "Operation successful",
+      "createSuccess": "Created successfully",
+      "updateSuccess": "Updated successfully",
+      "deleteSuccess": "Deleted successfully"
     }
   },
   "navigation": {
@@ -88,10 +94,8 @@
       "confirmDelete": "Confirm Deletion",
       "deleteWarning": "Are you sure you want to delete the document \"{name}\"? This action cannot be undone.",
       "addSubtitle": "Fill in the details for the new document",
-      "editSubtitle": "Updating existing record in the SWIM repository",
       "discard": "Discard",
       "saving": "Saving...",
-      "saveChanges": "Save Changes",
       "create": "Create Document",
       "view": "View Document"
     },
@@ -387,5 +391,105 @@
     "edit": "Edit",
     "delete": "Delete",
     "view": "View"
+  },
+  "users": {
+    "table": {
+      "title": "Users",
+      "subtitle": "users found",
+      "addLabel": "New User",
+      "rowsPerPageLabel": "Users per page",
+      "noRows": "No users found",
+      "columns": {
+        "name": "Name",
+        "email": "E-Mail",
+        "organization": "Organization",
+        "status": "Status",
+        "authLevel": "Authorization Level",
+        "type": "Type",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "authLevels": {
+        "total": "AUTHORIZED",
+        "parcial": "PENDING",
+        "restrita": "NOT AUTHORIZED",
+        "unknown": "UNKNOWN"
+      },
+      "types": {
+        "admin": "Administrator",
+        "gestor": "Manager",
+        "usuario": "User"
+      }
+    }
+  },
+  "registration": {
+    "title": "Register User",
+    "subtitle": "Create a new user account in the system",
+    "editTitle": "Edit User",
+    "editSubtitle": "Changing data for {name}",
+    "saveChanges": "Save Changes",
+    "success": "User registered successfully!",
+    "error": "Error registering user",
+    "labels": {
+      "nome": "Name *",
+      "email": "Email *",
+      "senha": "Password *",
+      "militar": "Military?",
+      "ativar": "Activate user?",
+      "tipoUsuario": "User Type *",
+      "organizacao": "Organization",
+      "tipoAutorizacao": "Authorization Type *",
+      "telefone": "Phone"
+    },
+    "placeholders": {
+      "nome": "Enter full name",
+      "email": "magno@decsa.gov.br"
+    }
+  },
+  "logs": {
+    "table": {
+      "title": "System Logs",
+      "subtitle": "Monitor system events and audit trails",
+      "rowsPerPage": "Logs per page",
+      "columns": {
+        "timestamp": "Timestamp",
+        "severity": "Severity",
+        "event": "Event Type",
+        "user": "User",
+        "endpoint": "Endpoint",
+        "actions": "Actions"
+      }
+    },
+    "dialog": {
+      "title": "Log Details",
+      "timestamp": "Date & Time",
+      "userContext": "User Context",
+      "network": "Network Information",
+      "operation": "Operation",
+      "changes": "Changes",
+      "errorDetails": "Error Details",
+      "userId": "User ID",
+      "userEmail": "Email",
+      "userIp": "IP Address",
+      "userAgent": "Agent",
+      "resource": "Resource",
+      "action": "Action",
+      "showTechnical": "Show Technical Info",
+      "hideTechnical": "Hide Technical Info"
+    },
+    "statistics": {
+      "totalEvents": "Total Events",
+      "totalErrors": "Errors (24h)",
+      "avgResponse": "Avg. Latency"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by error, endpoint...",
+      "severity": "Severity",
+      "all": "All",
+      "clearFilters": "Clear Filters"
+    }
   }
 }

@@ -1,24 +1,32 @@
 'use client';
 
-import { Box, Typography, Button } from '@mui/material';
 import { useTranslations } from 'next-intl';
+import { AddEntityPage } from '@/components/common/AddEntityPage';
+import { UserFormDialog } from '@/features/users/components/UserFormDialog';
+import type { UserFormValues } from '@/features/users/types/user.types';
+import PeopleIcon from '@mui/icons-material/People';
 
 export default function UsersAddPage() {
-  const t = useTranslations('navigation');
-  
+  const t = useTranslations('registration');
+  const navT = useTranslations('navigation');
+
+  const handleSubmit = async (values: UserFormValues) => {
+    // Log para fins de debug, a integração real ocorre no UserFormDialog via userService
+    console.log('Dados do formulário salvos com sucesso:', values);
+  };
+
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight={800} gutterBottom>
-        Página em Construção: {t('todos')} {/* Apenas como exemplo */}
-      </Typography>
-      <Typography variant="body1" color="text.secondary">
-        Rota: `/utility/users/add`
-      </Typography>
-      <Box sx={{ mt: 4 }}>
-        <Button variant="contained" href="/utility/document/documentTable">
-          Voltar para Documentos
-        </Button>
-      </Box>
-    </Box>
+    <AddEntityPage<UserFormValues>
+      title={t('title')}
+      subtitle={t('subtitle')}
+      successMessage={t('success')}
+      redirectRoute="/utility/users/manage"
+      onSubmit={handleSubmit}
+      FormDialog={UserFormDialog as any}
+      breadcrumbs={[
+        { label: navT('usuarios'), href: '/utility/users/manage', icon: <PeopleIcon fontSize="small" /> },
+        { label: navT('adicionar'), active: true },
+      ]}
+    />
   );
 }

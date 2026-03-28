@@ -1,4 +1,11 @@
-from crud.document import (
+from .contact_point import (
+    create_contact_point,
+    delete_contact_point,
+    get_contact_point,
+    get_contact_points,
+    update_contact_point,
+)
+from .document import (
     create_document,
     create_uploaded_file,
     delete_document,
@@ -8,7 +15,7 @@ from crud.document import (
     get_uploaded_file,
     update_document,
 )
-from crud.organization import (
+from .organization import (
     create_organization,
     delete_organization,
     get_organization,
@@ -16,7 +23,7 @@ from crud.organization import (
     get_organizations,
     update_organization,
 )
-from crud.service import (
+from .service import (
     create_service,
     delete_service,
     get_service,
@@ -24,7 +31,7 @@ from crud.service import (
     get_services,
     update_service,
 )
-from crud.user import (
+from .user import (
     authenticate_user,
     create_user,
     delete_user,
@@ -66,5 +73,12 @@ __all__ = [
     "create_service",
     "update_service",
     "delete_service",
+
+    "get_contact_point",
+    "get_contact_points",
+    "create_contact_point",
+    "update_contact_point",
+    "delete_contact_point",
 ]
+
 

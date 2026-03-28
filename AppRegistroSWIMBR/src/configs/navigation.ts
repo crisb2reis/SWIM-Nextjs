@@ -10,6 +10,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import ArticleIcon from '@mui/icons-material/Article';
 import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import InfoIcon from '@mui/icons-material/Info';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 export interface NavItem {
   id: string;
@@ -86,6 +87,12 @@ export const navigationItems: NavItem[] = [
       { id: 'contato-gerenciar', title: 'Gerenciar',           path: '/utility/contacts/manage' },
       { id: 'contato-adicionar', title: 'Adicionar',           path: '/utility/contacts/add' },
     ],
+  },
+  {
+    id: 'logs',
+    title: 'Logs de Sistema',
+    icon: AssessmentIcon,
+    path: '/utility/logs',
   },
   {
     id: 'informacoes-section',

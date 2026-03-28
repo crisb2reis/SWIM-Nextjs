@@ -10,7 +10,13 @@
     "noResults": "No se encontraron resultados",
     "home": "Inicio",
     "messages": {
-      "error": "Ocurrió un error inesperado"
+      "error": "Ocurreu un error inesperado",
+      "confirmDelete": "Confirmar Eliminación",
+      "deleteWarning": "¿Está seguro de que desea eliminar \"{name}\"? Esta acción no se pode deshacer.",
+      "success": "Operación realizada con éxito",
+      "createSuccess": "Creado con éxito",
+      "updateSuccess": "Actualizado con éxito",
+      "deleteSuccess": "Eliminado con éxito"
     }
   },
   "navigation": {
@@ -387,5 +393,105 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "view": "Ver"
+  },
+  "users": {
+    "table": {
+      "title": "Usuarios",
+      "subtitle": "usuarios encontrados",
+      "addLabel": "Nuevo Usuario",
+      "rowsPerPageLabel": "Usuarios por página",
+      "noRows": "No se encontraron usuarios",
+      "columns": {
+        "name": "Nombre",
+        "email": "Correo Electrónico",
+        "organization": "Organización",
+        "status": "Estado",
+        "authLevel": "Nivel de Autorización",
+        "type": "Tipo",
+        "actions": "Acciones"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "authLevels": {
+        "total": "AUTORIZADO",
+        "parcial": "PENDIENTE",
+        "restrita": "NO AUTORIZADO",
+        "unknown": "NO DEFINIDO"
+      },
+      "types": {
+        "admin": "Administrador",
+        "gestor": "Gestor",
+        "usuario": "Usuario"
+      }
+    }
+  },
+  "registration": {
+    "title": "Registrar Usuario",
+    "subtitle": "Crear una nueva cuenta de usuario en el sistema",
+    "editTitle": "Editar Usuario",
+    "editSubtitle": "Cambiando datos de {name}",
+    "saveChanges": "Guardar Cambios",
+    "success": "¡Usuario registrado con éxito!",
+    "error": "Error al registrar el usuario",
+    "labels": {
+      "nome": "Nombre *",
+      "email": "Correo electrónico *",
+      "senha": "Contraseña *",
+      "militar": "¿Militar?",
+      "ativar": "¿Activar usuario?",
+      "tipoUsuario": "Tipo de Usuario *",
+      "organizacao": "Organización",
+      "tipoAutorizacao": "Tipo de Autorización *",
+      "telefone": "Teléfono"
+    },
+    "placeholders": {
+      "nome": "Ingrese nombre completo",
+      "email": "magno@decsa.gov.br"
+    }
+  },
+  "logs": {
+    "table": {
+      "title": "Logs del Sistema",
+      "subtitle": "Monitorear eventos y auditorías del sistema",
+      "rowsPerPage": "Logs por página",
+      "columns": {
+        "timestamp": "Fecha y Hora",
+        "severity": "Gravedad",
+        "event": "Tipo de Evento",
+        "user": "Usuario",
+        "endpoint": "Endpoint",
+        "actions": "Acciones"
+      }
+    },
+    "dialog": {
+      "title": "Detalles del Log",
+      "timestamp": "Fecha y Hora",
+      "userContext": "Contexto de Usuario",
+      "network": "Información de Red",
+      "operation": "Operación",
+      "changes": "Cambios Realizados",
+      "errorDetails": "Detalles del Error",
+      "userId": "ID de Usuario",
+      "userEmail": "Correo",
+      "userIp": "Dirección IP",
+      "userAgent": "Agente/Navegador",
+      "resource": "Recurso",
+      "action": "Acción",
+      "showTechnical": "Mostrar info técnica",
+      "hideTechnical": "Ocultar info técnica"
+    },
+    "statistics": {
+      "totalEvents": "Total de Eventos",
+      "totalErrors": "Errores (24h)",
+      "avgResponse": "Latencia Promedio"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por error, endpoint...",
+      "severity": "Gravedad",
+      "all": "Todas",
+      "clearFilters": "Limpar Filtros"
+    }
   }
 }

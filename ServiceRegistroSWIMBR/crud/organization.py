@@ -3,6 +3,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from models.organization import Organization
+from models.system_log import EventType
+from core.audit import audit_log
 from schemas.organization import OrganizationCreate, OrganizationUpdate
 
 
@@ -23,6 +25,7 @@ def get_organizations(
     return query.offset(skip).limit(limit).all()
 
 
+@audit_log(EventType.RESOURCE_CREATE, resource_type="Organization")
 def create_organization(db: Session, org_in: OrganizationCreate) -> Organization:
     db_org = Organization(
         name=org_in.name.strip(),
@@ -38,6 +41,7 @@ def create_organization(db: Session, org_in: OrganizationCreate) -> Organization
     return db_org
 
 
+@audit_log(EventType.RESOURCE_UPDATE, resource_type="Organization")
 def update_organization(
     db: Session, db_org: Organization, org_in: OrganizationUpdate
 ) -> Organization:
@@ -54,6 +58,7 @@ def update_organization(
     return db_org
 
 
+@audit_log(EventType.RESOURCE_DELETE, resource_type="Organization")
 def delete_organization(db: Session, db_org: Organization) -> Organization:
     db.delete(db_org)
     db.commit()

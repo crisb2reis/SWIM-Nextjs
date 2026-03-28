@@ -1,9 +1,11 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from core.security import get_password_hash
+from core.audit import audit_log
 from models.user import User
+from models.system_log import EventType
 from schemas.user import UserCreate, UserUpdate
 
 # --- User CRUD ---
@@ -11,7 +13,7 @@ from schemas.user import UserCreate, UserUpdate
 
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(User).options(joinedload(User.organization)).filter(User.id == user_id).first()
 
 
 def get_user_by_username(db: Session, username: str) -> Optional[User]:
@@ -23,12 +25,18 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
-    return db.query(User).offset(skip).limit(limit).all()
+    return db.query(User).options(joinedload(User.organization)).offset(skip).limit(limit).all()
 
 
+@audit_log(EventType.AUTH_SIGNUP, resource_type="User")
 def create_user(db: Session, user_in: UserCreate) -> User:
     obj_in_data = user_in.model_dump()
     password = obj_in_data.pop("password")
+    
+    # Se o username não estiver explicitamente diferente do email, usamos o email como username
+    if not obj_in_data.get("username"):
+        obj_in_data["username"] = obj_in_data["email"]
+
     db_user = User(**obj_in_data, hashed_password=get_password_hash(password))
     db.add(db_user)
     db.commit()
@@ -36,6 +44,7 @@ def create_user(db: Session, user_in: UserCreate) -> User:
     return db_user
 
 
+@audit_log(EventType.RESOURCE_UPDATE, resource_type="User")
 def update_user(db: Session, db_user: User, user_in: UserUpdate) -> User:
     update_data = user_in.model_dump(exclude_unset=True)
     if "password" in update_data:
@@ -51,9 +60,12 @@ def update_user(db: Session, db_user: User, user_in: UserUpdate) -> User:
     return db_user
 
 
-def delete_user(db: Session, db_user: User) -> None:
+@audit_log(EventType.RESOURCE_DELETE, resource_type="User")
+def delete_user(db: Session, db_user: User) -> User:
+    """Retorna o objeto para que o decorator capture o ID antes do commit final."""
     db.delete(db_user)
     db.commit()
+    return db_user
 
 
 

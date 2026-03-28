@@ -7,6 +7,7 @@ from api.v1.endpoints import (
     organizations,
     services,
     users,
+    logs,
 )
 
 api_router = APIRouter()
@@ -16,3 +17,4 @@ api_router.include_router(documents.router)
 api_router.include_router(contact_points.router)
 api_router.include_router(organizations.router)
 api_router.include_router(services.router)
+api_router.include_router(logs.router, prefix="/logs")

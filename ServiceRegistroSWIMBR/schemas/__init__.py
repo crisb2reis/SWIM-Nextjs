@@ -1,11 +1,11 @@
-from schemas.document import (
+from .document import (
     DocumentCreate,
     DocumentListResponse,
     DocumentRead,
     DocumentUpdate,
     UploadedFileRead,
 )
-from schemas.registry import (
+from .registry import (
     GeographicalExtentCreate,
     GeographicalExtentRead,
     PolicyCreate,
@@ -13,7 +13,7 @@ from schemas.registry import (
     SecurityMechanismCreate,
     SecurityMechanismRead,
 )
-from schemas.user import (
+from .user import (
     OrganizationCreate,
     OrganizationRead,
     Token,
