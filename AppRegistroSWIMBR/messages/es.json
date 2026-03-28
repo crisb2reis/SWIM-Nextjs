@@ -450,5 +450,48 @@
       "nome": "Ingrese nombre completo",
       "email": "magno@decsa.gov.br"
     }
+  },
+  "logs": {
+    "table": {
+      "title": "Logs del Sistema",
+      "subtitle": "Monitorear eventos y auditorías del sistema",
+      "rowsPerPage": "Logs por página",
+      "columns": {
+        "timestamp": "Fecha y Hora",
+        "severity": "Gravedad",
+        "event": "Tipo de Evento",
+        "user": "Usuario",
+        "endpoint": "Endpoint",
+        "actions": "Acciones"
+      }
+    },
+    "dialog": {
+      "title": "Detalles del Log",
+      "timestamp": "Fecha y Hora",
+      "userContext": "Contexto de Usuario",
+      "network": "Información de Red",
+      "operation": "Operación",
+      "changes": "Cambios Realizados",
+      "errorDetails": "Detalles del Error",
+      "userId": "ID de Usuario",
+      "userEmail": "Correo",
+      "userIp": "Dirección IP",
+      "userAgent": "Agente/Navegador",
+      "resource": "Recurso",
+      "action": "Acción",
+      "showTechnical": "Mostrar info técnica",
+      "hideTechnical": "Ocultar info técnica"
+    },
+    "statistics": {
+      "totalEvents": "Total de Eventos",
+      "totalErrors": "Errores (24h)",
+      "avgResponse": "Latencia Promedio"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por error, endpoint...",
+      "severity": "Gravedad",
+      "all": "Todas",
+      "clearFilters": "Limpar Filtros"
+    }
   }
 }

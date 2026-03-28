@@ -9,6 +9,20 @@ from fastapi.staticfiles import StaticFiles
 import models  # noqa: F401
 from api.v1.router import api_router
 from core.config import settings
+from db.session import SessionLocal
+from crud.system_log import create_log
+from schemas.system_log import SystemLogCreate
+from models.system_log import EventType, LogSeverity
+import time
+import asyncio
+
+EXCLUDED_PATHS = {
+    "/docs", 
+    "/openapi.json", 
+    "/redoc", 
+    "/health", 
+    "/api/v1/logs/frontend"
+}
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -59,6 +73,81 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": exc.errors(), "body": str(exc.body)},
     )
+
+
+# --- Global Request Logging Middleware ---
+@app.middleware("http")
+async def system_logging_middleware(request: Request, call_next):
+    path = request.url.path
+    if path in EXCLUDED_PATHS or path.startswith("/static") or request.method == "OPTIONS":
+        return await call_next(request)
+
+    start_time = time.time()
+    
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        process_time_ms = int((time.time() - start_time) * 1000)
+        log_data = SystemLogCreate(
+            event_type=EventType.API_ERROR,
+            severity=LogSeverity.CRITICAL,
+            user_ip=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            endpoint=request.url.path,
+            method=request.method,
+            status_code=500,
+            response_time_ms=process_time_ms,
+            error_message=str(e)
+        )
+        def save_log_error():
+            db = SessionLocal()
+            try:
+                create_log(db, log_data)
+            except Exception:
+                pass
+            finally:
+                db.close()
+        asyncio.create_task(asyncio.to_thread(save_log_error))
+        raise 
+
+    process_time_ms = int((time.time() - start_time) * 1000)
+
+    severity = LogSeverity.INFO
+    if response.status_code >= 500:
+        severity = LogSeverity.ERROR
+    elif response.status_code >= 400:
+        severity = LogSeverity.WARNING
+        
+    event_type = EventType.API_RESPONSE_TIME
+    if response.status_code >= 500:
+        event_type = EventType.API_ERROR
+    elif response.status_code == 429:
+        event_type = EventType.RATE_LIMIT_EXCEEDED
+    elif response.status_code == 422:
+        event_type = EventType.VALIDATION_ERROR
+
+    log_data = SystemLogCreate(
+        event_type=event_type,
+        severity=severity,
+        user_ip=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        endpoint=path,
+        method=request.method,
+        status_code=response.status_code,
+        response_time_ms=process_time_ms
+    )
+    
+    def save_log():
+        db = SessionLocal()
+        try:
+            create_log(db, log_data)
+        except Exception:
+            pass
+        finally:
+            db.close()
+            
+    asyncio.create_task(asyncio.to_thread(save_log))
+    return response
 
 
 # --- Routers ---

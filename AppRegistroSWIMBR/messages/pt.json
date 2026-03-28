@@ -8,6 +8,7 @@
     "loading": "Carregando...",
     "errorOccurred": "Ocorreu um erro",
     "noResults": "Nenhum resultado encontrado",
+    "noRecords": "Nenhum registro selecionado",
     "home": "Início",
     "messages": {
       "error": "Ocorreu um erro inesperado",
@@ -449,5 +450,54 @@
     "edit": "Editar",
     "delete": "Excluir",
     "view": "Visualizar"
+  },
+  "logs": {
+    "title": "Logs de Sistema",
+    "subtitle": "Monitoramento de eventos, auditoria e erros do sistema",
+    "metadata": {
+      "title": "Logs | SWIM",
+      "description": "Visualização detalhada de eventos e auditoria do sistema SWIM"
+    },
+    "table": {
+      "title": "Eventos Recentes",
+      "subtitle": "{count} eventos encontrados",
+      "columns": {
+        "timestamp": "Data/Hora",
+        "severity": "Gravidade",
+        "eventType": "Tipo de Evento",
+        "user": "Usuário",
+        "resource": "Recurso",
+        "endpoint": "Endpoint",
+        "actions": "Ações"
+      }
+    },
+    "dialog": {
+      "title": "Detalhes do Log",
+      "timestamp": "Data e Hora",
+      "userContext": "Contexto de Usuário",
+      "network": "Informações de Rede",
+      "operation": "Operação",
+      "changes": "Alterações Realizadas",
+      "errorDetails": "Detalhes do Erro",
+      "userId": "ID do Usuário",
+      "userEmail": "E-mail",
+      "userIp": "Endereço IP",
+      "userAgent": "Navegador/Agente",
+      "resource": "Recurso",
+      "action": "Ação",
+      "showTechnical": "Mostrar detalhes técnicos",
+      "hideTechnical": "Ocultar detalhes técnicos"
+    },
+    "statistics": {
+      "totalEvents": "Total de Eventos",
+      "totalErrors": "Erros (24h)",
+      "avgResponse": "Tempo Médio"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por erro, endpoint ou recurso...",
+      "severity": "Gravidade",
+      "all": "Todas",
+      "clearFilters": "Limpar Filtros"
+    }
   }
 }

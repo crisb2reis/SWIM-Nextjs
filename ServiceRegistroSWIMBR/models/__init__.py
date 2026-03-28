@@ -6,6 +6,7 @@ from .registry import GeographicalExtent, Policy, SecurityMechanism
 from .service import Service
 from .uploaded_file import UploadedFile
 from .user import User
+from .system_log import SystemLog
 
 __all__ = [
     "Organization",
@@ -17,4 +18,5 @@ __all__ = [
     "Policy",
     "SecurityMechanism",
     "Service",
+    "SystemLog",
 ]

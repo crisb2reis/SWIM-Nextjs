@@ -9,12 +9,19 @@ import { usePathname } from '@/i18n/navigation';
 import { MainLayout } from './MainLayout';
 import { AuthGuard } from '../AuthGuard';
 import { SWRConfig } from 'swr';
+import { useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 const PUBLIC_ROUTES = ['/login', '/register', '/404', '/500'];
 
 export function AppWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+
+  // Ativa a captura de logs e erros globais no frontend
+  useEffect(() => {
+    logger.setupGlobalHandlers();
+  }, []);
 
   return (
     <SWRConfig 
