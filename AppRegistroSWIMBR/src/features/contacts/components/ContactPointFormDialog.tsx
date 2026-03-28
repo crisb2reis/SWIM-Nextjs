@@ -22,6 +22,7 @@ import type { ContactPoint } from '../types/contact.types';
 import type { Organization } from '@/features/organizations/types/organization.types';
 import { BaseFormDialog } from '@/components/common/BaseFormDialog';
 import { FormField } from '@/components/common/FormField';
+import { logger } from '@/lib/logger';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -52,14 +53,30 @@ export function ContactPointFormDialog({
 
   // Fecha o ciclo de submit com tratamento de erro global
   const handleSave = useCallback(
-    handleSubmit(async (values) => {
-      try {
-        await onSubmit(values);
-      } catch {
-        setError('root', { message: t('messages.submitError') });
-      }
-    }),
-    [handleSubmit, onSubmit, setError, t],
+    handleSubmit(
+      async (values) => {
+        try {
+          await onSubmit(values);
+        } catch {
+          setError('root', { message: t('messages.submitError') });
+        }
+      },
+      (validationErrors) => {
+        logger.error('Falha na validação do formulário de Ponto de Contato', null, {
+          event_type: 'FRONTEND_VALIDATION_ERROR',
+          action: isEditing ? 'UPDATE_CONTACT_VALIDATION' : 'CREATE_CONTACT_VALIDATION',
+          metadata: {
+            invalidFields: Object.keys(validationErrors),
+            errors: Object.entries(validationErrors).map(([field, err]) => ({
+              field,
+              message: err?.message,
+              type: err?.type,
+            })),
+          },
+        });
+      },
+    ),
+    [handleSubmit, onSubmit, setError, t, isEditing],
   );
 
   return (
@@ -187,6 +204,11 @@ interface OrgAutocompleteInnerProps {
   placeholder: string;
 }
 
+function getOrgId(val: Organization | number | null): number | null {
+  if (val == null) return null;
+  return typeof val === 'number' ? val : val.id;
+}
+
 function OrgAutocompleteInner({
   value,
   onChange,
@@ -205,9 +227,7 @@ function OrgAutocompleteInner({
     <Autocomplete
       options={organizations}
       getOptionLabel={(o) => o.name}
-      isOptionEqualToValue={(o, val) =>
-        o.id === (typeof val === 'number' ? val : val?.id)
-      }
+      isOptionEqualToValue={(o, val) => o.id === getOrgId(val as any)}
       value={selected}
       onChange={(_, newValue) => onChange(newValue?.id ?? 0)}
       renderInput={(params) => (

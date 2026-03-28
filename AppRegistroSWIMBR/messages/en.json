@@ -35,7 +35,8 @@
     "gerenciar": "Manage",
     "adicionar": "Add",
     "consultar": "Consult",
-    "manage": "Manage"
+    "manage": "Manage",
+    "logs": "System Logs"
   },
   "documents": {
     "title": "Documents",
@@ -126,7 +127,11 @@
       "versionFormat": "Use X.Y.Z format (ex: 1.0.0)",
       "locationRequired": "Location is required",
       "locationMax": "Maximum 200 characters",
-      "urlInvalid": "Invalid URL"
+      "urlInvalid": "Invalid URL",
+      "logoType": "Invalid format. Use JPG, PNG, WebP or SVG.",
+      "logoMax": "File too large. Maximum allowed: 2MB.",
+      "fileType": "Invalid format. Use PDF or DOCX.",
+      "fileMax": "File too large. Maximum allowed: 10MB."
     },
     "gallery": {
       "access": "Access document →",
