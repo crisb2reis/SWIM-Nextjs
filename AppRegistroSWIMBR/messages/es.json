@@ -10,7 +10,13 @@
     "noResults": "No se encontraron resultados",
     "home": "Inicio",
     "messages": {
-      "error": "Ocurrió un error inesperado"
+      "error": "Ocurreu un error inesperado",
+      "confirmDelete": "Confirmar Eliminación",
+      "deleteWarning": "¿Está seguro de que desea eliminar \"{name}\"? Esta acción no se pode deshacer.",
+      "success": "Operación realizada con éxito",
+      "createSuccess": "Creado con éxito",
+      "updateSuccess": "Actualizado con éxito",
+      "deleteSuccess": "Eliminado con éxito"
     }
   },
   "navigation": {
@@ -388,9 +394,45 @@
     "delete": "Eliminar",
     "view": "Ver"
   },
+  "users": {
+    "table": {
+      "title": "Usuarios",
+      "subtitle": "usuarios encontrados",
+      "addLabel": "Nuevo Usuario",
+      "rowsPerPageLabel": "Usuarios por página",
+      "noRows": "No se encontraron usuarios",
+      "columns": {
+        "name": "Nombre",
+        "email": "Correo Electrónico",
+        "organization": "Organización",
+        "status": "Estado",
+        "authLevel": "Nivel de Autorización",
+        "type": "Tipo",
+        "actions": "Acciones"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "authLevels": {
+        "total": "AUTORIZADO",
+        "parcial": "PENDIENTE",
+        "restrita": "NO AUTORIZADO",
+        "unknown": "NO DEFINIDO"
+      },
+      "types": {
+        "admin": "Administrador",
+        "gestor": "Gestor",
+        "usuario": "Usuario"
+      }
+    }
+  },
   "registration": {
     "title": "Registrar Usuario",
     "subtitle": "Crear una nueva cuenta de usuario en el sistema",
+    "editTitle": "Editar Usuario",
+    "editSubtitle": "Cambiando datos de {name}",
+    "saveChanges": "Guardar Cambios",
     "success": "¡Usuario registrado con éxito!",
     "error": "Error al registrar el usuario",
     "labels": {

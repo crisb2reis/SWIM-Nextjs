@@ -10,7 +10,13 @@
     "noResults": "No results found",
     "home": "Home",
     "messages": {
-      "error": "An unexpected error occurred"
+      "error": "An unexpected error occurred",
+      "confirmDelete": "Confirm Deletion",
+      "deleteWarning": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "success": "Operation successful",
+      "createSuccess": "Created successfully",
+      "updateSuccess": "Updated successfully",
+      "deleteSuccess": "Deleted successfully"
     }
   },
   "navigation": {
@@ -88,10 +94,8 @@
       "confirmDelete": "Confirm Deletion",
       "deleteWarning": "Are you sure you want to delete the document \"{name}\"? This action cannot be undone.",
       "addSubtitle": "Fill in the details for the new document",
-      "editSubtitle": "Updating existing record in the SWIM repository",
       "discard": "Discard",
       "saving": "Saving...",
-      "saveChanges": "Save Changes",
       "create": "Create Document",
       "view": "View Document"
     },
@@ -388,9 +392,45 @@
     "delete": "Delete",
     "view": "View"
   },
+  "users": {
+    "table": {
+      "title": "Users",
+      "subtitle": "users found",
+      "addLabel": "New User",
+      "rowsPerPageLabel": "Users per page",
+      "noRows": "No users found",
+      "columns": {
+        "name": "Name",
+        "email": "E-Mail",
+        "organization": "Organization",
+        "status": "Status",
+        "authLevel": "Authorization Level",
+        "type": "Type",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "authLevels": {
+        "total": "AUTHORIZED",
+        "parcial": "PENDING",
+        "restrita": "NOT AUTHORIZED",
+        "unknown": "UNKNOWN"
+      },
+      "types": {
+        "admin": "Administrator",
+        "gestor": "Manager",
+        "usuario": "User"
+      }
+    }
+  },
   "registration": {
     "title": "Register User",
     "subtitle": "Create a new user account in the system",
+    "editTitle": "Edit User",
+    "editSubtitle": "Changing data for {name}",
+    "saveChanges": "Save Changes",
     "success": "User registered successfully!",
     "error": "Error registering user",
     "labels": {

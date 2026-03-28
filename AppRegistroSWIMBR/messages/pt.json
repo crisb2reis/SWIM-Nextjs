@@ -10,7 +10,70 @@
     "noResults": "Nenhum resultado encontrado",
     "home": "Início",
     "messages": {
-      "error": "Ocorreu um erro inesperado"
+      "error": "Ocorreu um erro inesperado",
+      "confirmDelete": "Confirmar Exclusão",
+      "deleteWarning": "Tem certeza que deseja excluir \"{name}\"? Esta ação não pode ser desfeita.",
+      "success": "Operação realizada com sucesso",
+      "createSuccess": "Criado com sucesso",
+      "updateSuccess": "Atualizado com sucesso",
+      "deleteSuccess": "Excluído com sucesso"
+    }
+  },
+  "users": {
+    "table": {
+      "title": "Usuários",
+      "subtitle": "usuários encontrados",
+      "addLabel": "Novo Usuário",
+      "rowsPerPageLabel": "Usuários por página",
+      "noRows": "Nenhum usuário encontrado",
+      "columns": {
+        "name": "Nome",
+        "email": "E-Mail",
+        "organization": "Organização",
+        "status": "Status",
+        "authLevel": "Nível de Autorização",
+        "type": "Tipo",
+        "actions": "Ações"
+      },
+      "status": {
+        "active": "Ativo",
+        "inactive": "Inativo"
+      },
+      "authLevels": {
+        "total": "AUTORIZADO",
+        "parcial": "PENDENTE",
+        "restrita": "NÃO AUTORIZADO",
+        "unknown": "NÃO DEFINIDO"
+      },
+      "types": {
+        "admin": "Administrador",
+        "gestor": "Gestor",
+        "usuario": "Usuário"
+      }
+    }
+  },
+  "registration": {
+    "title": "Cadastrar Usuário",
+    "subtitle": "Crie uma nova conta de usuário no sistema",
+    "editTitle": "Editar Usuário",
+    "editSubtitle": "Alterando dados de {name}",
+    "saveChanges": "Salvar Alterações",
+    "success": "Usuário cadastrado com sucesso!",
+    "error": "Erro ao cadastrar usuário",
+    "labels": {
+      "nome": "Nome *",
+      "email": "Email *",
+      "senha": "Senha *",
+      "militar": "Militar?",
+      "ativar": "Ativar usuário?",
+      "tipoUsuario": "Tipo de Usuário *",
+      "organizacao": "Organização",
+      "tipoAutorizacao": "Tipo de Autorização *",
+      "telefone": "Telefone"
+    },
+    "placeholders": {
+      "nome": "Digite o nome completo",
+      "email": "magno@decsa.gov.br"
     }
   },
   "navigation": {
@@ -386,26 +449,5 @@
     "edit": "Editar",
     "delete": "Excluir",
     "view": "Visualizar"
-  },
-  "registration": {
-    "title": "Cadastrar Usuário",
-    "subtitle": "Crie uma nova conta de usuário no sistema",
-    "success": "Usuário cadastrado com sucesso!",
-    "error": "Erro ao cadastrar usuário",
-    "labels": {
-      "nome": "Nome *",
-      "email": "Email *",
-      "senha": "Senha *",
-      "militar": "Militar?",
-      "ativar": "Ativar usuário?",
-      "tipoUsuario": "Tipo de Usuário *",
-      "organizacao": "Organização",
-      "tipoAutorizacao": "Tipo de Autorização *",
-      "telefone": "Telefone"
-    },
-    "placeholders": {
-      "nome": "Digite o nome completo",
-      "email": "magno@decsa.gov.br"
-    }
   }
 }

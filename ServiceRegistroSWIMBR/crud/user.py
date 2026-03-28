@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from core.security import get_password_hash
 from models.user import User
@@ -11,7 +11,7 @@ from schemas.user import UserCreate, UserUpdate
 
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(User).options(joinedload(User.organization)).filter(User.id == user_id).first()
 
 
 def get_user_by_username(db: Session, username: str) -> Optional[User]:
@@ -23,7 +23,7 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
-    return db.query(User).offset(skip).limit(limit).all()
+    return db.query(User).options(joinedload(User.organization)).offset(skip).limit(limit).all()
 
 
 def create_user(db: Session, user_in: UserCreate) -> User:

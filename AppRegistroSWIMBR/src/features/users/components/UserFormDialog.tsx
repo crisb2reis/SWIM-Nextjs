@@ -1,121 +1,135 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import GroupIcon from '@mui/icons-material/Group';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert } from '@mui/material';
 
 import { BaseFormDialog } from '@/components/common/BaseFormDialog';
 import { useUserForm } from '../hooks/useUserForm';
 import { UserForm } from './UserForm';
-import type { UserFormValues } from '../types/user.types';
-import type { GenericFormDialogProps } from '@/components/common/AddEntityPage';
-import { userService } from '../services/user.service';
-import { organizationService } from '@/features/organizations/services/organizationService';
-import type { Organization } from '@/features/organizations/types/organization.types';
-import { useEffect } from 'react';
+import { User, UserFormValues } from '../types/user.types';
+import { useOrganizations } from '@/features/organizations/hooks/useOrganizations';
+
+// ─── Props ───────────────────────────────────────────────────────────────────
+
+interface UserFormDialogProps {
+  open: boolean;
+  user: User | null;
+  isSubmitting: boolean;
+  onClose: () => void;
+  onSubmit: (values: UserFormValues) => Promise<void>;
+}
+
+// ─── Constantes ──────────────────────────────────────────────────────────────
+
+const DEFAULT_VALUES: UserFormValues = {
+  nome: '',
+  email: '',
+  senha: '',
+  militar: false,
+  ativarUsuario: false,
+  tipoUsuario: '',
+  organizacao: '',
+  tipoAutorizacao: '',
+  telefone: '',
+};
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export function UserFormDialog({
   open,
-  isSubmitting: externalIsSubmitting,
+  user,
+  isSubmitting,
   onClose,
-  onSubmit: externalOnSubmit,
-}: GenericFormDialogProps<UserFormValues>) {
+  onSubmit,
+}: UserFormDialogProps) {
   const t = useTranslations('registration');
-  const commonT = useTranslations('common');
+  const commonT = useTranslations('common.messages');
+  const commonBaseT = useTranslations('common'); // Hook no nível raiz (NOVO-01)
   const actionT = useTranslations('actions');
 
-  const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
+  // SEC-04 & PERF-01: Usando hook centralizado com SWR para cache e controle de ciclo de vida
+  const { organizations, isLoading: isLoadingOrgs } = useOrganizations();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-
-  // Carregar organizações
-  useEffect(() => {
-    if (open) {
-      organizationService.list()
-        .then(setOrganizations)
-        .catch(err => console.error('Error fetching organizations:', err));
-    }
-  }, [open]);
 
   const { control, handleSubmit, reset, formState: { errors } } = useUserForm();
 
-  const isSubmitting = externalIsSubmitting || localIsSubmitting;
-
-  const handleSave = useCallback(
-    handleSubmit(async (values) => {
-      setLocalIsSubmitting(true);
+  // INC-01: Usando DEFAULT_VALUES para evitar duplicação de lógica (DRY)
+  useEffect(() => {
+    if (open) {
       setErrorMsg(null);
-      try {
-        // Integração real com o backend
-        await userService.createUser(values);
-        
-        setSuccessOpen(true);
-        reset(); // Limpa o formulário
-        
-        // Se houver um callback externo (para atualizar lista, p. ex.)
-        if (externalOnSubmit) {
-          await externalOnSubmit(values);
-        }
-
-        // Fecha o diálogo após um breve delay para mostrar o sucesso
-        setTimeout(() => {
-          onClose();
-        }, 1500);
-
-      } catch (err: any) {
-        console.error('Registration error:', err);
-        const detail = err.response?.data?.detail;
-        setErrorMsg(typeof detail === 'string' ? detail : t('error'));
-      } finally {
-        setLocalIsSubmitting(false);
+      if (user) {
+        reset({
+          ...DEFAULT_VALUES,
+          nome: user.nome || '',
+          email: user.email || '',
+          militar: user.is_military || false,
+          ativarUsuario: user.is_active || false,
+          tipoUsuario: user.user_type || '',
+          organizacao: user.organization_id?.toString() || '',
+          tipoAutorizacao: user.user_level_auth || '',
+          telefone: user.phone_number || '',
+          // senha permanece '' de DEFAULT_VALUES pois não deve ser pré-preenchida
+        });
+      } else {
+        reset(DEFAULT_VALUES);
       }
-    }),
-    [handleSubmit, externalOnSubmit, onClose, reset, t],
-  );
+    }
+  }, [open, user, reset]);
+
+  const handleSave = handleSubmit(async (values) => {
+    setErrorMsg(null);
+    try {
+      await onSubmit(values);
+      // Se onSubmit resolveu, o container já tratou o sucesso/erro com Toast.
+      // Se Houvesse um erro crítico não tratado no container, cairia no catch abaixo.
+    } catch (err: unknown) {
+      // INC-02: Garantindo que mensagens técnicas não vazem se ocorrer um erro inesperado
+      setErrorMsg(commonT('error'));
+    }
+  });
+
+  const isEditing = !!user;
+
+  /**
+   * QUAL-02: Títulos e labels internacionalizados, removendo strings hardcoded.
+   * SEC-01: Null-safe check para o nome do usuário.
+   */
+  const title = isEditing ? t('editTitle') : t('title');
+  const subtitle = isEditing 
+    ? t('editSubtitle', { name: user?.nome || 'Usuário' }) 
+    : t('subtitle');
+  const saveLabel = isEditing ? t('saveChanges') : t('title');
+  const savingLabel = commonBaseT('loading'); // Resolvido (NOVO-01)
 
   return (
-    <>
-      <BaseFormDialog
-        open={open}
-        isSubmitting={isSubmitting}
-        isEditing={false}
-        onClose={onClose}
-        onSave={handleSave}
-        icon={<GroupIcon />} 
-        title={t('title')}
-        subtitle={t('subtitle')}
-        discardLabel={actionT('cancel')}
-        saveLabel={t('title')}
-        savingLabel={commonT('loading')}
-        dialogId="user-registration-dialog"
-      >
-        {errorMsg && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {errorMsg}
-          </Alert>
-        )}
-
-        <UserForm 
-          control={control as any}
-          errors={errors}
-          organizations={organizations}
-        />
-      </BaseFormDialog>
-
-      <Snackbar 
-        open={successOpen} 
-        autoHideDuration={4000} 
-        onClose={() => setSuccessOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" sx={{ width: '100%' }}>
-          {t('success')}
+    <BaseFormDialog
+      open={open}
+      isSubmitting={isSubmitting}
+      isEditing={isEditing}
+      onClose={onClose}
+      onSave={handleSave}
+      icon={<GroupIcon />} 
+      title={title}
+      subtitle={subtitle}
+      discardLabel={actionT('cancel')}
+      saveLabel={saveLabel}
+      savingLabel={savingLabel}
+      dialogId="user-form-dialog"
+    >
+      {errorMsg && (
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+          {errorMsg}
         </Alert>
-      </Snackbar>
-    </>
+      )}
+
+      <UserForm 
+        control={control}
+        errors={errors}
+        organizations={organizations}
+        isLoadingOrgs={isLoadingOrgs} // INC-03: Passando estado de carregamento
+      />
+    </BaseFormDialog>
   );
 }

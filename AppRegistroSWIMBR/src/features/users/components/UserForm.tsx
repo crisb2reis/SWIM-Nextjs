@@ -17,6 +17,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import PhoneIcon from '@mui/icons-material/Phone';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Control, FieldErrors } from 'react-hook-form';
 import type { UserFormValues } from '../types/user.types';
 import type { Organization } from '@/features/organizations/types/organization.types';
@@ -30,6 +31,7 @@ interface UserFormProps {
   control: Control<UserFormValues>;
   errors: FieldErrors<UserFormValues>;
   organizations?: Organization[];
+  isLoadingOrgs?: boolean;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -38,7 +40,10 @@ export function UserForm({
   control,
   errors,
   organizations,
+  isLoadingOrgs,
 }: UserFormProps) {
+  const t = useTranslations('registration');
+  const userT = useTranslations('users.table');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleTogglePassword = () => setShowPassword(!showPassword);
@@ -50,20 +55,20 @@ export function UserForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <FormField
             name="nome"
-            control={control as any}
-            label="Nome *"
-            placeholder="Digite seu nome completo"
-            icon={<PersonIcon />}
+            control={control}
+            label={t('labels.nome')}
+            placeholder={t('placeholders.nome')}
+            icon={<PersonIcon fontSize="small" />}
             error={errors.nome}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <FormField
             name="telefone"
-            control={control as any}
-            label="Telefone"
+            control={control}
+            label={t('labels.telefone')}
             placeholder="(61) 98888-7777"
-            icon={<PhoneIcon />}
+            icon={<PhoneIcon fontSize="small" />}
             error={errors.telefone}
           />
         </Grid>
@@ -72,10 +77,10 @@ export function UserForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <FormField
             name="email"
-            control={control as any}
-            label="Email *"
-            placeholder="magno@decsa.gov.br"
-            icon={<EmailIcon />}
+            control={control}
+            label={t('labels.email')}
+            placeholder={t('placeholders.email')}
+            icon={<EmailIcon fontSize="small" />}
             error={errors.email}
             slotProps={{ type: 'email' }}
           />
@@ -83,13 +88,13 @@ export function UserForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <SelectField
             name="tipoUsuario"
-            control={control as any}
-            label="Tipo de Usuário *"
+            control={control}
+            label={t('labels.tipoUsuario')}
             error={errors.tipoUsuario}
             options={[
-              { value: 'admin', label: 'Administrador' },
-              { value: 'usuario', label: 'Usuário' },
-              { value: 'gestor', label: 'Gestor' },
+              { value: 'admin', label: userT('types.admin') },
+              { value: 'usuario', label: userT('types.usuario') },
+              { value: 'gestor', label: userT('types.gestor') },
             ]}
             slotProps={{
               InputProps: {
@@ -107,9 +112,9 @@ export function UserForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <FormField
             name="senha"
-            control={control as any}
-            label="Senha *"
-            icon={<LockIcon />}
+            control={control}
+            label={t('labels.senha')}
+            icon={<LockIcon fontSize="small" />}
             error={errors.senha}
             slotProps={{
               type: showPassword ? 'text' : 'password',
@@ -127,7 +132,7 @@ export function UserForm({
                       edge="end"
                       size="small"
                     >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -138,14 +143,18 @@ export function UserForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <SelectField
             name="organizacao"
-            control={control as any}
-            label="Organização"
+            control={control}
+            label={t('labels.organizacao')}
             error={errors.organizacao}
-            options={organizations?.map(org => ({
-              value: String(org.id),
-              label: org.acronym || org.name,
-            })) || []}
+            options={isLoadingOrgs 
+              ? [{ value: '', label: 'Carregando...' }] 
+              : organizations?.map(org => ({
+                  value: String(org.id),
+                  label: org.acronym || org.name,
+                })) || []
+            }
             slotProps={{
+              disabled: isLoadingOrgs, // Desabilita enquanto carrega
               InputProps: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -163,16 +172,16 @@ export function UserForm({
             <Grid size={{ xs: 6 }}>
               <RadioFieldSimNao
                 name="militar"
-                control={control as any}
-                label="Militar?"
+                control={control}
+                label={t('labels.militar')}
                 error={errors.militar}
               />
             </Grid>
             <Grid size={{ xs: 6 }}>
               <RadioFieldSimNao
                 name="ativarUsuario"
-                control={control as any}
-                label="Ativar usuário?"
+                control={control}
+                label={t('labels.ativar')}
                 error={errors.ativarUsuario}
               />
             </Grid>
@@ -181,13 +190,13 @@ export function UserForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <SelectField
             name="tipoAutorizacao"
-            control={control as any}
-            label="Tipo de Autorização *"
+            control={control}
+            label={t('labels.tipoAutorizacao')}
             error={errors.tipoAutorizacao}
             options={[
-              { value: 'total', label: 'Total' },
-              { value: 'parcial', label: 'Parcial' },
-              { value: 'restrita', label: 'Restrita' },
+              { value: 'total', label: userT('authLevels.total') },
+              { value: 'parcial', label: userT('authLevels.parcial') },
+              { value: 'restrita', label: userT('authLevels.restrita') },
             ]}
             slotProps={{
               InputProps: {
