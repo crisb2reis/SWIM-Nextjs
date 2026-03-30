@@ -46,10 +46,10 @@ function DocumentCard({ doc, onView }: { doc: Document; onView: (d: Document) =>
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const filename = String(doc.uploadfile?.file ?? '').split('/').pop() ?? '';
-    if (!filename) return;
+    const filename = String(doc.uploadfile?.name || doc.uploadfile?.file ?? '').split('/').pop() ?? '';
+    if (!filename || !doc.id) return;
     try {
-      const blob = await documentService.download(filename);
+      const blob = await documentService.download(doc.id);
       const url  = window.URL.createObjectURL(blob);
       const docEl    = window.document.createElement('a');
       docEl.href     = url;
