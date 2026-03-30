@@ -76,9 +76,9 @@ export function DocumentViewDialog({
 
   const handleDownload = async () => {
     if (!document?.uploadfile?.file) return;
-    const filename = String(document.uploadfile.file).split('/').pop() ?? '';
+    const filename = String(document.uploadfile.name || document.uploadfile.file).split('/').pop() ?? '';
     try {
-      const blob = await documentService.download(filename);
+      const blob = await documentService.download(document.id);
       const url  = window.URL.createObjectURL(blob);
       const docEl    = window.document.createElement('a');
       docEl.href     = url;

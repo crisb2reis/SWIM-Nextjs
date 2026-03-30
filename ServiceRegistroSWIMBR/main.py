@@ -1,3 +1,6 @@
+import os
+import time
+import asyncio
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,8 +16,6 @@ from db.session import SessionLocal
 from crud.system_log import create_log
 from schemas.system_log import SystemLogCreate
 from models.system_log import EventType, LogSeverity
-import time
-import asyncio
 
 EXCLUDED_PATHS = {
     "/docs", 
@@ -38,8 +39,6 @@ app = FastAPI(
 )
 
 # --- Static files (MUST be before routes) ---
-import os
-
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -73,6 +72,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+# --- Helper para Log em background ---
+def _save_log_to_db(log_data: SystemLogCreate):
+    db = SessionLocal()
+    try:
+        create_log(db, log_data)
+    except Exception:
+        pass
+    finally:
+        db.close()
+
+
 # --- Global Request Logging Middleware ---
 @app.middleware("http")
 async def system_logging_middleware(request: Request, call_next):
@@ -97,15 +107,7 @@ async def system_logging_middleware(request: Request, call_next):
             response_time_ms=process_time_ms,
             error_message=str(e)
         )
-        def save_log_error():
-            db = SessionLocal()
-            try:
-                create_log(db, log_data)
-            except Exception:
-                pass
-            finally:
-                db.close()
-        asyncio.create_task(asyncio.to_thread(save_log_error))
+        asyncio.create_task(asyncio.to_thread(_save_log_to_db, log_data))
         raise 
 
     process_time_ms = int((time.time() - start_time) * 1000)
@@ -135,16 +137,7 @@ async def system_logging_middleware(request: Request, call_next):
         response_time_ms=process_time_ms
     )
     
-    def save_log():
-        db = SessionLocal()
-        try:
-            create_log(db, log_data)
-        except Exception:
-            pass
-        finally:
-            db.close()
-            
-    asyncio.create_task(asyncio.to_thread(save_log))
+    asyncio.create_task(asyncio.to_thread(_save_log_to_db, log_data))
     return response
 
 

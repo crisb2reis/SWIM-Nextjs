@@ -1,9 +1,13 @@
+
 import os
 import shutil
+import uuid
+import mimetypes
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 import crud
@@ -20,15 +24,56 @@ from schemas.document import (
 
 router = APIRouter(prefix="/documents", tags=["Documentos"])
 
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.xlsx', '.jpg', '.png'}
 
-def _save_upload(upload_file: UploadFile) -> str:
-    """Salva o arquivo em UPLOAD_DIR e retorna o caminho relativo."""
+
+def validate_upload(file: UploadFile):
+    """Valida o tamanho e a extensão do arquivo."""
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Tipo de arquivo não permitido: {ext}"
+        )
+
+    # Verifica o tamanho do arquivo
+    file.file.seek(0, 2)  # Move para o fim
+    size = file.file.tell()
+    file.file.seek(0)      # Volta para o início
+
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O arquivo excede o limite de 10MB."
+        )
+
+
+def _save_upload(upload_file: UploadFile) -> tuple[str, str]:
+    """Salva o arquivo de forma segura com nome único e retorna o caminho e nome original."""
+    file_ext = Path(upload_file.filename).suffix
+    unique_name = f"{uuid.uuid4()}{file_ext}"
+
     upload_path = Path(settings.UPLOAD_DIR)
     upload_path.mkdir(parents=True, exist_ok=True)
-    dest = upload_path / upload_file.filename
-    with dest.open("wb") as buffer:
-        shutil.copyfileobj(upload_file.file, buffer)
-    return str(dest)
+
+    dest = upload_path / unique_name
+    dest = dest.resolve()
+    
+    # Prevenção simples contra Path Traversal
+    if not dest.is_relative_to(upload_path.resolve()):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nome de arquivo inválido"
+        )
+
+    try:
+        with dest.open("wb") as buffer:
+            shutil.copyfileobj(upload_file.file, buffer)
+    finally:
+        upload_file.file.close()
+
+    return str(dest), upload_file.filename
 
 
 @router.post(
@@ -48,34 +93,40 @@ def create_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Aceita `multipart/form-data` combinando metadados textuais e arquivo binário opcional."""
-    from datetime import date as date_type
+    file_path = None
+    try:
+        if file and file.filename:
+            validate_upload(file)
+            file_path, original_name = _save_upload(file)
+            db_file = crud.create_uploaded_file(db, file_path, original_name)
 
-    uploadfile_id = None
-    if file and file.filename:
-        file_path = _save_upload(file)
-        db_file = crud.create_uploaded_file(db, file_path)
-        uploadfile_id = db_file.id
+        doc = crud.create_document(
+            db,
+            DocumentCreate(
+                title=title,
+                description=description,
+                date_issued=date_issued,
+                location=location,
+                publish=publish,
+                version=version,
+                uploadfile_id=db_file.id if file and file.filename else None,
+            ),
+        )
+        db.commit()
+        return doc
 
-    parsed_date = None
-    if date_issued:
-        try:
-            parsed_date = date_type.fromisoformat(date_issued)
-        except ValueError:
-            raise HTTPException(
-                status_code=422, detail="date_issued inválido. Use formato YYYY-MM-DD."
-            )
-
-    doc_in = DocumentCreate(
-        title=title,
-        description=description,
-        date_issued=parsed_date,
-        location=location,
-        publish=publish,
-        version=version,
-        uploadfile_id=uploadfile_id,
-    )
-    return crud.create_document(db, doc_in)
+    except Exception as e:
+        db.rollback()
+        # Remove o arquivo físico se a transação do banco falhar
+        if file_path and Path(file_path).exists():
+            Path(file_path).unlink()
+        
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao criar documento: {str(e)}"
+        )
 
 
 @router.get(
@@ -143,5 +194,57 @@ def delete_document(
     doc = crud.get_document(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Documento não encontrado.")
+
+    file_path = None
+    if doc.uploadfile and doc.uploadfile.file:
+        file_path = Path(doc.uploadfile.file)
+
     crud.delete_document(db, db_doc=doc)
 
+    # Limpeza do arquivo físico após deleção bem sucedida no banco
+    if file_path and file_path.exists():
+        try:
+            file_path.unlink()
+        except OSError as e:
+            print(f"Erro ao remover arquivo físico: {e}")
+
+
+@router.get(
+    "/{document_id}/file",
+    summary="Baixar arquivo do documento",
+)
+def download_document_file(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    doc = crud.get_document(db, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento não encontrado.")
+
+    if not doc.uploadfile or not doc.uploadfile.file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Este documento não possui arquivo associado."
+        )
+
+    file_path = Path(doc.uploadfile.file)
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Arquivo físico não encontrado no servidor."
+        )
+
+    # Recupera o nome original ou usa o nome do arquivo único
+    original_name = getattr(doc.uploadfile, 'name', None) or file_path.name
+    
+    # Detecta o tipo MIME
+    media_type, _ = mimetypes.guess_type(str(file_path))
+    if not media_type:
+        media_type = "application/octet-stream"
+
+    return FileResponse(
+        path=file_path,
+        filename=original_name,
+        media_type=media_type
+    )
