@@ -17,6 +17,15 @@
       "createSuccess": "Creado con éxito",
       "updateSuccess": "Actualizado con éxito",
       "deleteSuccess": "Eliminado con éxito"
+    },
+    "table": {
+      "rowsPerPageLabel": "Filas por página:",
+      "of": "de",
+      "moreThan": "más de",
+      "noRows": "No se encontraron registros",
+      "loading": "Cargando...",
+      "errorLoading": "Error al cargar datos.",
+      "addLabel": "Agregar"
     }
   },
   "navigation": {

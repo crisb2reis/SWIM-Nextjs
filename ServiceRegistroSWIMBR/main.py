@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 # Importa todos os models para que o Alembic os detecte
@@ -37,22 +37,20 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+# --- Static files (MUST be before routes) ---
+import os
+
+os.makedirs("static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # --- ReDoc Customizado ---
 @app.get("/redoc", include_in_schema=False)
-async def redoc_html():
+async def redoc_html() -> HTMLResponse:
     return get_redoc_html(
         openapi_url=app.openapi_url,
         title=app.title + " - ReDoc",
         redoc_js_url="/static/redoc.standalone.js",
     )
-
-
-# --- Static files ---
-import os
-
-os.makedirs("static", exist_ok=True)
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ---  CORS ---
 app.add_middleware(
