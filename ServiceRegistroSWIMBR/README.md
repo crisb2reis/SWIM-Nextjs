@@ -34,14 +34,14 @@ alembic upgrade head
 
 ### 3. Iniciar o Servidor FastAPI
 Com o ambiente ativado e o banco rodando:
-```bash
-uvicorn main:app --reload
+```bash 
+uvicorn main:app --reload --host [IP_ADDRESS] --port 8001
 ```
 
 Acesse:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/health
+- **Swagger UI**: http://localhost:8001/docs
+- **ReDoc**: http://localhost:8001/redoc
+- **Health Check**: http://localhost:8001/health
 
 ---
 

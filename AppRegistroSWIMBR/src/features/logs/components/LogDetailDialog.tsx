@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { alpha } from '@mui/material/styles';
 import {
   Dialog,
   DialogTitle,
@@ -11,8 +12,7 @@ import {
   Typography,
   Box,
   Divider,
-  IconButton,
-  Tooltip
+  IconButton
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -27,13 +27,14 @@ interface LogDetailDialogProps {
 export function LogDetailDialog({ log, open, onClose }: LogDetailDialogProps) {
   const t = useTranslations('logs.dialog');
   const commonT = useTranslations('common');
+  const actionT = useTranslations('actions');
   
   const [showTechnical, setShowTechnical] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShowTechnical(false);
     onClose();
-  };
+  }, [onClose]);
 
   return (
     <Dialog 
@@ -176,25 +177,26 @@ export function LogDetailDialog({ log, open, onClose }: LogDetailDialogProps) {
                     </Button>
                     
                     {showTechnical && (
-                      <Box
-                        component="pre"
-                        sx={{
-                          mt: 1,
-                          p: 2,
-                          bgcolor: (theme) => theme.palette.error.main + '10', // 10% opacity error color
-                          color: 'error.main',
-                          border: '1px solid',
-                          borderColor: 'error.light',
-                          borderRadius: 1,
-                          overflowX: 'auto',
-                          fontSize: '0.75rem',
-                          fontFamily: 'monospace',
-                          maxHeight: '300px'
-                        }}
-                      >
-                        {log.stack_trace}
-                      </Box>
-                    )}
+                       <Box
+                         component="pre"
+                         sx={{
+                           mt: 1,
+                           p: 2,
+                           bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
+                           color: 'error.main',
+                           border: '1px solid',
+                           borderColor: 'error.light',
+                           borderRadius: 1,
+                           overflowX: 'auto',
+                           overflowY: 'auto',
+                           fontSize: '0.75rem',
+                           fontFamily: 'monospace',
+                           maxHeight: '300px'
+                         }}
+                       >
+                         {log.stack_trace}
+                       </Box>
+                     )}
                   </Box>
                 )}
               </Box>
@@ -205,7 +207,7 @@ export function LogDetailDialog({ log, open, onClose }: LogDetailDialogProps) {
       
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={handleClose} variant="outlined" color="inherit">
-          {commonT('actions.close')}
+          {actionT('close')}
         </Button>
       </DialogActions>
     </Dialog>
