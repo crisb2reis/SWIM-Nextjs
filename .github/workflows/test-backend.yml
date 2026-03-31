@@ -1,0 +1,48 @@
+name: Test Backend
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: swim_user
+          POSTGRES_PASSWORD: swim_password
+          POSTGRES_DB: swim_test_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U swim_user -d swim_test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ServiceRegistroSWIMBR
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: ServiceRegistroSWIMBR
+        env:
+          TEST_DB_URL: postgresql://swim_user:swim_password@localhost:5433/swim_test_db
+          ALLOW_TEST_ENDPOINTS: true
+        run: |
+          pytest -v --cov=crud --cov=models --cov-report=xml
