@@ -46,7 +46,7 @@ function DocumentCard({ doc, onView }: { doc: Document; onView: (d: Document) =>
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const filename = String(doc.uploadfile?.name || doc.uploadfile?.file ?? '').split('/').pop() ?? '';
+    const filename = String((doc.uploadfile?.name || doc.uploadfile?.file) ?? '').split('/').pop() ?? '';
     if (!filename || !doc.id) return;
     try {
       const blob = await documentService.download(doc.id);

@@ -52,7 +52,7 @@ export default function AddDocumentPage() {
 
       <DocumentFormDialog
         open={open}
-        document={null}
+        doc={null}
         isSubmitting={mutations.isSubmitting}
         onClose={() => router.push('/utility/document/documentTable')}
         onSubmit={handleSubmit}

@@ -75,7 +75,7 @@ export function DocumentViewDialog({
   const theme = useTheme();
 
   const handleDownload = async () => {
-    if (!document?.uploadfile?.file) return;
+    if (!document?.id || !document?.uploadfile?.file) return;
     const filename = String(document.uploadfile.name || document.uploadfile.file).split('/').pop() ?? '';
     try {
       const blob = await documentService.download(document.id);
