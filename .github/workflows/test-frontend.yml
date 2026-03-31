@@ -1,0 +1,78 @@
+name: Test Frontend (Vitest + Cypress)
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  frontend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: swim_user
+          POSTGRES_PASSWORD: swim_password
+          POSTGRES_DB: swim_test_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U swim_user -d swim_test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        working-directory: AppRegistroSWIMBR
+        run: npm ci
+
+      - name: Run unit/component tests (Vitest)
+        working-directory: AppRegistroSWIMBR
+        run: npm run test -- --run
+
+      - name: Build and start frontend (Next.js)
+        working-directory: AppRegistroSWIMBR
+        run: |
+          npm run build
+          npm run start &
+          # wait for Next.js to be available on :3000
+          n=0; until curl -sSf http://localhost:3000 || [ $n -ge 60 ]; do n=$((n+1)); sleep 1; done
+
+      - name: Setup Python for backend
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        working-directory: ServiceRegistroSWIMBR
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start backend (uvicorn)
+        working-directory: ServiceRegistroSWIMBR
+        env:
+          TEST_DB_URL: postgresql://swim_user:swim_password@localhost:5433/swim_test_db
+          ALLOW_TEST_ENDPOINTS: true
+        run: |
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          n=0; until curl -sSf http://localhost:8000 || [ $n -ge 60 ]; do n=$((n+1)); sleep 1; done
+
+      - name: Run Cypress E2E
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: AppRegistroSWIMBR
+          command: npm run cypress:run
+        env:
+          CYPRESS_BASE_URL: http://localhost:3000

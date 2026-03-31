@@ -18,6 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
+  db_test:
+    image: postgres:16-alpine
+    container_name: swim_postgres_test
+    environment:
+      POSTGRES_USER: swim_user
+      POSTGRES_PASSWORD: swim_password
+      POSTGRES_DB: swim_test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U swim_user -d swim_test_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: swim_pgadmin

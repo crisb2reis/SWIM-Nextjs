@@ -49,3 +49,10 @@ vi.mock('@/lib/axios', () => ({
   },
 }));
 
+
+// Importa factories locais para uso nos testes
+import * as factories from './src/tests/factories';
+
+// Expõe factories em globalThis para conveniência em testes que não importam explicitamente
+(globalThis as any).factories = factories;
+

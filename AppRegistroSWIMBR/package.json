@@ -10,6 +10,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -43,6 +45,7 @@
     "eslint-config-next": "16.2.1",
     "jsdom": "^29.0.1",
     "typescript": "^5",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "cypress": "^12.12.0"
   }
 }
