@@ -1,54 +1,51 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useForm } from 'react-hook-form';
 import { FormField } from '../FormField';
+import React from 'react';
 
-vi.mock('react-hook-form', () => ({
-  Controller: ({ render }: any) => render({ field: { name: 'test', value: '', onChange: vi.fn(), onBlur: vi.fn() } }),
-  useForm: () => ({ control: {} }),
-}));
+// Wrapper para testar comportamento real do formulário se necessário
+function TestWrapper({ error }: { error?: any }) {
+  const { control } = useForm({ defaultValues: { nome: '' } });
+  return (
+    <FormField
+      name="nome"
+      control={control}
+      label="Nome"
+      placeholder="Digite seu nome"
+      icon={<span data-testid="test-icon" />}
+      error={error}
+    />
+  );
+}
 
 describe('FormField', () => {
-  it('deve renderizar com label', () => {
-    render(
-      <FormField
-        name="nome"
-        control={{} as any}
-        label="Nome"
-        icon={<span />}
-      />
-    );
-
+  it('deve renderizar com label e placeholder', () => {
+    render(<TestWrapper />);
     expect(screen.getByLabelText('Nome')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Digite seu nome')).toBeInTheDocument();
   });
 
-  it('deve renderizar com erro', () => {
-    const error = { type: 'required', message: 'Obrigatório' } as any;
-
-    render(
-      <FormField
-        name="nome"
-        control={{} as any}
-        label="Nome"
-        icon={<span />}
-        error={error}
-      />
-    );
-
-    expect(screen.getByText('Obrigatório')).toBeInTheDocument();
+  it('deve permitir entrada de texto', async () => {
+    const user = userEvent.setup();
+    render(<TestWrapper />);
+    const input = screen.getByPlaceholderText('Digite seu nome') as HTMLInputElement;
+    
+    await user.type(input, 'Teste');
+    expect(input.value).toBe('Teste');
   });
 
-  it('deve renderizar icon', () => {
-    const icon = <span data-testid="test-icon" />;
+  it('deve exibir mensagem de erro quando presente', () => {
+    const mockError = { message: 'Campo obrigatório' } as any;
+    render(<TestWrapper error={mockError} />);
+    
+    expect(screen.getByText('Campo obrigatório')).toBeInTheDocument();
+    expect(screen.getByLabelText('Nome')).toBeInvalid();
+  });
 
-    render(
-      <FormField
-        name="test"
-        control={{} as any}
-        label="Test"
-        icon={icon}
-      />
-    );
-
+  it('deve renderizar o ícone fornecido', () => {
+    render(<TestWrapper />);
     expect(screen.getByTestId('test-icon')).toBeInTheDocument();
   });
 });
