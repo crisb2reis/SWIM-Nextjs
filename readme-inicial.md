@@ -103,7 +103,17 @@ Considerando o banco de dados já funcional, instancie o servidor web backend qu
    pip install -r requirements.txt
    ```
 
-5. **Inicie o servidor de desenvolvimento (Uvicorn):**
+5. **Criar o Usuário Administrativo Inicial (Seed):**
+   Com o ambiente virtual ativado e na pasta do backend, execute o script de semente para popular o banco com o usuário administrador:
+   ```bash
+   python scripts/seed.py
+   ```
+   **Credenciais Padrão Geradas:**
+   - **Username/Email**: `admin@swim.com`
+   - **Senha**: `admin1234`
+   *(Lembre-se de alterar essa senha após o primeiro acesso).*
+
+6. **Inicie o servidor de desenvolvimento (Uvicorn):**
    ```bash
    uvicorn main:app --reload
    ```
