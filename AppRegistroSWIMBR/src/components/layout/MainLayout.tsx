@@ -142,6 +142,23 @@ export function MainLayout({ children }: MainLayoutProps) {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  // Menu do usuário e função de logout
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => setUserMenuAnchor(event.currentTarget);
+  const handleCloseUserMenu = () => setUserMenuAnchor(null);
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/v1/auth/logout');
+    } catch (err) {
+      console.error('Erro ao chamar endpoint de logout', err);
+    } finally {
+      localStorage.removeItem('token');
+      handleCloseUserMenu();
+      router.push('/login');
+    }
+  };
+
   const currentSidebarWidth = desktopVisible && isDesktop ? SIDEBAR_WIDTH : 0;
 
   const currentLangLabel = {
@@ -260,6 +277,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </Typography>
                 </Box>
                 <Box 
+                  onClick={handleOpenUserMenu}
                   sx={{ 
                     width: 44, 
                     height: 44, 
@@ -271,11 +289,20 @@ export function MainLayout({ children }: MainLayoutProps) {
                     justifyContent: 'center',
                     fontWeight: 700,
                     fontSize: '0.9rem',
-                    boxShadow: '0 4px 10px rgba(37, 56, 101, 0.3)'
+                    boxShadow: '0 4px 10px rgba(37, 56, 101, 0.3)',
+                    cursor: 'pointer'
                   }}
                 >
                   {initials}
                 </Box>
+                <Menu
+                  anchorEl={userMenuAnchor}
+                  open={Boolean(userMenuAnchor)}
+                  onClose={handleCloseUserMenu}
+                  sx={{ mt: 1 }}
+                >
+                  <MenuItem onClick={handleLogout}>Sair</MenuItem>
+                </Menu>
             </Box>
           </Toolbar>
         </AppBar>
