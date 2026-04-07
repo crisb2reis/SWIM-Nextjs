@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_redoc_html
 from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
 # Importa todos os models para que o Alembic os detecte
@@ -42,6 +43,9 @@ app = FastAPI(
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# --- Middlewares de Performance ---
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # --- ReDoc Customizado ---
 @app.get("/redoc", include_in_schema=False)
 async def redoc_html() -> HTMLResponse:
@@ -58,6 +62,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=3600,  # Cache de preflight (OPTIONS) por 1 hora
 )
 
 

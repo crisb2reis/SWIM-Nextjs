@@ -464,6 +464,10 @@
     }
   },
   "logs": {
+    "metadata": {
+      "title": "Logs | SWIM",
+      "description": "Detailed view of SWIM system events and audit trails"
+    },
     "table": {
       "title": "System Logs",
       "subtitle": "Monitor system events and audit trails",

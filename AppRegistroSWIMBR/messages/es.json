@@ -466,6 +466,10 @@
     }
   },
   "logs": {
+    "metadata": {
+      "title": "Logs | SWIM",
+      "description": "Visualización detallada de eventos y auditoría del sistema SWIM"
+    },
     "table": {
       "title": "Logs del Sistema",
       "subtitle": "Monitorear eventos y auditorías del sistema",
