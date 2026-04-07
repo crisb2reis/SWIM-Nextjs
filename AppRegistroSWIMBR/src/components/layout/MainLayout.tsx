@@ -6,6 +6,7 @@
  */
 
 import { ReactNode, useState, useEffect, useContext } from 'react';
+import useSWR from 'swr';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
@@ -96,14 +97,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [desktopVisible, setDesktopVisible] = useState(true);
   const colorMode = useContext(ColorModeContext);
 
-  // Busca de Usuário logado
-  const [user, setUser] = useState<{ first_name: string; last_name: string; username: string } | null>(null);
-
-  useEffect(() => {
-    api.get('/api/v1/users/me')
-      .then(res => setUser(res.data))
-      .catch(err => console.error("Falha ao buscar usuário", err));
-  }, []);
+  // Busca de Usuário logado via useSWR (Cacheada e Automática)
+  const { data: user } = useSWR('/api/v1/users/me', (url) => api.get(url).then(res => res.data));
 
   const fullName = user 
     ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username 

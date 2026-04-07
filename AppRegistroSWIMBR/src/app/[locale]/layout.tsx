@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import MuiProvider from './MuiProvider';
@@ -41,9 +42,11 @@ export default async function RootLayout({
       <body style={{ margin: 0, backgroundColor: '#F5F5F9' }}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <MuiProvider>
-            <AppWrapper>
-              {children}
-            </AppWrapper>
+            <Suspense fallback={null}>
+              <AppWrapper>
+                {children}
+              </AppWrapper>
+            </Suspense>
           </MuiProvider>
         </NextIntlClientProvider>
       </body>
