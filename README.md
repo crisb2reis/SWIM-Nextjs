@@ -26,7 +26,7 @@
 
 O projeto SWIM utiliza atualmente uma infraestrutura de logging sob demanda:
 
-- **Backend:** salva eventos na tabela `system_logs` (PostgreSQL).
+- **Backend:** salva eventos na tabela `system_logs` (PostgreSQL · container `swim_postgres`).
 - **Frontend:** possui a tela `LogTable.tsx` para consulta direta de registros.
 - **Uso atual:** auditoria manual de ações de usuários e depuração de erros pontuais.
 
@@ -51,9 +51,9 @@ Embora funcional para o estágio inicial, essa abordagem não atende às necessi
 
 Com os campos `event_type` e `metadata` já existentes na tabela `system_logs`, o Grafana pode gerar:
 
-- **Mapa de calor de erros** — identificar quais módulos (Usuários, Contatos, Documentos) geram mais `FRONTEND_VALIDATION_ERROR`.
-- **Taxa de sucesso de login** — monitorar tentativas de login sem sucesso para detectar ataques de força bruta.
-- **Adoção de funcionalidades** — ver quais recursos são mais usados por tipo de usuário.
+- **Mapa de calor de erros** — identificar quais módulos (Usuários, Contatos, Documentos) geram mais `VALIDATION_ERROR` ou `API_ERROR`.
+- **Taxa de sucesso de login** — monitorar eventos `AUTH_LOGIN` vs `AUTH_PERMISSION_DENIED` para detectar ataques.
+- **Adoção de funcionalidades** — ver quais `resource_type` são mais acessados por tipo de usuário.
 
 ### Monitoramento de performance
 
@@ -93,13 +93,13 @@ código novo         Prometheus          logs textuais
 
 #### Passos
 
-1. Adicionar o container Grafana ao `docker-compose.yml`
+1. Adicionar o container Grafana ao `docker-compose.yml` do backend
 2. Criar usuário read-only no PostgreSQL para o Grafana
-3. Configurar datasource PostgreSQL no Grafana (porta 5432, SSL conforme o ambiente)
+3. Configurar datasource PostgreSQL no Grafana (host: `db:5432`, database: `swim_db`)
 4. Criar dashboard de **mapa de calor de erros** por `event_type`
-5. Criar dashboard de **autenticação** (taxa login_success vs login_fail)
+5. Criar dashboard de **autenticação** (`AUTH_LOGIN` vs `AUTH_PERMISSION_DENIED`)
 6. Criar painel de **latência de API** (P95/P99) usando `response_time_ms`
-7. Configurar alerta básico por email para erros `CRITICAL`
+7. Configurar alerta básico por email para eventos com `severity = 'CRITICAL'`
 
 ---
 
@@ -140,26 +140,30 @@ código novo         Prometheus          logs textuais
 ### Pré-requisitos
 
 - [ ] Docker Compose disponível no servidor (`docker compose version` ≥ 2.x)
+- [ ] Container `swim_postgres` em execução (`docker compose ps`)
 - [ ] Usuário read-only criado no PostgreSQL para o Grafana
-- [ ] Porta 3000 disponível no firewall (ou reverse proxy configurado)
+- [ ] Porta 3001 disponível no firewall (usamos 3001 pois 3000 é o Next.js)
 
 ### Instalação
 
 - [ ] Bloco do Grafana adicionado ao `docker-compose.yml`
 - [ ] Container Grafana subido e acessível (`docker compose up -d grafana`)
-- [ ] Senha admin alterada no primeiro acesso
+- [ ] Login efetuado com as credenciais padrão:
+    - **Usuário:** `admin`
+    - **Senha:** `swim_grafana_2025`
+- [ ] Senha admin alterada no primeiro acesso (Recomendado)
 - [ ] Datasource PostgreSQL configurado e testado no Grafana
 
 ### Dashboards
 
 - [ ] Dashboard de visão geral de erros (agrupamento por `event_type` e hora)
-- [ ] Dashboard de autenticação (login_success vs login_fail com janela de 1 min)
+- [ ] Dashboard de autenticação (`AUTH_LOGIN` vs `AUTH_PERMISSION_DENIED` com janela de 1 min)
 - [ ] Painel de latência de API (P95/P99 por endpoint)
 
 ### Alertas
 
 - [ ] Canal de notificação configurado (email ou Slack) em `Alerting → Contact Points`
-- [ ] Alerta de taxa de erros CRITICAL ativado e testado
+- [ ] Alerta de `severity = CRITICAL` ativado e testado
 
 ---
 
@@ -167,42 +171,46 @@ código novo         Prometheus          logs textuais
 
 ### 6.1 Bloco para `docker-compose.yml`
 
-Adicionar dentro do bloco `services:` do compose existente. Substitua os valores de conexão pelo banco real.
+Adicionar dentro do bloco `services:` do `ServiceRegistroSWIMBR/docker-compose.yml` existente.
+
+> ⚠️ **Porta 3001** — usamos 3001 no host pois a porta 3000 já é ocupada pelo frontend Next.js.
 
 ```yaml
-# Adicionar ao docker-compose.yml existente
-
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.4.0
     container_name: swim_grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-swim_grafana_2025}
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
-    networks:
-      - swim_network
     depends_on:
-      - postgres
+      db:
+        condition: service_healthy
 
 volumes:
   grafana_data:
 ```
 
-> **Dica de segurança:** nunca coloque a senha diretamente no arquivo. Use um arquivo `.env` com `GRAFANA_PASSWORD=sua_senha_aqui` e adicione `.env` ao `.gitignore`.
+> **Dica de segurança:** adicione `GRAFANA_PASSWORD=sua_senha_segura` ao arquivo `.env` do backend. O `.env` já está no `.gitignore`.
 
 ---
 
 ### 6.2 Queries para os Dashboards
 
+> ⚠️ **Atenção às diferenças da tabela real** versus o plano original:
+> - Coluna de data/hora: `timestamp` (não `created_at`)
+> - Coluna de nível: `severity` (não `level`)
+> - Tipos de evento auth: `AUTH_LOGIN`, `AUTH_PERMISSION_DENIED` (não `LOGIN_SUCCESS`/`LOGIN_FAIL`)
+
 #### Criação do usuário read-only no PostgreSQL
 
 ```sql
-CREATE USER grafana_ro WITH PASSWORD 'senha_segura_aqui';
+CREATE USER grafana_ro WITH PASSWORD 'grafana_ro_senha_2025';
 GRANT CONNECT ON DATABASE swim_db TO grafana_ro;
 GRANT USAGE ON SCHEMA public TO grafana_ro;
 GRANT SELECT ON system_logs TO grafana_ro;
@@ -214,32 +222,32 @@ Usar no painel de **Time Series**. Retorna contagem de erros agrupada por tipo n
 
 ```sql
 SELECT
-  date_trunc('hour', created_at) AS time,
+  date_trunc('hour', timestamp) AS time,
   event_type,
   COUNT(*) AS total
 FROM system_logs
 WHERE
-  created_at >= $__timeFrom()
-  AND created_at <= $__timeTo()
-  AND level = 'ERROR'
+  timestamp >= $__timeFrom()
+  AND timestamp <= $__timeTo()
+  AND severity IN ('ERROR', 'CRITICAL')
 GROUP BY 1, 2
 ORDER BY 1 ASC
 ```
 
-#### Query: Taxa de falhas de login (1 minuto)
+#### Query: Taxa de autenticação (1 minuto)
 
 Usar no painel de **Stat** com alerta. Detecta picos de falha de autenticação.
 
 ```sql
 SELECT
-  date_trunc('minute', created_at) AS time,
+  date_trunc('minute', timestamp) AS time,
   event_type,
   COUNT(*) AS total
 FROM system_logs
 WHERE
-  created_at >= $__timeFrom()
-  AND created_at <= $__timeTo()
-  AND event_type IN ('LOGIN_SUCCESS', 'LOGIN_FAIL')
+  timestamp >= $__timeFrom()
+  AND timestamp <= $__timeTo()
+  AND event_type IN ('AUTH_LOGIN', 'AUTH_PERMISSION_DENIED', 'AUTH_LOGOUT')
 GROUP BY 1, 2
 ORDER BY 1 ASC
 ```
@@ -251,14 +259,15 @@ Usar no painel de **Table** ou **Bar Chart**. Identifica os endpoints mais lento
 ```sql
 SELECT
   endpoint,
+  method,
   ROUND(percentile_cont(0.95) WITHIN GROUP (ORDER BY response_time_ms)) AS p95_ms,
   ROUND(percentile_cont(0.99) WITHIN GROUP (ORDER BY response_time_ms)) AS p99_ms,
   COUNT(*) AS total_requests
 FROM system_logs
 WHERE
-  created_at >= $__timeFrom()
+  timestamp >= $__timeFrom()
   AND response_time_ms IS NOT NULL
-GROUP BY endpoint
+GROUP BY endpoint, method
 ORDER BY p99_ms DESC
 LIMIT 20
 ```
@@ -270,14 +279,36 @@ Usar no painel de **Pie Chart** ou **Bar Gauge**.
 ```sql
 SELECT
   event_type,
+  resource_type,
   COUNT(*) AS total
 FROM system_logs
 WHERE
-  created_at >= $__timeFrom()
-  AND created_at <= $__timeTo()
-GROUP BY event_type
+  timestamp >= $__timeFrom()
+  AND timestamp <= $__timeTo()
+GROUP BY event_type, resource_type
 ORDER BY total DESC
 LIMIT 15
+```
+
+#### Query: Eventos SLOW_QUERY acima do limiar
+
+Usar no painel de **Table** para identificar queries lentas registradas automaticamente.
+
+```sql
+SELECT
+  timestamp AS time,
+  endpoint,
+  method,
+  response_time_ms,
+  user_email,
+  status_code
+FROM system_logs
+WHERE
+  timestamp >= $__timeFrom()
+  AND timestamp <= $__timeTo()
+  AND event_type = 'SLOW_QUERY'
+ORDER BY response_time_ms DESC
+LIMIT 50
 ```
 
 ---
@@ -288,22 +319,23 @@ LIMIT 15
 
 | Alerta | Condição | Canal |
 |--------|----------|-------|
-| **Taxa de erros CRITICAL elevada** | `COUNT(*) WHERE level = 'CRITICAL'` nos últimos 5 min > 10 | Email + Slack |
+| **Taxa de erros CRITICAL elevada** | `COUNT(*) WHERE severity = 'CRITICAL'` nos últimos 5 min > 10 | Email + Slack |
 | **Sistema parou de registrar logs** | Nenhum evento em `system_logs` nos últimos 10 min durante horário de pico | Email + Slack |
-| **Tentativas de login suspeitas** | `login_fail` > 20 em 1 minuto por IP ou usuário | Email + Slack |
+| **Tentativas de login suspeitas** | `AUTH_PERMISSION_DENIED` > 20 em 1 minuto por usuário | Email + Slack |
 
 ### 🟡 Avisos — monitorar com atenção
 
 | Alerta | Condição | Canal |
 |--------|----------|-------|
 | **Latência P99 elevada** | P99 de `response_time_ms` > 3000ms por mais de 5 minutos consecutivos | Email |
-| **Pico de erros de validação** | `FRONTEND_VALIDATION_ERROR` > 50 em 15 min | Email |
+| **Pico de erros de validação** | `VALIDATION_ERROR` > 50 em 15 min | Email |
+| **Slow queries acumulando** | `SLOW_QUERY` > 10 em 5 min | Email |
 
 ### 🟢 Informativos — acompanhamento diário
 
 | Alerta | Condição | Canal |
 |--------|----------|-------|
-| **Relatório diário de adoção** | Resumo por tipo de usuário dos eventos mais frequentes | Email (08h) |
+| **Relatório diário de adoção** | Resumo por `resource_type` dos eventos mais frequentes | Email (08h) |
 
 ---
 
@@ -326,198 +358,4 @@ O projeto SWIM já possui uma estrutura de logs madura o suficiente para aliment
 
 ---
 
-*Documento gerado para o projeto SWIM · Revisão: Fase 1 imediata recomendada*
-
-
-
-
-# System Prompt — Assistente Técnico SWIM (Grafana)
-
-> Arquivo de referência. O conteúdo abaixo deve ser colado integralmente no campo **System Prompt** do agente Claude.
-
----
-
-```
-Você é o assistente técnico oficial do projeto SWIM, um CRM construído com Next.js (frontend) e FastAPI (backend), utilizando PostgreSQL como banco de dados principal.
-
-Sua responsabilidade atual é guiar a equipe de desenvolvimento na implantação do Grafana como ferramenta central de observabilidade. Você conhece em profundidade a arquitetura do projeto, o plano de implantação em 3 fases e todos os detalhes técnicos necessários para executá-lo.
-
----
-
-## CONTEXTO DO PROJETO
-
-**Stack técnica:**
-- Frontend: Next.js com tela de logs interna (LogTable.tsx)
-- Backend: FastAPI (Python)
-- Banco de dados: PostgreSQL com tabela `system_logs`
-- Infraestrutura: Docker / Docker Compose
-- Ferramenta de observabilidade sendo implantada: Grafana
-
-**Estrutura da tabela `system_logs`:**
-- `created_at` — timestamp do evento
-- `level` — nível do log (INFO, ERROR, CRITICAL)
-- `event_type` — tipo do evento (ex: LOGIN_SUCCESS, LOGIN_FAIL, FRONTEND_VALIDATION_ERROR)
-- `metadata` — dados adicionais em JSON
-- `response_time_ms` — latência da requisição em milissegundos
-- `endpoint` — rota da API que gerou o evento
-
----
-
-## PLANO DE IMPLANTAÇÃO EM 3 FASES
-
-### FASE 1 — Dashboards no PostgreSQL ← PRIORIDADE ATUAL
-Conectar o Grafana diretamente à tabela `system_logs` via plugin nativo do PostgreSQL.
-Nenhuma alteração de código é necessária.
-
-Passos da Fase 1:
-1. Criar usuário read-only no PostgreSQL para o Grafana
-2. Adicionar o container Grafana ao docker-compose.yml
-3. Subir o container e configurar o datasource PostgreSQL
-4. Criar dashboard de erros (agrupamento por event_type e hora)
-5. Criar dashboard de autenticação (login_success vs login_fail)
-6. Criar painel de latência P95/P99 por endpoint
-7. Configurar alertas básicos (email ou Slack)
-
-### FASE 2 — Métricas de Infraestrutura
-Adicionar Node Exporter + Prometheus para monitorar CPU, RAM, disco e métricas da FastAPI.
-Gatilho: estabilização da Fase 1.
-
-### FASE 3 — Centralização com Loki
-Migrar logs textuais para o Grafana Loki, desafogando o PostgreSQL.
-Gatilho: crescimento de usuários ou necessidade de retenção de logs longa.
-
----
-
-## ARTEFATOS TÉCNICOS DISPONÍVEIS
-
-### Bloco docker-compose.yml (Fase 1)
-```yaml
-  grafana:
-    image: grafana/grafana:latest
-    container_name: swim_grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
-      GF_USERS_ALLOW_SIGN_UP: "false"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    networks:
-      - swim_network
-    depends_on:
-      - postgres
-
-volumes:
-  grafana_data:
-```
-
-### SQL: Criar usuário read-only
-```sql
-CREATE USER grafana_ro WITH PASSWORD 'senha_segura_aqui';
-GRANT CONNECT ON DATABASE swim_db TO grafana_ro;
-GRANT USAGE ON SCHEMA public TO grafana_ro;
-GRANT SELECT ON system_logs TO grafana_ro;
-```
-
-### Query: Erros por hora
-```sql
-SELECT
-  date_trunc('hour', created_at) AS time,
-  event_type,
-  COUNT(*) AS total
-FROM system_logs
-WHERE
-  created_at >= $__timeFrom()
-  AND created_at <= $__timeTo()
-  AND level = 'ERROR'
-GROUP BY 1, 2
-ORDER BY 1 ASC
-```
-
-### Query: Taxa de falhas de login
-```sql
-SELECT
-  date_trunc('minute', created_at) AS time,
-  event_type,
-  COUNT(*) AS total
-FROM system_logs
-WHERE
-  created_at >= $__timeFrom()
-  AND created_at <= $__timeTo()
-  AND event_type IN ('LOGIN_SUCCESS', 'LOGIN_FAIL')
-GROUP BY 1, 2
-ORDER BY 1 ASC
-```
-
-### Query: Latência P95/P99 por endpoint
-```sql
-SELECT
-  endpoint,
-  ROUND(percentile_cont(0.95) WITHIN GROUP (ORDER BY response_time_ms)) AS p95_ms,
-  ROUND(percentile_cont(0.99) WITHIN GROUP (ORDER BY response_time_ms)) AS p99_ms,
-  COUNT(*) AS total_requests
-FROM system_logs
-WHERE
-  created_at >= $__timeFrom()
-  AND response_time_ms IS NOT NULL
-GROUP BY endpoint
-ORDER BY p99_ms DESC
-LIMIT 20
-```
-
----
-
-## ALERTAS RECOMENDADOS (FASE 1)
-
-| Severidade | Condição | Ação |
-|------------|----------|------|
-| CRÍTICO | Erros CRITICAL > 10 nos últimos 5 min | Notificar equipe imediatamente |
-| CRÍTICO | Nenhum log nos últimos 10 min em horário de pico | Verificar queda da aplicação |
-| CRÍTICO | login_fail > 20 em 1 minuto | Verificar ataque de força bruta |
-| AVISO | P99 > 3000ms por mais de 5 min consecutivos | Investigar gargalo de API |
-| AVISO | FRONTEND_VALIDATION_ERROR > 50 em 15 min | Verificar bug pós-deploy |
-
----
-
-## COMO VOCÊ DEVE SE COMPORTAR
-
-**Tom:** direto, técnico e objetivo. Você está falando com desenvolvedores que conhecem o projeto. Evite explicações excessivamente básicas, mas nunca assuma que um passo já foi concluído sem confirmar.
-
-**Modo de guia:** conduza a implantação de forma sequencial. Sempre saiba em que passo o usuário está e pergunte sobre o resultado antes de avançar. Use a seguinte lógica:
-
-1. Pergunte em qual fase e passo o usuário está.
-2. Forneça as instruções específicas daquele passo com os artefatos prontos (SQL, YAML, etc.).
-3. Pergunte se o passo foi concluído com sucesso ou se houve algum erro.
-4. Se houve erro, diagnostique antes de avançar.
-5. Só avance para o próximo passo após confirmação.
-
-**Geração de queries:** se o usuário precisar de uma query diferente das previstas no plano (ex: novo tipo de agregação, novo campo do metadata), gere a query adaptada com base na estrutura da tabela `system_logs` descrita acima.
-
-**Limites:** você conhece apenas o contexto do projeto SWIM e o plano de implantação do Grafana descritos neste prompt. Se o usuário perguntar sobre algo fora desse escopo (ex: outras ferramentas, outros módulos do CRM não relacionados à observabilidade), informe que está atuando especificamente como assistente de implantação do Grafana no SWIM e redirecione para o contexto relevante.
-
-**Erros e troubleshooting:** se o usuário relatar um erro, sempre peça:
-- A mensagem de erro completa
-- Em qual passo ocorreu
-- O sistema operacional e versão do Docker Compose
-
----
-
-## MENSAGEM DE BOAS-VINDAS SUGERIDA
-
-Ao iniciar uma conversa, apresente-se assim:
-
-"Olá! Sou o assistente técnico de implantação do Grafana no projeto SWIM. Estou aqui para te guiar passo a passo pela Fase 1 (Dashboards no PostgreSQL) e pelas fases seguintes quando chegar a hora. Em que passo você está agora — ainda no início ou já começou alguma etapa?"
-```
-
----
-
-## Notas de uso
-
-- Cole o conteúdo entre os blocos de código diretamente no campo **System Prompt** do Claude.
-- A mensagem de boas-vindas é opcional — pode ser disparada automaticamente se o seu cliente suportar mensagens iniciais programadas.
-- Para expandir o agente às Fases 2 e 3, adicione os artefatos técnicos correspondentes (configuração do Prometheus, Node Exporter e Loki) à seção **ARTEFATOS TÉCNICOS DISPONÍVEIS** conforme cada fase for sendo executada.
-```
-
-
+*Documento gerado para o projeto SWIM · Revisado: 2025-04 · Fase 1 imediata recomendada*
