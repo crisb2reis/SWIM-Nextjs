@@ -29,5 +29,22 @@ services:
     depends_on:
       - db
 
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: swim_grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-swim_grafana_2025}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  grafana_data:
