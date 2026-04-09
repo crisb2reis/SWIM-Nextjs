@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
+// Se o Link for do i18n, importe de lá. Caso contrário: import Link from 'next/link';
+import Link from 'next/link';
 import {
   Box,
   Card,
@@ -17,23 +19,27 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import api from '@/lib/axios';
+import { isAxiosError } from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(
-    searchParams.get('error') === 'unauthorized' 
-      ? 'Sessão expirada. Por favor, faça login novamente.' 
+    searchParams.get('error') === 'unauthorized'
+      ? 'Sessão expirada. Por favor, faça login novamente.'
       : null
   );
 
-  const [username, setUsername] = useState('admin@swim.com');
-  const [password, setPassword] = useState('admin1234');
+  // Removidas as credenciais hardcoded
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setLoading(true);
     setError(null);
 
@@ -52,18 +58,31 @@ export default function LoginPage() {
       const token = response.data.access_token; // FastAPI devolve access_token
 
       if (token) {
-        localStorage.setItem('token', token);
-        router.push('/utility/document/documentTable');
+        localStorage.setItem('token', token); // Considere migrar para HttpOnly Cookies no futuro
+
+        // Remove os parâmetros de erro da URL ao fazer login com sucesso
+        if (searchParams.has('error')) {
+          router.replace('/utility/document/documentTable');
+        } else {
+          router.push('/utility/document/documentTable');
+        }
       } else {
         setError('Falha ao obter token de acesso.');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.detail?.[0]?.msg ||
-        err.response?.data?.detail || 
-        'Credenciais inválidas ou erro no servidor.'
-      );
+      if (isAxiosError(err)) {
+        const detail = err.response?.data?.detail;
+        if (Array.isArray(detail)) {
+          setError(detail[0]?.msg || 'Erro de validação.');
+        } else if (typeof detail === 'string') {
+          setError(detail);
+        } else {
+          setError('Credenciais inválidas ou erro no servidor.');
+        }
+      } else {
+        setError('Ocorreu um erro inesperado.');
+      }
     } finally {
       setLoading(false);
     }
@@ -102,6 +121,7 @@ export default function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 autoFocus
+                disabled={loading}
               />
 
               <TextField
@@ -111,11 +131,17 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        disabled={loading}
+                        aria-label="alternar visibilidade da senha"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -137,7 +163,12 @@ export default function LoginPage() {
 
           <Box sx={{ textAlign: 'center', mt: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Nova plataforma? <Typography component="span" variant="body2" sx={{ color: 'primary.main', cursor: 'pointer', fontWeight: 600 }}>Crie uma conta</Typography>
+              Nova plataforma?{' '}
+              <Link href="/register" passHref legacyBehavior>
+                <Typography component="a" variant="body2" sx={{ color: 'primary.main', cursor: 'pointer', fontWeight: 600, textDecoration: 'none' }}>
+                  Crie uma conta
+                </Typography>
+              </Link>
             </Typography>
           </Box>
         </Card>

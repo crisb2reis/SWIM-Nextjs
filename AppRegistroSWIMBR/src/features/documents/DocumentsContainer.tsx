@@ -133,7 +133,7 @@ export function DocumentsContainer() {
       {/* Dialog de criação / edição */}
       <DocumentFormDialog
         open={dialog.mode === 'add' || dialog.mode === 'edit'}
-        document={dialog.mode === 'edit' ? dialog.document : null}
+        doc={dialog.mode === 'edit' ? dialog.document : null}
         isSubmitting={mutations.isSubmitting}
         onClose={closeDialog}
         onSubmit={dialog.mode === 'add' ? handleCreate : handleUpdate}

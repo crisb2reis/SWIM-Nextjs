@@ -68,3 +68,10 @@ def test_list_users_requires_superuser(client, db):
 def test_get_user_me_unauthenticated(client):
     response = client.get("/api/v1/users/me")
     assert response.status_code == 401
+
+
+def test_logout(client):
+    """Verifica se o endpoint de logout responde com sucesso."""
+    response = client.post("/api/v1/auth/logout")
+    assert response.status_code == 200
+    assert "processado com sucesso" in response.json()["message"]

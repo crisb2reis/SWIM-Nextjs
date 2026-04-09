@@ -35,3 +35,17 @@ def login_for_access_token(
         raise HTTPException(status_code=400, detail="Usuário inativo.")
     access_token = create_access_token(data={"sub": user.username})
     return Token(access_token=access_token)
+
+
+@router.post(
+    "/logout",
+    summary="Logout da aplicação",
+)
+def logout():
+    """
+    Endpoint para logout. 
+    Como o estado do JWT é mantido no cliente (localStorage), 
+    este endpoint apenas retorna sucesso e o cliente fica responsável por destruir o token local.
+    Pode ser evoluído futuramente para invalidar o token em uma lista de revogação/blacklist.
+    """
+    return {"message": "Logout processado com sucesso. Remova o token no cliente."}
