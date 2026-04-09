@@ -111,6 +111,7 @@ export function ContactsContainer() {
 
       {/* Modal de Formulário */}
       <ContactPointFormDialog
+        key={selectedContact?.id ?? 'new'}
         open={dialogOpen}
         contact={selectedContact}
         organizations={organizations}

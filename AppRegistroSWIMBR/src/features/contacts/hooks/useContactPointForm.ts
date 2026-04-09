@@ -24,11 +24,11 @@ export const useContactPointForm = (defaultValues?: ContactPoint) => {
   return useForm<ContactPointFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: defaultValues?.name ?? '',
-      email: defaultValues?.email ?? '',
-      role: defaultValues?.role ?? '',
-      phone: defaultValues?.phone ?? '',
-      organization_id: defaultValues?.organization_id ?? 0,
+      name: defaultValues?.name || '',
+      email: defaultValues?.email || '',
+      role: defaultValues?.role || '',
+      phone: defaultValues?.phone || '',
+      organization_id: defaultValues?.organization_id || 0,
     },
   });
 };
